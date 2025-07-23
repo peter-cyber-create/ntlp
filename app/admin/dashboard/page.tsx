@@ -65,21 +65,21 @@ export default function AdminDashboard() {
     try {
       // Load data in parallel for better performance
       const [regResponse, contactResponse] = await Promise.all([
-        fetch('/api/registrations').catch(e => ({ ok: false, error: e })),
-        fetch('/api/contacts').catch(e => ({ ok: false, error: e }))
+        fetch('/api/registrations').catch(() => null),
+        fetch('/api/contacts').catch(() => null)
       ]);
       
       let regData, contactData;
       
       // Process registration data
-      if (regResponse.ok) {
+      if (regResponse && regResponse.ok) {
         regData = await regResponse.json()
         setRegistrationsData(regData.data || [])
         setRegistrationStats(regData.stats || {})
       }
 
       // Process contact data  
-      if (contactResponse.ok) {
+      if (contactResponse && contactResponse.ok) {
         contactData = await contactResponse.json()
         setContactsData(contactData.data || [])
         setContactStats(contactData.stats || {})
