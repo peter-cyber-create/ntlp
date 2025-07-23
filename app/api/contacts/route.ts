@@ -1,0 +1,80 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { connectToMongoose } from '@/lib/mongodb';
+import { Contact } from '@/lib/models';
+
+export async function GET() {
+  try {
+    await connectToMongoose();
+    
+    const contacts = await Contact.find({})
+      .sort({ submittedAt: -1 })
+      .limit(50);
+    
+    const stats = {
+      total: await Contact.countDocuments(),
+      new: await Contact.countDocuments({ status: 'new' }),
+      inProgress: await Contact.countDocuments({ status: 'in-progress' }),
+      resolved: await Contact.countDocuments({ status: 'resolved' })
+    };
+    
+    return NextResponse.json({
+      success: true,
+      data: contacts,
+      stats,
+      count: contacts.length
+    });
+  } catch (error) {
+    console.error('Error fetching contacts:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to fetch contacts',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    await connectToMongoose();
+    
+    const body = await request.json();
+    
+    // Validate required fields
+    const requiredFields = ['name', 'email', 'subject', 'message'];
+    const missingFields = requiredFields.filter(field => !body[field]);
+    
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Missing required fields',
+          missingFields
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Create new contact
+    const contact = new Contact(body);
+    const savedContact = await contact.save();
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Contact message submitted successfully',
+      data: savedContact
+    }, { status: 201 });
+  } catch (error) {
+    console.error('Error creating contact:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to submit contact message',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}
