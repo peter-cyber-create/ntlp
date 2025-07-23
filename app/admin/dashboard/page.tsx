@@ -36,10 +36,14 @@ export default function AdminDashboard() {
   const [filterStatus, setFilterStatus] = useState('all')
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
   const [selectedRegistrations, setSelectedRegistrations] = useState<string[]>([])
+  const [selectedAbstracts, setSelectedAbstracts] = useState<string[]>([])
   const [showBatchActions, setShowBatchActions] = useState(false)
   const [dashboardData, setDashboardData] = useState<any>(null)
   const [dataManager, setDataManager] = useState<DataManager | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [abstractsData, setAbstractsData] = useState<any[]>([])
+  const [abstractStats, setAbstractStats] = useState<any>({})
+  const [loadingAbstracts, setLoadingAbstracts] = useState(false)
 
   useEffect(() => {
     // Check authentication
@@ -56,6 +60,9 @@ export default function AdminDashboard() {
     
     // Load dashboard data
     loadDashboardData(dm)
+    
+    // Load abstracts data
+    loadAbstractsData()
   }, [])
 
   const loadDashboardData = (dm: DataManager) => {
@@ -95,6 +102,24 @@ export default function AdminDashboard() {
         { id: 4, name: 'Sarah Johnson', title: 'VC Partner', status: 'confirmed', sessions: 1 }
       ]
     })
+  }
+
+  const loadAbstractsData = async () => {
+    setLoadingAbstracts(true)
+    try {
+      const response = await fetch('/api/abstracts')
+      if (response.ok) {
+        const result = await response.json()
+        setAbstractsData(result.data || [])
+        setAbstractStats(result.stats || {})
+      } else {
+        console.error('Failed to fetch abstracts:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error fetching abstracts:', error)
+    } finally {
+      setLoadingAbstracts(false)
+    }
   }
 
   // Handle client-side only rendering for localStorage
@@ -164,6 +189,34 @@ export default function AdminDashboard() {
     loadDashboardData(dataManager) // Refresh data
   }
 
+  const handleSingleDelete = async (id: string, type: 'contact' | 'registration' | 'abstract') => {
+    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
+      try {
+        const endpoint = type === 'contact' ? '/api/contacts' : 
+                        type === 'registration' ? '/api/registrations' : '/api/abstracts';
+        
+        const response = await fetch(`${endpoint}?ids=${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`Successfully deleted ${type}`);
+          
+          // Refresh data
+          if (dataManager) loadDashboardData(dataManager);
+          if (type === 'abstract') loadAbstractsData();
+        } else {
+          console.error(`Failed to delete ${type}:`, response.statusText);
+          alert(`Failed to delete ${type}. Please try again.`);
+        }
+      } catch (error) {
+        console.error(`Error deleting ${type}:`, error);
+        alert(`Error deleting ${type}. Please try again.`);
+      }
+    }
+  }
+
   const filteredRegistrations = getFilteredRegistrations()
 
   const renderOverview = () => (
@@ -231,6 +284,19 @@ export default function AdminDashboard() {
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <Globe className="text-green-600" size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Abstract Submissions</p>
+              <p className="text-3xl font-bold text-gray-900">{abstractStats?.total || 0}</p>
+              <p className="text-sm text-orange-600">{abstractStats?.pending || 0} pending review</p>
+            </div>
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <FileText className="text-orange-600" size={24} />
             </div>
           </div>
         </div>
@@ -361,13 +427,17 @@ export default function AdminDashboard() {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex space-x-2">
-                      <button className="p-1 text-gray-600 hover:text-blue-600">
+                      <button className="p-1 text-gray-600 hover:text-blue-600" title="View">
                         <Eye size={16} />
                       </button>
-                      <button className="p-1 text-gray-600 hover:text-green-600">
+                      <button className="p-1 text-gray-600 hover:text-green-600" title="Edit">
                         <Edit size={16} />
                       </button>
-                      <button className="p-1 text-gray-600 hover:text-red-600">
+                      <button 
+                        onClick={() => handleSingleDelete(reg.id, 'registration')}
+                        className="p-1 text-gray-600 hover:text-red-600"
+                        title="Delete"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -407,35 +477,382 @@ export default function AdminDashboard() {
     </div>
   )
 
-  // Batch action handlers
-  const handleBatchDelete = (type: 'contacts' | 'registrations') => {
-    if (window.confirm(`Are you sure you want to delete ${type === 'contacts' ? selectedContacts.length : selectedRegistrations.length} selected ${type}?`)) {
-      if (type === 'contacts') {
-        selectedContacts.forEach(id => {
-          // Here you would call dataManager.deleteContact(id)
-          console.log(`Deleting contact: ${id}`)
+  const renderAbstracts = () => {
+    const filteredAbstracts = abstractsData.filter(abstract => {
+      const matchesSearch = searchTerm === '' || 
+        abstract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        abstract.primaryAuthor.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        abstract.primaryAuthor.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        abstract.primaryAuthor.email.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesStatus = filterStatus === 'all' || abstract.status === filterStatus
+      
+      return matchesSearch && matchesStatus
+    })
+
+    const handleAbstractStatusUpdate = async (id: string, newStatus: 'accepted' | 'rejected') => {
+      try {
+        const response = await fetch(`/api/abstracts`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id,
+            status: newStatus,
+            reviewComments: `Status updated to ${newStatus} by admin`
+          })
         })
-        setSelectedContacts([])
-      } else {
-        selectedRegistrations.forEach(id => {
-          // Here you would call dataManager.deleteRegistration(id)
-          console.log(`Deleting registration: ${id}`)
-        })
-        setSelectedRegistrations([])
+
+        if (response.ok) {
+          // Refresh abstracts data
+          loadAbstractsData()
+        } else {
+          console.error('Failed to update abstract status')
+        }
+      } catch (error) {
+        console.error('Error updating abstract status:', error)
       }
-      // Refresh data
-      if (dataManager) loadDashboardData(dataManager)
+    }
+
+    const handleAbstractDownload = (abstract: any) => {
+      if (abstract.filePath) {
+        window.open(abstract.filePath, '_blank')
+      }
+    }
+
+    return (
+      <div className="space-y-6">
+        {/* Abstract Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Abstracts</p>
+                <p className="text-3xl font-bold text-gray-900">{abstractStats.total || 0}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <FileText className="text-blue-600" size={24} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Pending Review</p>
+                <p className="text-3xl font-bold text-gray-900">{abstractStats.pending || 0}</p>
+              </div>
+              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <AlertCircle className="text-yellow-600" size={24} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Accepted</p>
+                <p className="text-3xl font-bold text-gray-900">{abstractStats.accepted || 0}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <CheckCircle className="text-green-600" size={24} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Rejected</p>
+                <p className="text-3xl font-bold text-gray-900">{abstractStats.rejected || 0}</p>
+              </div>
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <X className="text-red-600" size={24} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Header and Actions */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-2xl font-bold text-gray-900">Abstract Management</h2>
+          <div className="flex gap-3">
+            {selectedAbstracts.length > 0 && (
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    selectedAbstracts.forEach(id => handleAbstractStatusUpdate(id, 'accepted'))
+                    setSelectedAbstracts([])
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                >
+                  <CheckCircle size={16} />
+                  Accept ({selectedAbstracts.length})
+                </button>
+                <button 
+                  onClick={() => {
+                    selectedAbstracts.forEach(id => handleAbstractStatusUpdate(id, 'rejected'))
+                    setSelectedAbstracts([])
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                >
+                  <X size={16} />
+                  Reject ({selectedAbstracts.length})
+                </button>
+                <button 
+                  onClick={() => handleBatchDelete('abstracts')}
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                >
+                  <Trash2 size={16} />
+                  Delete ({selectedAbstracts.length})
+                </button>
+              </div>
+            )}
+            <button 
+              onClick={() => {
+                const csv = abstractsData.map(a => 
+                  `"${a.title}","${a.primaryAuthor.firstName} ${a.primaryAuthor.lastName}","${a.primaryAuthor.email}","${a.category}","${a.presentationType}","${a.status}","${new Date(a.submittedAt).toLocaleDateString()}"`
+                ).join('\n')
+                const blob = new Blob([`Title,Author,Email,Category,Type,Status,Submitted\n${csv}`], { type: 'text/csv' })
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `abstracts-${new Date().toISOString().split('T')[0]}.csv`
+                a.click()
+                window.URL.revokeObjectURL(url)
+              }}
+              className="btn-secondary text-sm"
+            >
+              <Download size={16} className="mr-2" />
+              Export CSV
+            </button>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search abstracts..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+            </div>
+            <div className="sm:w-48">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Abstracts Table */}
+        {loadingAbstracts ? (
+          <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading abstracts...</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="text-left py-3 px-6 font-medium text-gray-900">
+                      <input
+                        type="checkbox"
+                        checked={selectedAbstracts.length === filteredAbstracts.length && filteredAbstracts.length > 0}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedAbstracts(filteredAbstracts.map(a => a._id))
+                          } else {
+                            setSelectedAbstracts([])
+                          }
+                        }}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                    </th>
+                    <th className="text-left py-3 px-6 font-medium text-gray-900">Title</th>
+                    <th className="text-left py-3 px-6 font-medium text-gray-900">Author</th>
+                    <th className="text-left py-3 px-6 font-medium text-gray-900">Category</th>
+                    <th className="text-left py-3 px-6 font-medium text-gray-900">Type</th>
+                    <th className="text-left py-3 px-6 font-medium text-gray-900">Status</th>
+                    <th className="text-left py-3 px-6 font-medium text-gray-900">Submitted</th>
+                    <th className="text-left py-3 px-6 font-medium text-gray-900">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredAbstracts.map((abstract: any) => (
+                    <tr key={abstract._id} className="hover:bg-gray-50">
+                      <td className="py-4 px-6">
+                        <input
+                          type="checkbox"
+                          checked={selectedAbstracts.includes(abstract._id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedAbstracts([...selectedAbstracts, abstract._id])
+                            } else {
+                              setSelectedAbstracts(selectedAbstracts.filter(id => id !== abstract._id))
+                            }
+                          }}
+                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        />
+                      </td>
+                      <td className="py-4 px-6 font-medium text-gray-900 max-w-xs truncate">
+                        {abstract.title}
+                      </td>
+                      <td className="py-4 px-6 text-gray-600">
+                        {abstract.primaryAuthor.firstName} {abstract.primaryAuthor.lastName}
+                        <br />
+                        <span className="text-xs text-gray-500">{abstract.primaryAuthor.email}</span>
+                      </td>
+                      <td className="py-4 px-6 text-gray-600">{abstract.category}</td>
+                      <td className="py-4 px-6 text-gray-600 capitalize">{abstract.presentationType}</td>
+                      <td className="py-4 px-6">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(abstract.status)}`}>
+                          {abstract.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-gray-600">
+                        {new Date(abstract.submittedAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex space-x-2">
+                          <button 
+                            onClick={() => handleAbstractDownload(abstract)}
+                            className="p-1 text-gray-600 hover:text-blue-600"
+                            title="Download File"
+                          >
+                            <Download size={16} />
+                          </button>
+                          {abstract.status === 'pending' && (
+                            <>
+                              <button 
+                                onClick={() => handleAbstractStatusUpdate(abstract._id, 'accepted')}
+                                className="p-1 text-gray-600 hover:text-green-600"
+                                title="Accept"
+                              >
+                                <CheckCircle size={16} />
+                              </button>
+                              <button 
+                                onClick={() => handleAbstractStatusUpdate(abstract._id, 'rejected')}
+                                className="p-1 text-gray-600 hover:text-red-600"
+                                title="Reject"
+                              >
+                                <X size={16} />
+                              </button>
+                            </>
+                          )}
+                          <button 
+                            onClick={() => handleSingleDelete(abstract._id, 'abstract')}
+                            className="p-1 text-gray-600 hover:text-red-600"
+                            title="Delete"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredAbstracts.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="py-8 px-6 text-center text-gray-500">
+                        {abstractsData.length === 0 ? 'No abstracts submitted yet.' : 'No abstracts match your search criteria.'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Batch action handlers
+  const handleBatchDelete = async (type: 'contacts' | 'registrations' | 'abstracts') => {
+    const selectedIds = type === 'contacts' ? selectedContacts : 
+                       type === 'registrations' ? selectedRegistrations : selectedAbstracts;
+    
+    if (selectedIds.length === 0) return;
+    
+    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} selected ${type}?`)) {
+      try {
+        const endpoint = type === 'contacts' ? '/api/contacts' : 
+                        type === 'registrations' ? '/api/registrations' : '/api/abstracts';
+        
+        const response = await fetch(`${endpoint}?ids=${selectedIds.join(',')}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`Successfully deleted ${result.deletedCount} ${type}`);
+          
+          // Clear selections
+          if (type === 'contacts') setSelectedContacts([]);
+          else if (type === 'registrations') setSelectedRegistrations([]);
+          else setSelectedAbstracts([]);
+          
+          // Refresh data
+          if (dataManager) loadDashboardData(dataManager);
+          if (type === 'abstracts') loadAbstractsData();
+        } else {
+          console.error(`Failed to delete ${type}:`, response.statusText);
+          alert(`Failed to delete ${type}. Please try again.`);
+        }
+      } catch (error) {
+        console.error(`Error deleting ${type}:`, error);
+        alert(`Error deleting ${type}. Please try again.`);
+      }
     }
   }
 
-  const handleBatchMarkRead = (type: 'contacts') => {
-    selectedContacts.forEach(id => {
-      // Here you would call dataManager.markContactAsRead(id)
-      console.log(`Marking contact as read: ${id}`)
-    })
-    setSelectedContacts([])
-    // Refresh data
-    if (dataManager) loadDashboardData(dataManager)
+  const handleBatchMarkRead = async (type: 'contacts') => {
+    if (selectedContacts.length === 0) return;
+    
+    try {
+      const response = await fetch('/api/contacts', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: selectedContacts,
+          status: 'resolved'
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`Successfully updated ${result.updatedCount} contacts`);
+        setSelectedContacts([]);
+        
+        // Refresh data
+        if (dataManager) loadDashboardData(dataManager);
+      } else {
+        console.error('Failed to update contacts:', response.statusText);
+        alert('Failed to update contacts. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating contacts:', error);
+      alert('Error updating contacts. Please try again.');
+    }
   }
 
   const handleBatchExport = (type: 'contacts' | 'registrations') => {
@@ -462,6 +879,7 @@ export default function AdminDashboard() {
   const navigation = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'registrations', label: 'Registrations', icon: Users },
+    { id: 'abstracts', label: 'Abstracts', icon: FileText },
     { id: 'contacts', label: 'Inquiries', icon: Mail },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
     { id: 'export', label: 'Data Export', icon: Download },
@@ -556,6 +974,7 @@ export default function AdminDashboard() {
         <main className="flex-1 p-4 sm:p-6 lg:ml-0 min-h-screen">
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'registrations' && renderRegistrations()}
+          {activeTab === 'abstracts' && renderAbstracts()}
           {activeTab === 'analytics' && renderAnalytics()}
           {activeTab === 'contacts' && (
             <div className="space-y-6">

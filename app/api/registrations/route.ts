@@ -95,3 +95,83 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    await connectToMongoose();
+    
+    const { searchParams } = new URL(request.url);
+    const ids = searchParams.get('ids');
+    
+    if (!ids) {
+      return NextResponse.json(
+        { success: false, message: 'Registration IDs are required' },
+        { status: 400 }
+      );
+    }
+
+    const idArray = ids.split(',');
+    const result = await Registration.deleteMany({ _id: { $in: idArray } });
+
+    return NextResponse.json({
+      success: true,
+      message: `Successfully deleted ${result.deletedCount} registration(s)`,
+      deletedCount: result.deletedCount
+    });
+
+  } catch (error) {
+    console.error('Error deleting registrations:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to delete registrations',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    await connectToMongoose();
+    
+    const { ids, status } = await request.json();
+    
+    if (!ids || !status) {
+      return NextResponse.json(
+        { success: false, message: 'Registration IDs and status are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid status. Must be pending, confirmed, or cancelled' },
+        { status: 400 }
+      );
+    }
+
+    const result = await Registration.updateMany(
+      { _id: { $in: ids } },
+      { status, updatedAt: new Date() }
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: `Successfully updated ${result.modifiedCount} registration(s)`,
+      updatedCount: result.modifiedCount
+    });
+
+  } catch (error) {
+    console.error('Error updating registrations:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to update registrations',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}

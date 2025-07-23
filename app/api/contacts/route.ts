@@ -78,3 +78,83 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    await connectToMongoose();
+    
+    const { searchParams } = new URL(request.url);
+    const ids = searchParams.get('ids');
+    
+    if (!ids) {
+      return NextResponse.json(
+        { success: false, message: 'Contact IDs are required' },
+        { status: 400 }
+      );
+    }
+
+    const idArray = ids.split(',');
+    const result = await Contact.deleteMany({ _id: { $in: idArray } });
+
+    return NextResponse.json({
+      success: true,
+      message: `Successfully deleted ${result.deletedCount} contact(s)`,
+      deletedCount: result.deletedCount
+    });
+
+  } catch (error) {
+    console.error('Error deleting contacts:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to delete contacts',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    await connectToMongoose();
+    
+    const { ids, status } = await request.json();
+    
+    if (!ids || !status) {
+      return NextResponse.json(
+        { success: false, message: 'Contact IDs and status are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!['new', 'in-progress', 'resolved'].includes(status)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid status. Must be new, in-progress, or resolved' },
+        { status: 400 }
+      );
+    }
+
+    const result = await Contact.updateMany(
+      { _id: { $in: ids } },
+      { status, updatedAt: new Date() }
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: `Successfully updated ${result.modifiedCount} contact(s)`,
+      updatedCount: result.modifiedCount
+    });
+
+  } catch (error) {
+    console.error('Error updating contacts:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to update contacts',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}

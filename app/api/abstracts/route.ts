@@ -190,3 +190,100 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    await connectToMongoose();
+    
+    const { id, status, reviewComments } = await request.json();
+    
+    if (!id || !status) {
+      return NextResponse.json(
+        { success: false, message: 'Abstract ID and status are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!['pending', 'accepted', 'rejected'].includes(status)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid status. Must be pending, accepted, or rejected' },
+        { status: 400 }
+      );
+    }
+
+    const updateData: any = {
+      status,
+      reviewedAt: new Date()
+    };
+
+    if (reviewComments) {
+      updateData.reviewComments = reviewComments;
+    }
+
+    const updatedAbstract = await Abstract.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedAbstract) {
+      return NextResponse.json(
+        { success: false, message: 'Abstract not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Abstract status updated successfully',
+      data: updatedAbstract
+    });
+
+  } catch (error) {
+    console.error('Error updating abstract:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to update abstract',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    await connectToMongoose();
+    
+    const { searchParams } = new URL(request.url);
+    const ids = searchParams.get('ids');
+    
+    if (!ids) {
+      return NextResponse.json(
+        { success: false, message: 'Abstract IDs are required' },
+        { status: 400 }
+      );
+    }
+
+    const idArray = ids.split(',');
+    const result = await Abstract.deleteMany({ _id: { $in: idArray } });
+
+    return NextResponse.json({
+      success: true,
+      message: `Successfully deleted ${result.deletedCount} abstract(s)`,
+      deletedCount: result.deletedCount
+    });
+
+  } catch (error) {
+    console.error('Error deleting abstracts:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to delete abstracts',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}

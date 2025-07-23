@@ -29,16 +29,6 @@ export function Navbar() {
     { name: 'Register', href: '/register', type: 'primary' },
   ]
 
-  // Check if user is admin
-  const [isAdmin, setIsAdmin] = useState(false)
-  
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const adminAuth = localStorage.getItem('adminAuth')
-      setIsAdmin(!!adminAuth)
-    }
-  }, [])
-
   // Handle scroll for floating navbar
   useEffect(() => {
     const handleScroll = () => {
@@ -114,20 +104,6 @@ export function Navbar() {
                   {item.name}
                 </Link>
               ))}
-              
-              {/* Admin Link */}
-              {isAdmin && (
-                <Link
-                  href="/admin/dashboard"
-                  className={`font-medium px-3 py-2 rounded-lg text-sm transition-colors ${
-                    shouldUseWhiteText 
-                      ? 'text-orange-300 hover:text-orange-200 hover:bg-orange-500/20' 
-                      : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'
-                  }`}
-                >
-                  Admin
-                </Link>
-              )}
             </div>
           </div>
 
@@ -181,17 +157,6 @@ export function Navbar() {
                     {item.name}
                   </Link>
                 ))}
-                
-                {/* Admin Link */}
-                {isAdmin && (
-                  <Link
-                    href="/admin/dashboard"
-                    className="block px-4 py-3 rounded-lg font-medium text-center transition-colors bg-orange-50 text-orange-600 hover:bg-orange-100 border border-orange-200"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Admin Dashboard
-                  </Link>
-                )}
               </div>
             </div>
           </div>
