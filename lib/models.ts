@@ -92,22 +92,23 @@ export interface IAbstract extends Document {
 // Mongoose Schemas
 // Registration Schema
 const RegistrationSchema = new mongoose.Schema<IRegistration>({
-  name: { type: String, required: true, trim: true },
+  firstName: { type: String, required: true, trim: true },
+  lastName: { type: String, required: true, trim: true },
   email: { type: String, required: true, trim: true, lowercase: true },
   phone: { type: String, required: true, trim: true },
   organization: { type: String, required: true, trim: true },
   position: { type: String, required: true, trim: true },
   district: { type: String, required: true },
-  attendanceType: { type: String, enum: ['in-person', 'virtual', 'hybrid'], default: 'in-person' },
-  dietaryRequirements: { type: String, default: '' },
-  accessibility: { type: String, default: '' },
-  registeredAt: { type: Date, default: Date.now },
-  status: { type: String, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending' }
+  registrationType: { type: String, enum: ['early-bird', 'regular', 'student'], default: 'regular' },
+  isVerified: { type: Boolean, default: false },
+  registrationDate: { type: Date, default: Date.now },
+  paymentStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
+  specialRequirements: { type: String, default: '' }
 })
 
 // Add indexes
 RegistrationSchema.index({ email: 1 })
-RegistrationSchema.index({ registeredAt: -1 })
+RegistrationSchema.index({ registrationDate: -1 })
 
 // Contact Schema  
 const ContactSchema = new mongoose.Schema<IContact>({
@@ -117,8 +118,9 @@ const ContactSchema = new mongoose.Schema<IContact>({
   organization: { type: String, trim: true },
   subject: { type: String, required: true, trim: true },
   message: { type: String, required: true, trim: true },
+  status: { type: String, enum: ['new', 'in-progress', 'resolved'], default: 'new' },
   submittedAt: { type: Date, default: Date.now },
-  status: { type: String, enum: ['new', 'read', 'responded'], default: 'new' }
+  respondedAt: { type: Date }
 })
 
 // Add indexes
