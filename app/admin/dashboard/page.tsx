@@ -63,25 +63,29 @@ export default function AdminDashboard() {
 
   const loadRealData = async () => {
     try {
+      // Load data in parallel for better performance
+      const [regResponse, contactResponse] = await Promise.all([
+        fetch('/api/registrations').catch(e => ({ ok: false, error: e })),
+        fetch('/api/contacts').catch(e => ({ ok: false, error: e }))
+      ]);
+      
       let regData, contactData;
       
-      // Load registrations
-      const regResponse = await fetch('/api/registrations')
+      // Process registration data
       if (regResponse.ok) {
         regData = await regResponse.json()
         setRegistrationsData(regData.data || [])
         setRegistrationStats(regData.stats || {})
       }
 
-      // Load contacts
-      const contactResponse = await fetch('/api/contacts')
+      // Process contact data  
       if (contactResponse.ok) {
         contactData = await contactResponse.json()
         setContactsData(contactData.data || [])
         setContactStats(contactData.stats || {})
       }
 
-      // Load abstracts
+      // Load abstracts asynchronously (doesn't block dashboard loading)
       loadAbstractsData()
 
       // Set dashboard overview data

@@ -1,8 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Upload, FileText, Users, Award, Calendar, AlertCircle, CheckCircle } from 'lucide-react'
-import { useToast, ToastContainer } from '../../components/Toast'
+import { Calendar, Clock, Users, Award, AlertCircle, CheckCircle, Upload, X, FileText } from 'lucide-react'
+import { Toast, ToastContainer, useToast } from '@/components/Toast'
+import { optimizedFetch } from '@/lib/performance'
+import { LoadingButton } from '@/components/LoadingComponents'
 
 export default function AbstractsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -158,10 +160,11 @@ export default function AbstractsPage() {
         submitData.append('abstractFile', selectedFile)
       }
       
-      const response = await fetch('/api/abstracts', {
+      // Use optimized fetch with timeout and retry
+      const response = await optimizedFetch('/api/abstracts', {
         method: 'POST',
         body: submitData
-      })
+      }, 15000) // 15 second timeout for file uploads
 
       const result = await response.json()
 
@@ -201,7 +204,11 @@ export default function AbstractsPage() {
       }
     } catch (error) {
       console.error('Error submitting abstract:', error)
-      showError('Network error. Please check your connection and try again.', 6000)
+      if (error instanceof Error && error.name === 'AbortError') {
+        showError('Request timeout. Please check your connection and try again.', 6000)
+      } else {
+        showError('Network error. Please check your connection and try again.', 6000)
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -732,20 +739,13 @@ export default function AbstractsPage() {
 
               {/* Submit Button */}
               <div className="text-center">
-                <button
+                <LoadingButton
                   type="submit"
-                  disabled={isSubmitting}
-                  className="bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  isLoading={isSubmitting}
+                  className="bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 transition-all duration-200"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <span className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></span>
-                      Submitting Abstract...
-                    </>
-                  ) : (
-                    'Submit Abstract'
-                  )}
-                </button>
+                  {isSubmitting ? 'Submitting Abstract...' : 'Submit Abstract'}
+                </LoadingButton>
                 <p className="text-sm text-gray-600 mt-4">
                   By submitting this form, you agree to the conference terms and conditions.
                 </p>

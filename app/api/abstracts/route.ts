@@ -3,6 +3,7 @@ import { connectToMongoose } from '@/lib/mongodb';
 import { Abstract } from '@/lib/models';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { PerformanceMonitor } from '@/lib/performance';
 
 export async function GET() {
   try {
@@ -45,9 +46,18 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToMongoose();
+    PerformanceMonitor.start('abstract-submission-total');
     
-    const formData = await request.formData();
+    // Connect to database with performance monitoring
+    await PerformanceMonitor.measure('database-connection', async () => {
+      await connectToMongoose();
+    });
+    
+    // Parse form data
+    const formData = await PerformanceMonitor.measure('form-data-parsing', async () => {
+      return await request.formData();
+    });
+    
     const abstractDataString = formData.get('abstractData') as string;
     const file = formData.get('abstractFile') as File;
     
@@ -67,7 +77,7 @@ export async function POST(request: NextRequest) {
     
     const abstractData = JSON.parse(abstractDataString);
     
-    // Validate required fields
+    // Validate required fields (fast operation)
     const requiredFields = [
       'title', 'category', 'abstract', 'keywords', 
       'objectives', 'methodology', 'results', 'conclusions'
@@ -101,7 +111,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Validate file
+    // Validate file (fast operation)
     const allowedTypes = [
       'application/pdf',
       'application/msword',
@@ -122,10 +132,32 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Check if email already exists
-    const existingAbstract = await Abstract.findOne({ 
-      'primaryAuthor.email': abstractData.primaryAuthor.email 
-    });
+    // Parallel operations to improve performance
+    const [existingAbstract, fileBuffer, uploadsDir] = await Promise.all([
+      // Check if email already exists
+      PerformanceMonitor.measure('duplicate-check', async () => {
+        return await Abstract.findOne({ 
+          'primaryAuthor.email': abstractData.primaryAuthor.email 
+        }).select('_id').lean(); // Use lean() for better performance
+      }),
+      
+      // Process file in parallel
+      PerformanceMonitor.measure('file-processing', async () => {
+        const bytes = await file.arrayBuffer();
+        return Buffer.from(bytes);
+      }),
+      
+      // Create uploads directory in parallel
+      PerformanceMonitor.measure('directory-creation', async () => {
+        const dir = path.join(process.cwd(), 'uploads', 'abstracts');
+        try {
+          await mkdir(dir, { recursive: true });
+        } catch (error) {
+          // Directory might already exist
+        }
+        return dir;
+      })
+    ]);
     
     if (existingAbstract) {
       return NextResponse.json(
@@ -137,36 +169,31 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Save file
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), 'uploads', 'abstracts');
-    try {
-      await mkdir(uploadsDir, { recursive: true });
-    } catch (error) {
-      // Directory might already exist
-    }
-    
-    // Generate unique filename
+    // Generate unique filename and save file
     const timestamp = Date.now();
     const fileExtension = path.extname(file.name);
     const fileName = `abstract_${timestamp}_${abstractData.primaryAuthor.lastName.toLowerCase()}${fileExtension}`;
     const filePath = path.join(uploadsDir, fileName);
     
-    await writeFile(filePath, buffer);
+    // Save file and create database record in parallel
+    const [, savedAbstract] = await Promise.all([
+      PerformanceMonitor.measure('file-save', async () => {
+        await writeFile(filePath, fileBuffer);
+      }),
+      
+      PerformanceMonitor.measure('database-save', async () => {
+        const abstractRecord = new Abstract({
+          ...abstractData,
+          fileName: fileName,
+          filePath: filePath,
+          fileSize: file.size,
+          fileType: file.type
+        });
+        return await abstractRecord.save();
+      })
+    ]);
     
-    // Create abstract record
-    const abstractRecord = new Abstract({
-      ...abstractData,
-      fileName: fileName,
-      filePath: filePath,
-      fileSize: file.size,
-      fileType: file.type
-    });
-    
-    const savedAbstract = await abstractRecord.save();
+    PerformanceMonitor.end('abstract-submission-total');
     
     return NextResponse.json({
       success: true,
@@ -179,6 +206,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
     
   } catch (error) {
+    PerformanceMonitor.end('abstract-submission-total');
     console.error('Error creating abstract:', error);
     return NextResponse.json(
       {

@@ -37,7 +37,7 @@ export async function connectToDatabase() {
   return { client, db };
 }
 
-// Mongoose Connection
+// Mongoose Connection with optimization
 let cached = (global as any).mongoose || { conn: null, promise: null };
 
 export async function connectToMongoose() {
@@ -48,9 +48,15 @@ export async function connectToMongoose() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      bufferMaxEntries: 0, // Disable mongoose buffering
+      connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log('✅ MongoDB connected successfully');
       return mongoose;
     });
   }
@@ -59,6 +65,7 @@ export async function connectToMongoose() {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
+    console.error('❌ MongoDB connection failed:', e);
     throw e;
   }
 

@@ -206,4 +206,40 @@ export const PageSkeleton: React.FC<PageSkeletonProps> = ({
   )
 }
 
+interface LoadingButtonProps {
+  isLoading: boolean;
+  children: React.ReactNode;
+  className?: string;
+  disabled?: boolean;
+  onClick?: () => void;
+  type?: 'button' | 'submit';
+}
+
+export const LoadingButton: React.FC<LoadingButtonProps> = ({
+  isLoading,
+  children,
+  className = '',
+  disabled = false,
+  onClick,
+  type = 'button'
+}) => {
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled || isLoading}
+      className={`relative flex items-center justify-center ${className} ${
+        isLoading || disabled ? 'opacity-50 cursor-not-allowed' : ''
+      }`}
+    >
+      {isLoading && (
+        <div className="absolute left-3">
+          <LoadingSpinner size="sm" color="white" />
+        </div>
+      )}
+      <span className={isLoading ? 'ml-6' : ''}>{children}</span>
+    </button>
+  );
+};
+
 export default LoadingSpinner
