@@ -283,6 +283,157 @@ export default function AdminDashboard() {
     }
   }
 
+  // View handlers
+  const handleViewItem = (item: any, type: 'contact' | 'registration' | 'abstract') => {
+    let content = '';
+    let title = '';
+
+    switch (type) {
+      case 'contact':
+        title = `Contact Message from ${item.name}`;
+        content = `
+Name: ${item.name}
+Email: ${item.email}
+Subject: ${item.subject}
+Status: ${item.status}
+Date: ${new Date(item.createdAt).toLocaleString()}
+
+Message:
+${item.message}
+        `;
+        break;
+      case 'registration':
+        title = `Registration Details - ${item.name}`;
+        content = `
+Name: ${item.name}
+Email: ${item.email}
+Phone: ${item.phone}
+Institution: ${item.institution}
+Position: ${item.position}
+Session Track: ${item.sessionTrack}
+Status: ${item.status}
+Registration Date: ${new Date(item.registrationDate).toLocaleString()}
+Ticket Number: ${item.ticket}
+
+Dietary Requirements: ${item.dietaryRequirements || 'None'}
+Special Needs: ${item.specialNeeds || 'None'}
+        `;
+        break;
+      case 'abstract':
+        title = `Abstract Details - ${item.title}`;
+        content = `
+Title: ${item.title}
+Author: ${item.primaryAuthor.firstName} ${item.primaryAuthor.lastName}
+Email: ${item.primaryAuthor.email}
+Institution: ${item.primaryAuthor.institution}
+Category: ${item.category}
+Presentation Type: ${item.presentationType}
+Status: ${item.status}
+Submitted: ${new Date(item.submittedAt).toLocaleString()}
+
+Abstract:
+${item.abstractText}
+
+${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` : ''}
+        `;
+        break;
+    }
+
+    alert(content);
+  };
+
+  // Edit handlers (for now using prompts, could be enhanced with modals)
+  const handleEditItem = async (item: any, type: 'contact' | 'registration' | 'abstract') => {
+    switch (type) {
+      case 'contact':
+        const newContactStatus = prompt(`Edit Contact Status for ${item.name}:`, item.status);
+        if (newContactStatus && newContactStatus !== item.status) {
+          await updateItemStatus(item._id, newContactStatus, 'contact');
+        }
+        break;
+      case 'registration':
+        const newRegStatus = prompt(`Edit Registration Status for ${item.name}:`, item.status);
+        if (newRegStatus && newRegStatus !== item.status) {
+          await handleStatusUpdate(item._id, newRegStatus);
+        }
+        break;
+      case 'abstract':
+        const newAbstractStatus = prompt(`Edit Abstract Status for "${item.title}":`, item.status);
+        if (newAbstractStatus && newAbstractStatus !== item.status && (newAbstractStatus === 'accepted' || newAbstractStatus === 'rejected')) {
+          await handleAbstractStatusUpdate(item._id, newAbstractStatus as 'accepted' | 'rejected');
+        }
+        break;
+    }
+  };
+
+  // Generic status update function
+  const updateItemStatus = async (id: string, newStatus: string, type: 'contact' | 'registration' | 'abstract') => {
+    try {
+      const endpoint = type === 'contact' ? '/api/contacts' : 
+                      type === 'registration' ? '/api/registrations' : '/api/abstracts';
+      
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: id,
+          status: newStatus,
+          updatedBy: 'admin'
+        }),
+      });
+
+      if (response.ok) {
+        console.log(`Successfully updated ${type} status`);
+        // Refresh data
+        if (type === 'abstract') {
+          loadAbstractsData();
+        } else {
+          loadRealData();
+        }
+      } else {
+        console.error(`Failed to update ${type} status:`, response.statusText);
+        alert(`Failed to update ${type} status. Please try again.`);
+      }
+    } catch (error) {
+      console.error(`Error updating ${type} status:`, error);
+      alert(`Error updating ${type} status. Please try again.`);
+    }
+  };
+
+  // Abstract-specific handlers
+  const handleAbstractStatusUpdate = async (id: string, newStatus: 'accepted' | 'rejected') => {
+    try {
+      const response = await fetch(`/api/abstracts`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id,
+          status: newStatus,
+          reviewComments: `Status updated to ${newStatus} by admin`
+        })
+      })
+
+      if (response.ok) {
+        // Refresh abstracts data
+        loadAbstractsData()
+      } else {
+        console.error('Failed to update abstract status')
+      }
+    } catch (error) {
+      console.error('Error updating abstract status:', error)
+    }
+  };
+
+  const handleAbstractDownload = (abstract: any) => {
+    if (abstract.filePath) {
+      window.open(abstract.filePath, '_blank')
+    }
+  };
+
   const filteredRegistrations = getFilteredRegistrations()
 
   const renderOverview = () => (
@@ -551,10 +702,18 @@ export default function AdminDashboard() {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex space-x-2">
-                      <button className="p-1 text-gray-600 hover:text-blue-600" title="View">
+                      <button 
+                        onClick={() => handleViewItem(reg, 'registration')}
+                        className="p-1 text-gray-600 hover:text-blue-600" 
+                        title="View"
+                      >
                         <Eye size={16} />
                       </button>
-                      <button className="p-1 text-gray-600 hover:text-green-600" title="Edit">
+                      <button 
+                        onClick={() => handleEditItem(reg, 'registration')}
+                        className="p-1 text-gray-600 hover:text-green-600" 
+                        title="Edit"
+                      >
                         <Edit size={16} />
                       </button>
                       <button 
@@ -613,37 +772,6 @@ export default function AdminDashboard() {
       
       return matchesSearch && matchesStatus
     })
-
-    const handleAbstractStatusUpdate = async (id: string, newStatus: 'accepted' | 'rejected') => {
-      try {
-        const response = await fetch(`/api/abstracts`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id,
-            status: newStatus,
-            reviewComments: `Status updated to ${newStatus} by admin`
-          })
-        })
-
-        if (response.ok) {
-          // Refresh abstracts data
-          loadAbstractsData()
-        } else {
-          console.error('Failed to update abstract status')
-        }
-      } catch (error) {
-        console.error('Error updating abstract status:', error)
-      }
-    }
-
-    const handleAbstractDownload = (abstract: any) => {
-      if (abstract.filePath) {
-        window.open(abstract.filePath, '_blank')
-      }
-    }
 
     return (
       <div className="space-y-6">
@@ -857,8 +985,22 @@ export default function AdminDashboard() {
                       <td className="py-4 px-6">
                         <div className="flex space-x-2">
                           <button 
-                            onClick={() => handleAbstractDownload(abstract)}
+                            onClick={() => handleViewItem(abstract, 'abstract')}
                             className="p-1 text-gray-600 hover:text-blue-600"
+                            title="View Details"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button 
+                            onClick={() => handleEditItem(abstract, 'abstract')}
+                            className="p-1 text-gray-600 hover:text-green-600"
+                            title="Edit Status"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button 
+                            onClick={() => handleAbstractDownload(abstract)}
+                            className="p-1 text-gray-600 hover:text-purple-600"
                             title="Download File"
                           >
                             <Download size={16} />
@@ -1003,11 +1145,18 @@ export default function AdminDashboard() {
                     <td className="py-4 px-6">
                       <div className="flex space-x-2">
                         <button 
-                          onClick={() => alert(`Message: ${contact.message}`)}
+                          onClick={() => handleViewItem(contact, 'contact')}
                           className="p-1 text-gray-600 hover:text-blue-600"
                           title="View Message"
                         >
                           <Eye size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleEditItem(contact, 'contact')}
+                          className="p-1 text-gray-600 hover:text-green-600"
+                          title="Edit Status"
+                        >
+                          <Edit size={16} />
                         </button>
                         <button 
                           onClick={() => handleSingleDelete(contact._id, 'contact')}
