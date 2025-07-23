@@ -27,7 +27,8 @@ import {
   Filter,
   Upload,
   Menu,
-  X
+  X,
+  ExternalLink
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -429,8 +430,35 @@ ${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` :
   };
 
   const handleAbstractDownload = (abstract: any) => {
-    if (abstract.filePath) {
-      window.open(abstract.filePath, '_blank')
+    if (abstract._id || abstract.fileName) {
+      // Primary method: Use secure API endpoint
+      const downloadUrl = abstract._id 
+        ? `/api/abstracts/download/?id=${abstract._id}`
+        : `/api/abstracts/download/?filename=${abstract.fileName}`;
+      
+      // Create a temporary link to trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = abstract.fileName || `abstract_${abstract._id}.pdf`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log(`Downloaded: ${abstract.fileName || abstract._id}`);
+    } else {
+      alert('File information not available for download');
+      console.error('Abstract download failed - missing file information:', abstract);
+    }
+  };
+
+  const handleAbstractPreview = (abstract: any) => {
+    if (abstract.fileName) {
+      // Use direct file access for preview
+      const previewUrl = `/uploads-abstracts/${abstract.fileName}`;
+      window.open(previewUrl, '_blank');
+    } else {
+      alert('File not available for preview');
     }
   };
 
@@ -997,6 +1025,13 @@ ${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` :
                             title="Edit Status"
                           >
                             <Edit size={16} />
+                          </button>
+                          <button 
+                            onClick={() => handleAbstractPreview(abstract)}
+                            className="p-1 text-gray-600 hover:text-indigo-600"
+                            title="Preview File"
+                          >
+                            <ExternalLink size={16} />
                           </button>
                           <button 
                             onClick={() => handleAbstractDownload(abstract)}
