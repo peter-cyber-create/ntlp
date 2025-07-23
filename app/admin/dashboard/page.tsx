@@ -44,6 +44,10 @@ export default function AdminDashboard() {
   const [abstractsData, setAbstractsData] = useState<any[]>([])
   const [abstractStats, setAbstractStats] = useState<any>({})
   const [loadingAbstracts, setLoadingAbstracts] = useState(false)
+  const [registrationsData, setRegistrationsData] = useState<any[]>([])
+  const [registrationStats, setRegistrationStats] = useState<any>({})
+  const [contactsData, setContactsData] = useState<any[]>([])
+  const [contactStats, setContactStats] = useState<any>({})
 
   useEffect(() => {
     // Check authentication
@@ -53,17 +57,48 @@ export default function AdminDashboard() {
       return
     }
 
-    // Initialize data manager
-    const dm = DataManager.getInstance()
-    dm.seedDemoData() // Add some demo data if empty
-    setDataManager(dm)
-    
-    // Load dashboard data
-    loadDashboardData(dm)
-    
-    // Load abstracts data
-    loadAbstractsData()
+    // Load real data from APIs
+    loadRealData()
   }, [])
+
+  const loadRealData = async () => {
+    try {
+      let regData, contactData;
+      
+      // Load registrations
+      const regResponse = await fetch('/api/registrations')
+      if (regResponse.ok) {
+        regData = await regResponse.json()
+        setRegistrationsData(regData.data || [])
+        setRegistrationStats(regData.stats || {})
+      }
+
+      // Load contacts
+      const contactResponse = await fetch('/api/contacts')
+      if (contactResponse.ok) {
+        contactData = await contactResponse.json()
+        setContactsData(contactData.data || [])
+        setContactStats(contactData.stats || {})
+      }
+
+      // Load abstracts
+      loadAbstractsData()
+
+      // Set dashboard overview data
+      setDashboardData({
+        stats: {
+          totalRegistrations: regData?.stats?.total || 0,
+          pendingRegistrations: regData?.stats?.pending || 0,
+          totalSpeakers: 0, // Will be updated when we have speaker data
+          contactSubmissions: contactData?.stats?.total || 0,
+          websiteViews: 15420, // Mock data for now
+          conversionRate: 75 // Mock data for now
+        }
+      })
+    } catch (error) {
+      console.error('Error loading data:', error)
+    }
+  }
 
   const loadDashboardData = (dm: DataManager) => {
     const stats = dm.getStats()
@@ -150,18 +185,23 @@ export default function AdminDashboard() {
   }
 
   const getFilteredRegistrations = () => {
-    if (!dataManager || !dashboardData) return []
+    if (!registrationsData) return []
     
-    const allRegistrations = dataManager.getRegistrations({ 
-      status: filterStatus, 
-      search: searchTerm 
-    })
-    
-    return allRegistrations.map(reg => ({
-      id: reg.id,
+    return registrationsData.filter(reg => {
+      const matchesSearch = searchTerm === '' || 
+        reg.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reg.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reg.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reg.organization.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesStatus = filterStatus === 'all' || reg.status === filterStatus
+      
+      return matchesSearch && matchesStatus
+    }).map(reg => ({
+      id: reg._id,
       name: `${reg.firstName} ${reg.lastName}`,
       email: reg.email,
-      ticket: reg.ticketType,
+      ticket: reg.registrationType || 'Standard',
       date: new Date(reg.createdAt).toLocaleDateString(),
       status: reg.status
     }))
@@ -182,11 +222,30 @@ export default function AdminDashboard() {
     window.URL.revokeObjectURL(url)
   }
 
-  const handleStatusUpdate = (id: string, newStatus: string) => {
-    if (!dataManager) return
-    
-    dataManager.updateRegistrationStatus(id, newStatus as any)
-    loadDashboardData(dataManager) // Refresh data
+  const handleStatusUpdate = async (id: string, newStatus: string) => {
+    try {
+      const response = await fetch('/api/registrations', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: [id],
+          status: newStatus
+        })
+      });
+
+      if (response.ok) {
+        // Refresh data
+        loadRealData();
+      } else {
+        console.error('Failed to update registration status');
+        alert('Failed to update status. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating registration status:', error);
+      alert('Error updating status. Please try again.');
+    }
   }
 
   const handleSingleDelete = async (id: string, type: 'contact' | 'registration' | 'abstract') => {
@@ -204,8 +263,11 @@ export default function AdminDashboard() {
           console.log(`Successfully deleted ${type}`);
           
           // Refresh data
-          if (dataManager) loadDashboardData(dataManager);
-          if (type === 'abstract') loadAbstractsData();
+          if (type === 'abstract') {
+            loadAbstractsData();
+          } else {
+            loadRealData();
+          }
         } else {
           console.error(`Failed to delete ${type}:`, response.statusText);
           alert(`Failed to delete ${type}. Please try again.`);
@@ -370,6 +432,36 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {selectedRegistrations.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-blue-900">
+              {selectedRegistrations.length} registration(s) selected
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  selectedRegistrations.forEach(id => handleStatusUpdate(id, 'confirmed'))
+                  setSelectedRegistrations([])
+                }}
+                className="btn-primary text-sm"
+              >
+                Confirm ({selectedRegistrations.length})
+              </button>
+              <button
+                onClick={() => {
+                  selectedRegistrations.forEach(id => handleSingleDelete(id, 'registration'))
+                  setSelectedRegistrations([])
+                }}
+                className="btn-danger text-sm"
+              >
+                Delete ({selectedRegistrations.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <div className="flex flex-col sm:flex-row gap-4">
@@ -405,6 +497,20 @@ export default function AdminDashboard() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">
+                  <input
+                    type="checkbox"
+                    checked={selectedRegistrations.length === filteredRegistrations.length && filteredRegistrations.length > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedRegistrations(filteredRegistrations.map(r => r.id))
+                      } else {
+                        setSelectedRegistrations([])
+                      }
+                    }}
+                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  />
+                </th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Name</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Email</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Ticket</th>
@@ -416,6 +522,20 @@ export default function AdminDashboard() {
             <tbody className="divide-y divide-gray-200">
               {filteredRegistrations.map((reg: any) => (
                 <tr key={reg.id} className="hover:bg-gray-50">
+                  <td className="py-4 px-6">
+                    <input
+                      type="checkbox"
+                      checked={selectedRegistrations.includes(reg.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedRegistrations([...selectedRegistrations, reg.id])
+                        } else {
+                          setSelectedRegistrations(selectedRegistrations.filter(id => id !== reg.id))
+                        }
+                      }}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                  </td>
                   <td className="py-4 px-6 font-medium text-gray-900">{reg.name}</td>
                   <td className="py-4 px-6 text-gray-600">{reg.email}</td>
                   <td className="py-4 px-6 text-gray-600">{reg.ticket}</td>
@@ -784,6 +904,133 @@ export default function AdminDashboard() {
     )
   }
 
+  const renderContacts = () => {
+    const filteredContacts = contactsData.filter(contact => {
+      const matchesSearch = searchTerm === '' || 
+        contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contact.subject.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesStatus = filterStatus === 'all' || contact.status === filterStatus
+      
+      return matchesSearch && matchesStatus
+    })
+
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-900">Contact Management</h2>
+        
+        {selectedContacts.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-blue-900">
+                {selectedContacts.length} contact(s) selected
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    selectedContacts.forEach(id => handleSingleDelete(id, 'contact'))
+                    setSelectedContacts([])
+                  }}
+                  className="btn-danger text-sm"
+                >
+                  Delete ({selectedContacts.length})
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="text-left py-3 px-6 font-medium text-gray-900">
+                    <input
+                      type="checkbox"
+                      checked={selectedContacts.length === filteredContacts.length && filteredContacts.length > 0}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedContacts(filteredContacts.map(c => c._id))
+                        } else {
+                          setSelectedContacts([])
+                        }
+                      }}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                  </th>
+                  <th className="text-left py-3 px-6 font-medium text-gray-900">Name</th>
+                  <th className="text-left py-3 px-6 font-medium text-gray-900">Email</th>
+                  <th className="text-left py-3 px-6 font-medium text-gray-900">Subject</th>
+                  <th className="text-left py-3 px-6 font-medium text-gray-900">Status</th>
+                  <th className="text-left py-3 px-6 font-medium text-gray-900">Date</th>
+                  <th className="text-left py-3 px-6 font-medium text-gray-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredContacts.map((contact: any) => (
+                  <tr key={contact._id} className="hover:bg-gray-50">
+                    <td className="py-4 px-6">
+                      <input
+                        type="checkbox"
+                        checked={selectedContacts.includes(contact._id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedContacts([...selectedContacts, contact._id])
+                          } else {
+                            setSelectedContacts(selectedContacts.filter(id => id !== contact._id))
+                          }
+                        }}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                    </td>
+                    <td className="py-4 px-6 font-medium text-gray-900">{contact.name}</td>
+                    <td className="py-4 px-6 text-gray-600">{contact.email}</td>
+                    <td className="py-4 px-6 text-gray-600 max-w-xs truncate">{contact.subject}</td>
+                    <td className="py-4 px-6">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(contact.status)}`}>
+                        {contact.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-gray-600">
+                      {new Date(contact.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={() => alert(`Message: ${contact.message}`)}
+                          className="p-1 text-gray-600 hover:text-blue-600"
+                          title="View Message"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleSingleDelete(contact._id, 'contact')}
+                          className="p-1 text-gray-600 hover:text-red-600"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filteredContacts.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="py-8 px-6 text-center text-gray-500">
+                      {contactsData.length === 0 ? 'No contacts submitted yet.' : 'No contacts match your search criteria.'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Batch action handlers
   const handleBatchDelete = async (type: 'contacts' | 'registrations' | 'abstracts') => {
     const selectedIds = type === 'contacts' ? selectedContacts : 
@@ -810,8 +1057,11 @@ export default function AdminDashboard() {
           else setSelectedAbstracts([]);
           
           // Refresh data
-          if (dataManager) loadDashboardData(dataManager);
-          if (type === 'abstracts') loadAbstractsData();
+          if (type === 'abstracts') {
+            loadAbstractsData();
+          } else {
+            loadRealData();
+          }
         } else {
           console.error(`Failed to delete ${type}:`, response.statusText);
           alert(`Failed to delete ${type}. Please try again.`);
@@ -976,10 +1226,8 @@ export default function AdminDashboard() {
           {activeTab === 'registrations' && renderRegistrations()}
           {activeTab === 'abstracts' && renderAbstracts()}
           {activeTab === 'analytics' && renderAnalytics()}
-          {activeTab === 'contacts' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h2 className="text-2xl font-bold text-gray-900">Contact Management</h2>
+          {activeTab === 'contacts' && renderContacts()}
+          {activeTab === 'speakers' && (
                 <div className="flex gap-3">
                   {selectedContacts.length > 0 && (
                     <div className="flex gap-2">
@@ -1083,121 +1331,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Contacts Table */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div className="p-6 border-b border-gray-100">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        placeholder="Search contacts..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      />
-                    </div>
-                    <select
-                      value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      <option value="all">All Status</option>
-                      <option value="new">New</option>
-                      <option value="replied">Replied</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="archived">Archived</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left">
-                          <input
-                            type="checkbox"
-                            checked={selectedContacts.length === dataManager?.getContactSubmissions().length}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedContacts(dataManager?.getContactSubmissions().map(c => c.id) || [])
-                              } else {
-                                setSelectedContacts([])
-                              }
-                            }}
-                            className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500"
-                          />
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {dataManager?.getContactSubmissions()
-                        .filter(contact => {
-                          const matchesSearch = contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                              contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                              contact.subject.toLowerCase().includes(searchTerm.toLowerCase())
-                          const matchesFilter = filterStatus === 'all' || contact.status === filterStatus
-                          return matchesSearch && matchesFilter
-                        })
-                        .map((contact) => (
-                          <tr key={contact.id} className={selectedContacts.includes(contact.id) ? 'bg-primary-50' : ''}>
-                            <td className="px-6 py-4">
-                              <input
-                                type="checkbox"
-                                checked={selectedContacts.includes(contact.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedContacts([...selectedContacts, contact.id])
-                                  } else {
-                                    setSelectedContacts(selectedContacts.filter(id => id !== contact.id))
-                                  }
-                                }}
-                                className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">{contact.name}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{contact.email}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm text-gray-900 max-w-xs truncate">{contact.subject}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                contact.status === 'new' ? 'bg-orange-100 text-orange-800' :
-                                contact.status === 'replied' ? 'bg-blue-100 text-blue-800' :
-                                contact.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {contact.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(contact.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex gap-2">
-                                <button className="text-primary-600 hover:text-primary-900">View</button>
-                                <button className="text-blue-600 hover:text-blue-900">Reply</button>
-                                <button className="text-red-600 hover:text-red-900">Delete</button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'contacts' && renderContacts()}
           {activeTab === 'speakers' && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
