@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { Eye, EyeOff, Lock, User, Shield } from 'lucide-react'
 
 export default function AdminLoginPage() {
@@ -42,8 +43,14 @@ export default function AdminLoginPage() {
         
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Shield className="text-white" size={32} />
+          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg border border-gray-200">
+            <Image 
+              src="/images/uganda-coat-of-arms.png" 
+              alt="Uganda Coat of Arms" 
+              width={40} 
+              height={40}
+              className="object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Portal</h1>
           <p className="text-primary-600 font-medium">The Communicable and Non-Communicable Diseases Conference 2025</p>

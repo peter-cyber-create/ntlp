@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
 import DataManager from '../../../lib/dataManager'
 import AnalyticsCharts from '../../../components/AnalyticsCharts'
 import { 
@@ -462,6 +463,88 @@ ${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` :
     }
   };
 
+  // Bulk download functionality for multiple abstracts
+  const handleBulkAbstractDownload = async () => {
+    if (selectedAbstracts.length === 0) {
+      alert('No abstracts selected for download');
+      return;
+    }
+
+    try {
+      // Get the selected abstract data
+      const selectedAbstractData = abstractsData.filter(abstract => 
+        selectedAbstracts.includes(abstract._id)
+      );
+
+      if (selectedAbstractData.length === 0) {
+        alert('Selected abstracts not found');
+        return;
+      }
+
+      // Download each file individually (since browsers limit simultaneous downloads)
+      for (let i = 0; i < selectedAbstractData.length; i++) {
+        const abstract = selectedAbstractData[i];
+        
+        // Add a small delay between downloads to prevent browser blocking
+        if (i > 0) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        // Trigger download using the existing function
+        handleAbstractDownload(abstract);
+      }
+
+      // Clear selection after download
+      setSelectedAbstracts([]);
+      
+      console.log(`Bulk download initiated for ${selectedAbstractData.length} abstracts`);
+    } catch (error) {
+      console.error('Error in bulk download:', error);
+      alert('Error occurred during bulk download. Please try again.');
+    }
+  };
+
+  // Export selected abstracts metadata to CSV
+  const handleExportSelectedAbstracts = () => {
+    if (selectedAbstracts.length === 0) {
+      alert('No abstracts selected for export');
+      return;
+    }
+
+    const selectedAbstractData = abstractsData.filter(abstract => 
+      selectedAbstracts.includes(abstract._id)
+    );
+
+    const csvData = selectedAbstractData.map(abstract => {
+      return [
+        `"${abstract.title}"`,
+        `"${abstract.primaryAuthor.firstName} ${abstract.primaryAuthor.lastName}"`,
+        `"${abstract.primaryAuthor.email}"`,
+        `"${abstract.primaryAuthor.institution || abstract.primaryAuthor.affiliation || ''}"`,
+        `"${abstract.category}"`,
+        `"${abstract.presentationType}"`,
+        `"${abstract.status}"`,
+        `"${new Date(abstract.submittedAt).toLocaleDateString()}"`,
+        `"${abstract.fileName || 'N/A'}"`,
+        `"${abstract.keywords || ''}"`,
+        `"${abstract.abstract.substring(0, 100)}..."`
+      ].join(',');
+    }).join('\n');
+
+    const csvContent = `Title,Author,Email,Institution,Category,Type,Status,Submitted,File,Keywords,Abstract Preview\n${csvData}`;
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `selected_abstracts_${new Date().toISOString().split('T')[0]}.csv`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    console.log(`Exported ${selectedAbstractData.length} selected abstracts to CSV`);
+  };
+
   const filteredRegistrations = getFilteredRegistrations()
 
   const renderOverview = () => (
@@ -879,6 +962,20 @@ ${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` :
                 >
                   <X size={16} />
                   Reject ({selectedAbstracts.length})
+                </button>
+                <button 
+                  onClick={handleBulkAbstractDownload}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                >
+                  <Download size={16} />
+                  Download ({selectedAbstracts.length})
+                </button>
+                <button 
+                  onClick={handleExportSelectedAbstracts}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                >
+                  <Upload size={16} />
+                  Export CSV ({selectedAbstracts.length})
                 </button>
                 <button 
                   onClick={() => handleBatchDelete('abstracts')}
@@ -1314,6 +1411,229 @@ ${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` :
     }
   }
 
+  const renderExport = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-900">Data Export Center</h2>
+        <div className="text-sm text-gray-500">Export all conference data</div>
+      </div>
+
+      {/* Export Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        {/* Registrations Export */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center mb-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Users className="text-blue-600" size={24} />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-semibold text-gray-900">Registrations</h3>
+              <p className="text-sm text-gray-600">{registrationsData.length} records</p>
+            </div>
+          </div>
+          <p className="text-gray-600 mb-4">Export all registration data including participant details, session tracks, and status.</p>
+          <div className="space-y-2">
+            <button
+              onClick={() => {
+                const csvData = registrationsData.map(reg => [
+                  `"${reg.name}"`,
+                  `"${reg.email}"`,
+                  `"${reg.phone || ''}"`,
+                  `"${reg.institution || ''}"`,
+                  `"${reg.position || ''}"`,
+                  `"${reg.sessionTrack || ''}"`,
+                  `"${reg.status}"`,
+                  `"${new Date(reg.registrationDate).toLocaleDateString()}"`,
+                  `"${reg.ticket || ''}"`,
+                  `"${reg.dietaryRequirements || ''}"`,
+                  `"${reg.specialNeeds || ''}"`
+                ].join(','));
+                
+                const csvContent = `Name,Email,Phone,Institution,Position,Session Track,Status,Registration Date,Ticket,Dietary Requirements,Special Needs\n${csvData.join('\n')}`;
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `registrations_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            >
+              <Download size={16} />
+              Export CSV
+            </button>
+            <button
+              onClick={() => {
+                const jsonData = JSON.stringify(registrationsData, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `registrations_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+              }}
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            >
+              <FileText size={16} />
+              Export JSON
+            </button>
+          </div>
+        </div>
+
+        {/* Abstracts Export */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center mb-4">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <FileText className="text-purple-600" size={24} />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-semibold text-gray-900">Abstracts</h3>
+              <p className="text-sm text-gray-600">{abstractsData.length} records</p>
+            </div>
+          </div>
+          <p className="text-gray-600 mb-4">Export abstract submissions including metadata, author information, and review status.</p>
+          <div className="space-y-2">
+            <button
+              onClick={() => {
+                const csvData = abstractsData.map(abstract => [
+                  `"${abstract.title}"`,
+                  `"${abstract.primaryAuthor.firstName} ${abstract.primaryAuthor.lastName}"`,
+                  `"${abstract.primaryAuthor.email}"`,
+                  `"${abstract.primaryAuthor.institution || abstract.primaryAuthor.affiliation || ''}"`,
+                  `"${abstract.category}"`,
+                  `"${abstract.presentationType}"`,
+                  `"${abstract.status}"`,
+                  `"${new Date(abstract.submittedAt).toLocaleDateString()}"`,
+                  `"${abstract.fileName || 'N/A'}"`,
+                  `"${abstract.keywords || ''}"`,
+                  `"${abstract.abstract.replace(/"/g, '""')}"`
+                ].join(','));
+                
+                const csvContent = `Title,Author,Email,Institution,Category,Type,Status,Submitted,File,Keywords,Abstract\n${csvData.join('\n')}`;
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `abstracts_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+              }}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            >
+              <Download size={16} />
+              Export CSV
+            </button>
+            <button
+              onClick={() => {
+                const jsonData = JSON.stringify(abstractsData, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `abstracts_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+              }}
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            >
+              <FileText size={16} />
+              Export JSON
+            </button>
+          </div>
+        </div>
+
+        {/* Contacts Export */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center mb-4">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <Mail className="text-green-600" size={24} />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-semibold text-gray-900">Contacts</h3>
+              <p className="text-sm text-gray-600">{contactsData.length} records</p>
+            </div>
+          </div>
+          <p className="text-gray-600 mb-4">Export contact inquiries and messages from the contact form.</p>
+          <div className="space-y-2">
+            <button
+              onClick={() => {
+                const csvData = contactsData.map(contact => [
+                  `"${contact.name}"`,
+                  `"${contact.email}"`,
+                  `"${contact.subject}"`,
+                  `"${contact.message.replace(/"/g, '""')}"`,
+                  `"${contact.status}"`,
+                  `"${new Date(contact.createdAt).toLocaleDateString()}"`
+                ].join(','));
+                
+                const csvContent = `Name,Email,Subject,Message,Status,Date\n${csvData.join('\n')}`;
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `contacts_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+              }}
+              className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            >
+              <Download size={16} />
+              Export CSV
+            </button>
+            <button
+              onClick={() => {
+                const jsonData = JSON.stringify(contactsData, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `contacts_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+              }}
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            >
+              <FileText size={16} />
+              Export JSON
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Bulk Export */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Bulk Export</h3>
+        <p className="text-gray-600 mb-4">Export all conference data in a single operation.</p>
+        <div className="flex gap-4">
+          <button
+            onClick={() => {
+              const timestamp = new Date().toISOString().split('T')[0];
+              
+              // Create summary report
+              const summary = `NTLP Conference 2025 - Data Export Summary
+Generated: ${new Date().toLocaleString()}
+
+STATISTICS:
+- Total Registrations: ${registrationsData.length}
+- Total Abstracts: ${abstractsData.length}
+- Total Contact Inquiries: ${contactsData.length}
+
+REGISTRATION STATUS:
+- Confirmed: ${registrationsData.filter(r => r.status === 'confirmed').length}
+- Pending: ${registrationsData.filter(r => r.status === 'pending').length}
+
+ABSTRACT STATUS:
+- Accepted: ${abstractsData.filter(a => a.status === 'accepted').length}
+- Pending: ${abstractsData.filter(a => a.status === 'pending').length}
+- Rejected: ${abstractsData.filter(a => a.status === 'rejected').length}`;
+
+              const blob = new Blob([summary], { type: 'text/plain' });
+              const link = document.createElement('a');
+              link.href = URL.createObjectURL(blob);
+              link.download = `conference_summary_${timestamp}.txt`;
+              link.click();
+            }}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2"
+          >
+            <Download size={20} />
+            Export Summary Report
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
   const navigation = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'registrations', label: 'Registrations', icon: Users },
@@ -1337,8 +1657,14 @@ ${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` :
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-gray-200 shadow-sm">
+              <Image 
+                src="/images/uganda-coat-of-arms.png" 
+                alt="Uganda Coat of Arms" 
+                width={24} 
+                height={24}
+                className="object-contain"
+              />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-lg sm:text-xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -1415,6 +1741,7 @@ ${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` :
           {activeTab === 'abstracts' && renderAbstracts()}
           {activeTab === 'analytics' && renderAnalytics()}
           {activeTab === 'contacts' && renderContacts()}
+          {activeTab === 'export' && renderExport()}
           {activeTab === 'speakers' && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">Speaker Management</h2>
