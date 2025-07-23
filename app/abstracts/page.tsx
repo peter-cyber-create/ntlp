@@ -161,7 +161,7 @@ export default function AbstractsPage() {
       }
       
       // Use optimized fetch with timeout and retry
-      const response = await optimizedFetch('/api/abstracts', {
+      const response = await optimizedFetch('/api/abstracts/', {
         method: 'POST',
         body: submitData
       }, 15000) // 15 second timeout for file uploads
