@@ -40,11 +40,11 @@
   }
   
   .floating-nav {
-    @apply fixed top-8 left-0 right-0 z-40 transition-all duration-300;
+    @apply fixed top-4 left-0 right-0 z-40 transition-all duration-300;
   }
   
   .nav-scrolled {
-    @apply bg-white/95 backdrop-blur-sm shadow-lg;
+    @apply bg-white/95 backdrop-blur-md shadow-xl border-b border-gray-200/50;
   }
   
   .nav-transparent {
