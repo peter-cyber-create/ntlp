@@ -5,6 +5,9 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { PerformanceMonitor } from '@/lib/performance';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     await connectToMongoose();
@@ -147,11 +150,15 @@ export async function POST(request: NextRequest) {
         return Buffer.from(bytes);
       }),
       
-      // Create uploads directory in parallel
+      // Create uploads directory in parallel - both locations for production compatibility
       PerformanceMonitor.measure('directory-creation', async () => {
         const dir = path.join(process.cwd(), 'uploads', 'abstracts');
+        const publicDir = path.join(process.cwd(), 'public', 'uploads', 'abstracts');
         try {
-          await mkdir(dir, { recursive: true });
+          await Promise.all([
+            mkdir(dir, { recursive: true }),
+            mkdir(publicDir, { recursive: true })
+          ]);
         } catch (error) {
           // Directory might already exist
         }
@@ -169,16 +176,21 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Generate unique filename and save file
+    // Generate unique filename and save file to both locations
     const timestamp = Date.now();
     const fileExtension = path.extname(file.name);
     const fileName = `abstract_${timestamp}_${abstractData.primaryAuthor.lastName.toLowerCase()}${fileExtension}`;
     const filePath = path.join(uploadsDir, fileName);
+    const publicFilePath = path.join(process.cwd(), 'public', 'uploads', 'abstracts', fileName);
     
     // Save file and create database record in parallel
     const [, savedAbstract] = await Promise.all([
       PerformanceMonitor.measure('file-save', async () => {
-        await writeFile(filePath, fileBuffer);
+        // Save to both locations for compatibility
+        await Promise.all([
+          writeFile(filePath, fileBuffer),
+          writeFile(publicFilePath, fileBuffer)
+        ]);
       }),
       
       PerformanceMonitor.measure('database-save', async () => {

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToMongoose } from '@/lib/mongodb';
 import { Contact } from '@/lib/models';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     await connectToMongoose();

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import DatabaseManager from '@/lib/databaseManager';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const dbManager = DatabaseManager.getInstance();

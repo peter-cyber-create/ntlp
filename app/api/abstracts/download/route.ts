@@ -4,6 +4,9 @@ import path from 'path';
 import { connectToMongoose } from '@/lib/mongodb';
 import { Abstract } from '@/lib/models';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -33,44 +36,54 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Construct the file path
+    // Construct the file path - try multiple locations for compatibility
     const uploadsDir = path.join(process.cwd(), 'uploads', 'abstracts');
-    const filePath = path.join(uploadsDir, abstract.fileName);
+    const publicUploadsDir = path.join(process.cwd(), 'public', 'uploads', 'abstracts');
+    
+    let filePath = path.join(uploadsDir, abstract.fileName);
+    let fileBuffer;
 
     try {
-      const fileBuffer = await readFile(filePath);
-      
-      // Get file extension to determine content type
-      const ext = path.extname(abstract.fileName).toLowerCase();
-      let contentType = 'application/octet-stream';
-      
-      switch (ext) {
-        case '.pdf':
-          contentType = 'application/pdf';
-          break;
-        case '.doc':
-          contentType = 'application/msword';
-          break;
-        case '.docx':
-          contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-          break;
+      // Try primary uploads directory first
+      fileBuffer = await readFile(filePath);
+    } catch (primaryError) {
+      try {
+        // Fallback to public uploads directory
+        filePath = path.join(publicUploadsDir, abstract.fileName);
+        fileBuffer = await readFile(filePath);
+      } catch (fallbackError) {
+        console.error('File not found in either location:', { primaryError, fallbackError });
+        return NextResponse.json(
+          { success: false, message: 'File not found on server' },
+          { status: 404 }
+        );
       }
-
-      return new NextResponse(fileBuffer, {
-        status: 200,
-        headers: {
-          'Content-Type': contentType,
-          'Content-Disposition': `attachment; filename="${abstract.fileName}"`,
-          'Content-Length': fileBuffer.length.toString(),
-        },
-      });
-    } catch (fileError) {
-      console.error('Error reading file:', fileError);
-      return NextResponse.json(
-        { success: false, message: 'File not found on server' },
-        { status: 404 }
-      );
     }
+      
+    // Get file extension to determine content type
+    const ext = path.extname(abstract.fileName).toLowerCase();
+    let contentType = 'application/octet-stream';
+    
+    switch (ext) {
+      case '.pdf':
+        contentType = 'application/pdf';
+        break;
+      case '.doc':
+        contentType = 'application/msword';
+        break;
+      case '.docx':
+        contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        break;
+    }
+
+    return new NextResponse(fileBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': contentType,
+        'Content-Disposition': `attachment; filename="${abstract.fileName}"`,
+        'Content-Length': fileBuffer.length.toString(),
+      },
+    });
   } catch (error) {
     console.error('Error downloading abstract:', error);
     return NextResponse.json(
