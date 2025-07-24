@@ -441,54 +441,18 @@ class DataManager {
           email: 'minister@health.go.ug',
           title: 'MINISTER FOR HEALTH',
           organization: 'Republic of Uganda',
-          bio: 'Biography',
+          bio: 'Leading Uganda\'s health sector with extensive experience in public health policy and healthcare system strengthening.',
           expertise: ['Health Policy', 'Government', 'Public Health', 'Disease Prevention'],
-          sessionProposal: 'Integerated Health Systems for a Resilient Future: Harnessing Technology in Combating Diseases'
+          sessionProposal: 'Integrated Health Systems for a Resilient Future: Harnessing Technology in Combating Diseases'
         },
         {
           name: 'DR. CHARLES OLARO',
           email: 'commissioner@health.go.ug',
           title: 'DIRECTOR GENERAL HEALTH SERVICES',
           organization: 'Ministry of Health Uganda',
-          bio: 'Biography',
+          bio: 'Overseeing health service delivery across Uganda with focus on health system strengthening and quality improvement.',
           expertise: ['Health Services', 'Public Health', 'Health Administration'],
           sessionProposal: 'Strengthening Health Systems in Uganda'
-        },
-        {
-          name: 'Speaker 3',
-          email: 'speaker3@health.go.ug',
-          title: 'Medical Officer',
-          organization: 'Ministry of Health Uganda',
-          bio: 'Biography',
-          expertise: ['Health Policy', 'Legislation', 'Public Health'],
-          sessionProposal: 'Legislative Approaches to Disease Prevention'
-        },
-        {
-          name: 'Speaker 1',
-          email: 'speaker1@health.go.ug',
-          title: 'Health Expert',
-          organization: 'Ministry of Health Uganda',
-          bio: 'Biography',
-          expertise: ['Public Health', 'Disease Prevention'],
-          sessionProposal: 'Community Health Strategies for Disease Prevention'
-        },
-        {
-          name: 'Speaker 2',
-          email: 'speaker2@health.go.ug',
-          title: 'Health Specialist',
-          organization: 'Ministry of Health Uganda',
-          bio: 'Biography',
-          expertise: ['Health Development', 'Partnership'],
-          sessionProposal: 'Health Partnership Development in Uganda'
-        },
-        {
-          name: 'Dr. Michael Oduya',
-          email: 'michael@hospital.ng',
-          title: 'Chief Medical Officer',
-          organization: 'Lagos University Teaching Hospital',
-          bio: 'Pioneer in implementing electronic health records and telemedicine in Nigeria.',
-          expertise: ['Telemedicine', 'Electronic Health Records', 'Hospital Management', 'Clinical Innovation'],
-          sessionProposal: 'Telemedicine Implementation: Lessons from Nigeria'
         }
       ]
 

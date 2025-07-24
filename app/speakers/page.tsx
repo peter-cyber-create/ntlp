@@ -13,7 +13,7 @@ export default function SpeakersPage() {
       name: 'DR JANE RUTH ACENG',
       title: 'MINISTER FOR HEALTH',
       company: 'Republic of Uganda',
-      bio: 'Biography',
+      bio: 'Leading Uganda\'s health sector with extensive experience in public health policy and healthcare system strengthening.',
       image: '/placeholder-speaker.jpg',
       expertise: ['Healthcare Policy', 'Public Health', 'Digital Health Systems'],
       country: 'Uganda'
@@ -23,97 +23,17 @@ export default function SpeakersPage() {
       name: 'DR. CHARLES OLARO',
       title: 'DIRECTOR GENERAL HEALTH SERVICES',
       company: 'Ministry of Health Uganda',
-      bio: 'Biography',
+      bio: 'Overseeing health service delivery across Uganda with focus on health system strengthening and quality improvement.',
       image: '/placeholder-speaker.jpg',
       expertise: ['Health Services', 'Public Health', 'Health Administration'],
-      country: 'Uganda'
-    },
-    {
-      id: 3,
-      name: 'Speaker 1',
-      title: 'Health Expert',
-      company: 'Ministry of Health Uganda',
-      bio: 'Biography',
-      image: '/placeholder-speaker.jpg',
-      expertise: ['Public Health', 'Disease Prevention'],
-      country: 'Uganda'
-    },
-    {
-      id: 4,
-      name: 'Speaker 2',
-      title: 'Health Specialist',
-      company: 'Ministry of Health Uganda',
-      bio: 'Biography',
-      image: '/placeholder-speaker.jpg',
-      expertise: ['Health Development', 'Partnership', 'Community Health'],
-      country: 'Uganda'
-    },
-    {
-      id: 5,
-      name: 'Speaker 3',
-      title: 'Medical Officer',
-      company: 'Ministry of Health Uganda',
-      bio: 'Biography',
-      image: '/placeholder-speaker.jpg',
-      expertise: ['Health Services', 'Public Health', 'Health Administration'],
-      country: 'Uganda'
-    },
-    {
-      id: 6,
-      name: 'Speaker 4',
-      title: 'Health Administrator',
-      company: 'Ministry of Health Uganda',
-      bio: 'Biography',
-      image: '/placeholder-speaker.jpg',
-      expertise: ['Health Education', 'Community Health', 'Public Health'],
-      country: 'Uganda'
-    },
-    {
-      id: 7,
-      name: 'Speaker 1',
-      title: 'Health Expert',
-      company: 'Ministry of Health Uganda',
-      bio: 'Biography',
-      image: '/placeholder-speaker.jpg',
-      expertise: ['Public Health', 'Disease Prevention'],
-      country: 'Uganda'
-    },
-    {
-      id: 8,
-      name: 'Speaker 2',
-      title: 'Health Specialist',
-      company: 'Ministry of Health Uganda',
-      bio: 'Biography',
-      image: '/placeholder-speaker.jpg',
-      expertise: ['Community Health', 'Health Policy'],
-      country: 'Uganda'
-    },
-    {
-      id: 9,
-      name: 'Speaker 3',
-      title: 'Medical Officer',
-      company: 'Ministry of Health Uganda',
-      bio: 'Biography',
-      image: '/placeholder-speaker.jpg',
-      expertise: ['Clinical Medicine', 'Public Health'],
-      country: 'Uganda'
-    },
-    {
-      id: 10,
-      name: 'Speaker 4',
-      title: 'Health Administrator',
-      company: 'Ministry of Health Uganda',
-      bio: 'Biography',
-      image: '/placeholder-speaker.jpg',
-      expertise: ['Health Management', 'Health Systems'],
       country: 'Uganda'
     }
   ]
 
   const speakerStats = [
-    { number: '10+', label: 'Expert Speakers', icon: Users },
+    { number: '2', label: 'Confirmed Speakers', icon: Users },
     { number: '5+', label: 'Ministry Departments', icon: Globe },
-    { number: '10+', label: 'Health Leaders', icon: Award }
+    { number: 'More', label: 'Speakers Coming', icon: Award }
   ]
 
   return (
@@ -126,8 +46,8 @@ export default function SpeakersPage() {
               Our Speakers
             </h1>
             <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-              Learn from Uganda's most influential health leaders and experts 
-              at The Communicable and Non-Communicable Diseases Conference.
+              Hear from Uganda's top health leaders including the Minister for Health 
+              and Director General of Health Services.
             </p>
           </div>
         </div>
@@ -161,7 +81,7 @@ export default function SpeakersPage() {
               Featured Speakers
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Meet some of the distinguished experts who will be sharing their insights and experiences.
+              Our confirmed speakers bring decades of experience in Uganda's health sector.
             </p>
           </div>
 

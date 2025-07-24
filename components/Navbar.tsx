@@ -54,8 +54,8 @@ export function Navbar() {
               />
             </div>
             <div className="flex flex-col">
-              <span className={`font-bold text-sm sm:text-lg transition-colors ${shouldUseWhiteText ? 'text-white' : 'text-gray-900'}`}>
-                The Communicable and Non-Communicable Diseases Conference 2025
+              <span className={`font-bold text-xs sm:text-sm lg:text-base transition-colors ${shouldUseWhiteText ? 'text-white' : 'text-gray-900'}`}>
+                Diseases Conference 2025
               </span>
               <span className={`text-xs font-medium transition-colors ${shouldUseWhiteText ? 'text-primary-200' : 'text-gray-600'}`}>
                 Ministry of Health Uganda
