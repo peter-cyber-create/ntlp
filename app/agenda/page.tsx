@@ -29,7 +29,7 @@ export default function AgendaPage() {
         title: 'Keynote: Uganda Health Challenges and Solutions',
         type: 'keynote',
         location: 'Main Auditorium',
-        speaker: 'DR. CHARLES OLARO, Commissioner Health Services',
+        speaker: 'DR. CHARLES OLARO, Director General Health Services',
         description: 'Addressing both communicable and non-communicable diseases in Uganda'
       },
       {

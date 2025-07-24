@@ -1,33 +1,33 @@
 # The Communicable and Non-Communicable Diseases Conference 2025
 
-A professional Next.js website for The Communicable and Non-Communicable Diseases Conference 2025 - "United Action Against Communicable and Non-Communicable Diseases", showcasing Uganda's premier health conference organized by the Ministry of Health Uganda with a comprehensive admin dashboard.
+Website for Uganda's premier health conference focusing on "United Action Against Communicable and Non-Communicable Diseases". Built for the Ministry of Health Uganda with complete management capabilities.
 
-## 🚀 Key Features
+## 🚀 What's Included
 
 ### Public Website
-- **Modern Design**: Clean, professional design built with Next.js 14 and Tailwind CSS
-- **Responsive**: Fully responsive design that works on all devices
-- **Performance**: Optimized for speed and SEO
-- **Professional Pages**:
-  - Homepage with hero section and key features
-  - About page with mission and vision
-  - Detailed agenda with 3-day schedule
-  - Speaker profiles and featured experts
-  - Partners and sponsorship opportunities
-  - Contact page with form and information
-  - Registration page with ticket selection
+- **Clean Design**: Professional website built with Next.js 14 and Tailwind CSS
+- **Mobile Friendly**: Works perfectly on all devices and screen sizes
+- **Fast Loading**: Optimized for speed and search engines
+- **Complete Pages**:
+  - Homepage introducing the conference
+  - About section with conference goals
+  - Full 3-day agenda and schedule
+  - Speaker profiles and information
+  - Partner organizations and sponsors
+  - Contact details and location
+  - Registration with pricing options
 
 ### Admin Dashboard
-- **Authentication**: Secure login system (demo: admin/conference2025)
-- **Comprehensive Analytics**: Interactive charts and dashboards with Recharts
-- **Registration Management**: View, filter, and manage event registrations
-- **Contact Management**: Handle contact form submissions and inquiries
-- **Speaker Management**: Review and manage speaker applications
-- **Settings Panel**: Configure event details, tickets, and system settings
-- **Data Export**: CSV export functionality for all data types
-- **Real-time Statistics**: Live dashboard with key metrics and KPIs
+- **Secure Access**: Protected login for conference organizers
+- **Visual Analytics**: Charts and graphs showing registration trends
+- **Registration Tracking**: Manage all conference registrations
+- **Contact Management**: Handle inquiries and messages
+- **Speaker Coordination**: Organize speaker applications
+- **Conference Settings**: Update event details and pricing
+- **Data Export**: Download registration and contact data
+- **Live Updates**: Real-time statistics and metrics
 
-### Technical Features
+### Technical Setup
 - **MySQL Database**: Robust MySQL database with connection pooling
 - **Interactive Charts**: Registration trends, geographic distribution, ticket analytics
 - **Notification System**: Toast notifications for user feedback

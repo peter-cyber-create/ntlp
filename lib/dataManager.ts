@@ -448,7 +448,7 @@ class DataManager {
         {
           name: 'DR. CHARLES OLARO',
           email: 'commissioner@health.go.ug',
-          title: 'COMMISSIONER HEALTH SERVICES',
+          title: 'DIRECTOR GENERAL HEALTH SERVICES',
           organization: 'Ministry of Health Uganda',
           bio: 'Biography',
           expertise: ['Health Services', 'Public Health', 'Health Administration'],

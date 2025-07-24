@@ -22,6 +22,20 @@ export default function RegisterPage() {
 
   const ticketTypes = [
     {
+      id: 'student',
+      name: 'Student',
+      price: 'UGX 100,000',
+      description: 'Special rate for students (ID required)',
+      features: [
+        'All 3 days access',
+        'Conference materials',
+        'Certificate of attendance',
+        'Student networking session',
+        'Access to proceedings'
+      ],
+      deadline: 'March 10, 2025'
+    },
+    {
       id: 'early-bird',
       name: 'Early Bird',
       price: 'UGX 250,000',
@@ -47,19 +61,6 @@ export default function RegisterPage() {
         'Networking lunch',
         'Conference materials',
         'Certificate of attendance'
-      ],
-      deadline: 'March 10, 2025'
-    },
-    {
-      id: 'student',
-      name: 'Student',
-      price: 'UGX 100,000',
-      description: 'Special rate for students (ID required)',
-      features: [
-        'All 3 days access',
-        'Conference materials',
-        'Certificate of attendance',
-        'Student networking session'
       ],
       deadline: 'March 10, 2025'
     }
@@ -202,8 +203,8 @@ export default function RegisterPage() {
               Register Now
             </h1>
             <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-              Secure your spot at The Communicable and Non-Communicable Diseases Conference. 
-              Join Uganda's health leaders in addressing critical health challenges.
+              Be part of Uganda's most important health conference. 
+              Register today to join discussions on the future of health in our country.
             </p>
           </div>
         </div>
@@ -215,7 +216,7 @@ export default function RegisterPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Registration</h2>
-              <p className="text-xl text-gray-600">Select the registration type that best fits your needs</p>
+              <p className="text-xl text-gray-600">Choose the option that works best for you</p>
               {!selectedTicket && (
                 <p className="text-red-600 mt-2 font-medium">⚠️ Please select a ticket type below to continue</p>
               )}

@@ -7,132 +7,171 @@ export const metadata = {
 }
 
 export default function PartnersPage() {
-  const partners = {
-    platinum: [
-      {
-        name: 'The Global Fund',
-        logo: '/placeholder-logo.jpg',
-        description: 'Global partnership fighting AIDS, tuberculosis and malaria.',
-        website: 'https://www.theglobalfund.org'
-      },
-      {
-        name: 'World Health Organization (WHO)',
-        logo: '/placeholder-logo.jpg',
-        description: 'Leading global health organization supporting Uganda health initiatives.',
-        website: 'https://www.who.int/uganda'
-      },
-      {
-        name: 'Centers for Disease Control and Prevention (CDC)',
-        logo: '/placeholder-logo.jpg',
-        description: 'Supporting disease prevention and health promotion in Uganda.',
-        website: 'https://www.cdc.gov/globalhealth/countries/uganda'
-      }
-    ],
-    gold: [
-      {
-        name: 'USAID Uganda',
-        logo: '/placeholder-logo.jpg',
-        description: 'Supporting health system strengthening and disease prevention programs.',
-        website: 'https://www.usaid.gov/uganda'
-      },
-      {
-        name: 'PEPFAR Uganda',
-        logo: '/placeholder-logo.jpg',
-        description: 'President\'s Emergency Plan for AIDS Relief supporting HIV/AIDS programs.',
-        website: 'https://www.pepfar.gov/countries/uganda'
-      },
-      {
-        name: 'GAVI Alliance',
-        logo: '/placeholder-logo.jpg',
-        description: 'Supporting immunization and health system strengthening in Uganda.',
-        website: 'https://www.gavi.org'
-      },
-      {
-        name: 'UNICEF Uganda',
-        logo: '/placeholder-logo.jpg',
-        description: 'Supporting child health and nutrition programs across Uganda.',
-        website: 'https://www.unicef.org/uganda'
-      }
-    ],
-    silver: [
-      {
-        name: 'Infectious Diseases Institute (IDI)',
-        logo: '/placeholder-logo.jpg',
-        description: 'Leading infectious disease research and treatment center in Uganda.',
-        website: 'https://www.idi.mak.ac.ug'
-      },
-      {
-        name: 'Uganda Cancer Institute',
-        logo: '/placeholder-logo.jpg',
-        description: 'National referral center for cancer treatment and research in Uganda.',
-        website: 'https://www.uci.or.ug'
-      },
-      {
-        name: 'Joint Clinical Research Centre (JCRC)',
-        logo: '/placeholder-logo.jpg',
-        description: 'Leading clinical research organization for HIV/AIDS and other diseases.',
-        website: 'https://www.jcrc.org.ug'
-      },
-      {
-        name: 'Mulago National Referral Hospital',
-        logo: '/placeholder-logo.jpg',
-        description: 'Uganda\'s premier national referral hospital and teaching institution.',
-        website: 'https://www.mulago.go.ug'
-      },
-      {
-        name: 'Butabika National Referral Hospital',
-        logo: '/placeholder-logo.jpg',
-        description: 'National center of excellence for mental health services in Uganda.',
-        website: 'https://www.health.go.ug'
-      },
-      {
-        name: 'Uganda National Institute for Public Health',
-        logo: '/placeholder-logo.jpg',
-        description: 'National public health research and disease surveillance institute.',
-        website: 'https://www.health.go.ug'
-      }
-    ],
-    startup: [
-      {
-        name: 'MedNet Technologies',
-        logo: '/placeholder-logo.jpg',
-        description: 'Uganda-based health information systems and telemedicine solutions.',
-        website: 'https://www.health.go.ug'
-      },
-      {
-        name: 'Rocket Health',
-        logo: '/placeholder-logo.jpg',
-        description: 'Digital health platform providing on-demand healthcare services in Uganda.',
-        website: 'https://rockethealth.africa'
-      },
-      {
-        name: 'SafeBoda Health',
-        logo: '/placeholder-logo.jpg',
-        description: 'Motorcycle ambulance and emergency health services across Uganda.',
-        website: 'https://safeboda.com/health'
-      },
-      {
-        name: 'CarePay Uganda',
-        logo: '/placeholder-logo.jpg',
-        description: 'Digital health insurance and payment solutions for Uganda healthcare.',
-        website: 'https://www.carepay.com'
-      },
-      {
-        name: 'HealthTech Uganda',
-        logo: '/placeholder-logo.jpg',
-        description: 'Local health technology innovation hub supporting Uganda startups.',
-        website: 'https://www.health.go.ug'
-      },
-      {
-        name: 'Uganda Digital Health Initiative',
-        logo: '/placeholder-logo.jpg',
-        description: 'Government-led digital advancement of Uganda healthcare systems.',
-        website: 'https://www.health.go.ug'
-      }
-    ]
-  }
+  const allPartners = [
+    // International Organizations
+    {
+      name: 'The Global Fund',
+      logo: '/placeholder-logo.jpg',
+      description: 'Fighting AIDS, tuberculosis and malaria through international partnerships.',
+      website: 'https://www.theglobalfund.org'
+    },
+    {
+      name: 'World Health Organization (WHO)',
+      logo: '/placeholder-logo.jpg',
+      description: 'The UN health agency coordinating international health efforts worldwide.',
+      website: 'https://www.who.int/uganda'
+    },
+    {
+      name: 'Centers for Disease Control and Prevention (CDC)',
+      logo: '/placeholder-logo.jpg',
+      description: 'US health agency providing technical support and funding for disease prevention.',
+      website: 'https://www.cdc.gov/globalhealth/countries/uganda'
+    },
+    {
+      name: 'USAID Uganda',
+      logo: '/placeholder-logo.jpg',
+      description: 'US government agency working to reduce poverty and support development.',
+      website: 'https://www.usaid.gov/uganda'
+    },
+    {
+      name: 'PEPFAR Uganda',
+      logo: '/placeholder-logo.jpg',
+      description: 'Emergency plan providing antiretroviral treatment and prevention services.',
+      website: 'https://www.pepfar.gov/countries/uganda'
+    },
+    {
+      name: 'GAVI Alliance',
+      logo: '/placeholder-logo.jpg',
+      description: 'Public-private partnership increasing access to immunization in developing countries.',
+      website: 'https://www.gavi.org'
+    },
+    {
+      name: 'UNICEF Uganda',
+      logo: '/placeholder-logo.jpg',
+      description: 'UN agency advocating for children rights and providing humanitarian assistance.',
+      website: 'https://www.unicef.org/uganda'
+    },
+    // National Institutions
+    {
+      name: 'Infectious Diseases Institute (IDI)',
+      logo: '/placeholder-logo.jpg',
+      description: 'Makerere University-based institute providing clinical care, research and training.',
+      website: 'https://www.idi.mak.ac.ug'
+    },
+    {
+      name: 'Uganda Cancer Institute',
+      logo: '/placeholder-logo.jpg',
+      description: 'Specialized facility providing comprehensive cancer care and research.',
+      website: 'https://www.uci.or.ug'
+    },
+    {
+      name: 'Joint Clinical Research Centre (JCRC)',
+      logo: '/placeholder-logo.jpg',
+      description: 'Non-profit organization conducting clinical research and providing treatment.',
+      website: 'https://www.jcrc.org.ug'
+    },
+    {
+      name: 'Mulago National Referral Hospital',
+      logo: '/placeholder-logo.jpg',
+      description: 'Teaching hospital serving as Uganda\'s premier medical institution.',
+      website: 'https://www.mulago.go.ug'
+    },
+    {
+      name: 'Butabika National Referral Hospital',
+      logo: '/placeholder-logo.jpg',
+      description: 'Specialized facility providing mental health services nationwide.',
+      website: 'https://www.health.go.ug'
+    },
+    {
+      name: 'Uganda National Institute for Public Health',
+      logo: '/placeholder-logo.jpg',
+      description: 'Government institute conducting surveillance and public health research.',
+      website: 'https://www.health.go.ug'
+    },
+    // Technology Partners
+    {
+      name: 'MedNet Technologies',
+      logo: '/placeholder-logo.jpg',
+      description: 'Local company developing health information systems and digital solutions.',
+      website: 'https://www.health.go.ug'
+    },
+    {
+      name: 'Rocket Health',
+      logo: '/placeholder-logo.jpg',
+      description: 'Platform connecting patients with qualified doctors through technology.',
+      website: 'https://rockethealth.africa'
+    },
+    {
+      name: 'SafeBoda Health',
+      logo: '/placeholder-logo.jpg',
+      description: 'Service providing emergency transport and healthcare delivery.',
+      website: 'https://safeboda.com/health'
+    },
+    {
+      name: 'CarePay Uganda',
+      logo: '/placeholder-logo.jpg',
+      description: 'Financial technology company facilitating healthcare payments.',
+      website: 'https://www.carepay.com'
+    },
+    {
+      name: 'HealthTech Uganda',
+      logo: '/placeholder-logo.jpg',
+      description: 'Innovation hub supporting local health technology development.',
+      website: 'https://www.health.go.ug'
+    },
+    {
+      name: 'Uganda Digital Health Initiative',
+      logo: '/placeholder-logo.jpg',
+      description: 'Government program digitizing healthcare delivery systems.',
+      website: 'https://www.health.go.ug'
+    }
+  ]
 
   const sponsorshipTiers = [
+    {
+      name: 'Startup Partner',
+      price: '$5,000',
+      color: 'bg-gradient-to-r from-primary-400 to-primary-600',
+      benefits: [
+        'Startup exhibition space',
+        'Pitch competition entry',
+        'Logo on startup materials',
+        '5 complimentary tickets',
+        'Mobile app listing',
+        'Networking access',
+        'Mentorship opportunities'
+      ]
+    },
+    {
+      name: 'Silver Sponsor',
+      price: '$15,000',
+      color: 'bg-gradient-to-r from-gray-300 to-gray-500',
+      benefits: [
+        'Standard booth location',
+        'Logo on select materials',
+        'Coffee break sponsorship',
+        '10 complimentary tickets',
+        'Mobile app listing',
+        'Social media mentions',
+        'Newsletter inclusion'
+      ]
+    },
+    {
+      name: 'Gold Sponsor',
+      price: '$25,000',
+      color: 'bg-gradient-to-r from-yellow-400 to-yellow-600',
+      benefits: [
+        'Premium booth location',
+        'Panel participation opportunity',
+        'Logo on conference materials',
+        'Networking lunch sponsorship',
+        'VIP dinner for 6 guests',
+        '15 complimentary tickets',
+        'Mobile app branding',
+        'Social media mentions',
+        'Newsletter inclusion'
+      ]
+    },
     {
       name: 'Platinum Sponsor',
       price: '$50,000',
@@ -206,8 +245,8 @@ export default function PartnersPage() {
               Our Partners
             </h1>
             <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-              We're proud to collaborate with leading organizations, governments, and 
-              partners who share our vision of advancing African healthcare through technology.
+              Together with our partners, we're building stronger health systems across Uganda and beyond. 
+              These organizations share our commitment to improving healthcare delivery through innovation and collaboration.
             </p>
           </div>
         </div>
@@ -249,129 +288,34 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      {/* Platinum Partners */}
+      {/* All Partners */}
       <section className="section-padding bg-gray-50">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Platinum Partners
+              Our Partners
             </h2>
-            <p className="text-xl text-gray-600">Our highest level strategic partners</p>
+            <p className="text-xl text-gray-600">Organizations working with us to strengthen health systems in Uganda</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {partners.platinum.map((partner, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
-                <div className="h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg flex items-center justify-center mb-6">
-                  <span className="text-2xl font-bold text-gray-600">{partner.name}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {allPartners.map((partner, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div className="h-20 bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg flex items-center justify-center mb-4">
+                  <span className="text-sm font-semibold text-primary-700 text-center px-2">{partner.name}</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{partner.name}</h3>
-                <p className="text-gray-600 mb-6">{partner.description}</p>
-                <a 
-                  href={partner.website} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  Visit Website →
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Gold Partners */}
-      <section className="section-padding">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Gold Partners
-            </h2>
-            <p className="text-xl text-gray-600">Technology and innovation leaders</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {partners.gold.map((partner, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
-                <div className="h-20 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-lg font-bold text-yellow-800">{partner.name}</span>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">{partner.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">{partner.description}</p>
-                <a 
-                  href={partner.website} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-                >
-                  Learn More →
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Silver Partners */}
-      <section className="section-padding bg-gray-50">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Silver Partners
-            </h2>
-            <p className="text-xl text-gray-600">Government and institutional partners</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {partners.silver.map((partner, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition-shadow">
-                <div className="h-16 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg flex items-center justify-center mb-3">
-                  <span className="text-sm font-bold text-gray-600">{partner.name}</span>
-                </div>
-                <h3 className="text-md font-bold text-gray-900 mb-2">{partner.name}</h3>
-                <p className="text-gray-600 text-xs mb-3">{partner.description}</p>
-                {partner.website !== '#' && (
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">{partner.name}</h3>
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">{partner.description}</p>
+                {partner.website && (
                   <a 
                     href={partner.website} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-primary-600 hover:text-primary-700 font-medium text-xs"
+                    className="text-primary-600 hover:text-primary-700 font-medium text-sm inline-flex items-center"
                   >
-                    Visit →
+                    Learn More →
                   </a>
                 )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Startup Partners */}
-      <section className="section-padding">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Startup Partners
-            </h2>
-            <p className="text-xl text-gray-600">Progressive health organizations</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {partners.startup.map((partner, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-3 text-center hover:shadow-lg transition-shadow">
-                <div className="h-12 bg-gradient-to-r from-primary-100 to-primary-200 rounded-md flex items-center justify-center mb-2">
-                  <span className="text-xs font-bold text-primary-800">{partner.name}</span>
-                </div>
-                <h3 className="text-sm font-bold text-gray-900 mb-1">{partner.name}</h3>
-                <a 
-                  href={partner.website} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary-600 hover:text-primary-700 font-medium text-xs"
-                >
-                  Visit →
-                </a>
               </div>
             ))}
           </div>
@@ -386,8 +330,8 @@ export default function PartnersPage() {
               Sponsorship Opportunities
             </h2>
             <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-              Partner with us to reach Africa's most influential healthcare technology community 
-              and drive meaningful change in African healthcare.
+              Join us as a sponsor and connect with health professionals, researchers, and leaders 
+              who are shaping the future of healthcare in Uganda and across Africa.
             </p>
           </div>
 

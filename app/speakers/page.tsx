@@ -21,7 +21,7 @@ export default function SpeakersPage() {
     {
       id: 2,
       name: 'DR. CHARLES OLARO',
-      title: 'COMMISSIONER HEALTH SERVICES',
+      title: 'DIRECTOR GENERAL HEALTH SERVICES',
       company: 'Ministry of Health Uganda',
       bio: 'Biography',
       image: '/placeholder-speaker.jpg',
