@@ -8,9 +8,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">A</span>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 flex items-center justify-center">
+                <img 
+                  src="/images/uganda-coat-of-arms.png" 
+                  alt="Uganda Coat of Arms" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="font-bold text-xl">
                 The Communicable and Non-Communicable Diseases Conference

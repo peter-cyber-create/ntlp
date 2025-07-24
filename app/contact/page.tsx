@@ -64,6 +64,16 @@ export default function ContactPage() {
       <section className="bg-gradient-to-r from-primary-600 to-primary-800 text-white section-padding">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
+            {/* Uganda Coat of Arms */}
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full p-3">
+                <img 
+                  src="/images/uganda-coat-of-arms.png" 
+                  alt="Uganda Coat of Arms" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Contact Us
             </h1>

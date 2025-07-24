@@ -43,21 +43,21 @@ export function Navbar() {
   return (
     <nav className={`floating-nav ${isScrolled ? 'nav-scrolled' : 'nav-transparent'}`}>
       <div className="container mx-auto px-4 relative">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-24 py-2">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
+          <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
               <img 
                 src="/images/uganda-coat-of-arms.png" 
                 alt="Uganda Coat of Arms" 
                 className="w-full h-full object-contain"
               />
             </div>
-            <div className="flex flex-col">
-              <span className={`font-bold text-xs sm:text-sm lg:text-base transition-colors ${shouldUseWhiteText ? 'text-white' : 'text-gray-900'}`}>
-                Diseases Conference 2025
+            <div className="flex flex-col min-w-0">
+              <span className={`font-bold text-sm sm:text-base lg:text-lg leading-tight transition-colors ${shouldUseWhiteText ? 'text-white' : 'text-gray-900'}`}>
+                The Communicable and Non-Communicable Diseases Conference 2025
               </span>
-              <span className={`text-xs font-medium transition-colors ${shouldUseWhiteText ? 'text-primary-200' : 'text-gray-600'}`}>
+              <span className={`text-xs sm:text-sm font-medium transition-colors ${shouldUseWhiteText ? 'text-primary-200' : 'text-gray-600'}`}>
                 Ministry of Health Uganda
               </span>
             </div>

@@ -13,8 +13,18 @@ export default function HomePage() {
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24 text-center text-white">
           <div className="max-w-5xl mx-auto">
-            <div className="mb-4 sm:mb-6">
-              <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-primary-500/20 border border-primary-300/30 rounded-full text-primary-100 text-xs sm:text-sm font-medium mb-4">
+            <div className="mb-6 sm:mb-8">
+              {/* Uganda Coat of Arms */}
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full p-3">
+                  <img 
+                    src="/images/uganda-coat-of-arms.png" 
+                    alt="Uganda Coat of Arms" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
+              <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-primary-500/20 border border-primary-300/30 rounded-full text-primary-100 text-xs sm:text-sm font-medium">
                 <span className="mr-2">🇺🇬</span>
                 <span className="hidden sm:inline">Republic of Uganda • </span>
                 <span>Ministry of Health</span>
