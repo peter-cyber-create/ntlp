@@ -40,7 +40,7 @@
   }
   
   .floating-nav {
-    @apply fixed top-4 left-0 right-0 z-40 transition-all duration-300;
+    @apply fixed top-2 left-0 right-0 z-40 transition-all duration-300;
   }
   
   .nav-scrolled {
@@ -53,7 +53,7 @@
   
   /* Add padding for floating navbar */
   .main-content {
-    @apply pt-20 sm:pt-24 lg:pt-28;
+    @apply pt-28 sm:pt-32 lg:pt-36;
   }
   
   /* Reduce padding for admin pages */

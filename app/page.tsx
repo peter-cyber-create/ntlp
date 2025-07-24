@@ -1,11 +1,15 @@
 import React from 'react'
 import Link from 'next/link'
 import { Calendar, MapPin, Users, Award, ArrowRight } from 'lucide-react'
+
 import VideoBackground from '../components/VideoBackground'
+import HomeSlideshow from '../components/HomeSlideshow'
 
 export default function HomePage() {
   return (
     <div>
+      {/* Homepage Slideshow */}
+      <HomeSlideshow />
       {/* Hero Section with Video Background */}
       <VideoBackground 
         className="min-h-screen flex items-center justify-center -mt-32 pt-32"

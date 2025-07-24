@@ -43,7 +43,7 @@ export function Navbar() {
   return (
     <nav className={`floating-nav ${isScrolled ? 'nav-scrolled' : 'nav-transparent'}`}>
       <div className="container mx-auto px-4 relative">
-        <div className="flex justify-between items-center h-24 py-2">
+        <div className="flex justify-between items-center h-32 py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
