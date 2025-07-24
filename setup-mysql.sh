@@ -113,8 +113,8 @@ if [ "$TABLE_COUNT" -gt 0 ]; then
     echo "2. Start your Next.js application:"
     echo "   npm run dev"
     echo ""
-    echo "3. Test the database connection at:"
-    echo "   http://localhost:3000/database-test"
+    echo "3. Access your application at:"
+    echo "   http://localhost:3000"
     
 else
     echo -e "${RED}❌ Database verification failed${NC}"

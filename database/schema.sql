@@ -108,23 +108,6 @@ CREATE TABLE IF NOT EXISTS partners (
   INDEX idx_order (displayOrder)
 );
 
--- Table: test_documents (for database testing)
-CREATE TABLE IF NOT EXISTS test_documents (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  content TEXT,
-  category VARCHAR(100),
-  tags JSON,
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_category (category),
-  INDEX idx_created (createdAt)
-);
-
--- Insert sample test data
-INSERT IGNORE INTO test_documents (title, content, category, tags) VALUES
-('Test Document 1', 'This is a test document for database connectivity testing.', 'test', '["database", "test", "mysql"]'),
-('Sample Conference Abstract', 'Sample abstract content for testing the conference system.', 'conference', '["conference", "health", "uganda"]');
-
 -- Create admin user table (for future authentication)
 CREATE TABLE IF NOT EXISTS admin_users (
   id INT AUTO_INCREMENT PRIMARY KEY,

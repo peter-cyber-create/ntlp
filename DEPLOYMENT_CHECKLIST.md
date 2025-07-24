@@ -113,8 +113,8 @@ docker run -p 3000:3000 ntlp-conference
 
 ### 📈 Database Status
 - **Active Connection**: ✅ Connected to MySQL Database
-- **Test Registrations**: Ready for production entries
-- **Test Contacts**: Ready for contact submissions  
+- **Registrations**: Ready for production entries
+- **Contacts**: Ready for contact submissions  
 - **Abstract Submissions**: Ready for production
 
 ### 🔍 Build Status
