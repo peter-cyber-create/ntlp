@@ -29,7 +29,7 @@
 - [x] **Form Footnotes**: User guidance for all form fields
 
 #### 🗄️ Database Integration
-- [x] **MongoDB Atlas**: Production database connectivity
+- [x] **MySQL Database**: Production database connectivity
 - [x] **Data Models**: Registration, Contact, Abstract schemas
 - [x] **API Endpoints**: Complete CRUD operations
 - [x] **Data Persistence**: All form submissions saved to database
@@ -72,14 +72,19 @@
 ### 1. Environment Setup
 ```bash
 # Production environment variables
-MONGODB_URI=mongodb+srv://peterpaulwagidoso:0uZO3cuwXRs687h5@ntlp.iydd8kl.mongodb.net/
+DB_HOST=your-mysql-host
+DB_PORT=3306
+DB_USER=your-mysql-username
+DB_PASSWORD=your-mysql-password
+DB_NAME=ntlp_conference_2025
+DATABASE_POOL_MAX=20
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 NODE_ENV=production
 ```
 
 ### 2. Security Checklist
 - [ ] Change admin password from default (`conference2025`)
-- [ ] Update MongoDB connection with production credentials
+- [ ] Update MySQL connection with production credentials
 - [ ] Configure HTTPS/SSL certificates
 - [ ] Set up monitoring and logging
 
@@ -107,9 +112,9 @@ docker run -p 3000:3000 ntlp-conference
 ## 📊 Current System Statistics
 
 ### 📈 Database Status
-- **Active Connection**: ✅ Connected to MongoDB Atlas
-- **Test Registrations**: 3 confirmed entries
-- **Test Contacts**: 1 contact submission  
+- **Active Connection**: ✅ Connected to MySQL Database
+- **Test Registrations**: Ready for production entries
+- **Test Contacts**: Ready for contact submissions  
 - **Abstract Submissions**: Ready for production
 
 ### 🔍 Build Status

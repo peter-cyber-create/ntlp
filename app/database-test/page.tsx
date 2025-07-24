@@ -6,12 +6,14 @@ import { Database, CheckCircle, XCircle, Loader2, RefreshCw } from 'lucide-react
 interface DatabaseStats {
   success: boolean
   message: string
-  mongodb?: {
-    ping: string
-    database: string
-    collections: number
-    dataSize: number
-    storageSize: number
+  mysql?: {
+    version: string
+    currentTime: string
+    pool: {
+      totalConnections: number
+      activeConnections: number
+      idleConnections: number
+    }
   }
   timestamp: string
   error?: string
@@ -98,37 +100,32 @@ export default function DatabaseTestPage() {
                   ? 'bg-green-50 border-green-200' 
                   : 'bg-red-50 border-red-200'
               }`}>
-                <div className="flex items-center space-x-2 mb-2">
-                  {connectionStatus.success ? (
+                {connectionStatus.success ? (
+                  <div className="flex items-center space-x-2">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                  ) : (
+                    <span className="font-medium text-green-800">Connected to MySQL</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
                     <XCircle className="h-5 w-5 text-red-600" />
-                  )}
-                  <span className={`font-medium ${
-                    connectionStatus.success ? 'text-green-900' : 'text-red-900'
-                  }`}>
-                    {connectionStatus.message}
-                  </span>
-                </div>
+                    <span className="font-medium text-red-800">{connectionStatus.message}</span>
+                  </div>
+                )}
                 
-                {connectionStatus.mongodb && (
-                  <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                {connectionStatus.mysql && (
+                  <div className="mt-4 space-y-2 text-sm">
                     <div>
-                      <span className="font-medium text-gray-700">Database:</span>
-                      <span className="ml-2 text-gray-900">{connectionStatus.mongodb.database}</span>
+                      <span className="font-medium text-gray-700">MySQL Version:</span>
+                      <span className="ml-2 text-gray-900">{connectionStatus.mysql.version}</span>
                     </div>
                     <div>
-                      <span className="font-medium text-gray-700">Ping Status:</span>
-                      <span className="ml-2 text-gray-900">{connectionStatus.mongodb.ping}</span>
+                      <span className="font-medium text-gray-700">Server Time:</span>
+                      <span className="ml-2 text-gray-900">{connectionStatus.mysql.currentTime}</span>
                     </div>
                     <div>
-                      <span className="font-medium text-gray-700">Collections:</span>
-                      <span className="ml-2 text-gray-900">{connectionStatus.mongodb.collections}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">Data Size:</span>
+                      <span className="font-medium text-gray-700">Pool Status:</span>
                       <span className="ml-2 text-gray-900">
-                        {(connectionStatus.mongodb.dataSize / 1024 / 1024).toFixed(2)} MB
+                        {connectionStatus.mysql.pool.activeConnections}/{connectionStatus.mysql.pool.totalConnections} active
                       </span>
                     </div>
                   </div>
@@ -188,13 +185,6 @@ export default function DatabaseTestPage() {
                   </span>
                 </div>
 
-                {testResult.insertedId && (
-                  <div className="mt-4 text-sm">
-                    <span className="font-medium text-gray-700">Inserted ID:</span>
-                    <span className="ml-2 text-gray-900 font-mono">{testResult.insertedId}</span>
-                  </div>
-                )}
-
                 {testResult.document && (
                   <div className="mt-4">
                     <span className="font-medium text-gray-700">Test Document:</span>
@@ -223,12 +213,8 @@ export default function DatabaseTestPage() {
                   <span className="ml-2 text-gray-900">{process.env.NODE_ENV || 'development'}</span>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Database Name:</span>
-                  <span className="ml-2 text-gray-900">ntlp</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">MongoDB Cluster:</span>
-                  <span className="ml-2 text-gray-900">ntlp.iydd8kl.mongodb.net</span>
+                  <span className="font-medium text-gray-700">Database:</span>
+                  <span className="ml-2 text-gray-900">MySQL</span>
                 </div>
                 <div>
                   <span className="font-medium text-gray-700">Connection Status:</span>

@@ -1,35 +1,86 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToMongoose } from '@/lib/mongodb';
-import { Registration } from '@/lib/models';
+import DatabaseManager from '@/lib/mysql';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    await connectToMongoose();
+    const db = DatabaseManager.getInstance();
     
-    const registrations = await Registration.find({})
-      .sort({ registrationDate: -1 })
-      .limit(50);
+    // Get registrations with pagination
+    const registrations = await db.execute(`
+      SELECT 
+        id,
+        first_name as firstName,
+        last_name as lastName,
+        email,
+        phone,
+        organization,
+        position,
+        district,
+        registration_type as registrationType,
+        is_verified as isVerified,
+        registration_date as registrationDate,
+        payment_status as paymentStatus,
+        special_requirements as specialRequirements,
+        status,
+        created_at as createdAt
+      FROM registrations 
+      ORDER BY registration_date DESC 
+      LIMIT 50
+    `);
+    
+    // Get stats
+    const statsQueries = await Promise.all([
+      db.executeOne('SELECT COUNT(*) as total FROM registrations'),
+      db.executeOne('SELECT COUNT(*) as verified FROM registrations WHERE is_verified = 1'),
+      db.executeOne('SELECT COUNT(*) as pending FROM registrations WHERE payment_status = ?', ['pending']),
+      db.executeOne('SELECT COUNT(*) as completed FROM registrations WHERE payment_status = ?', ['completed']),
+      db.execute(`
+        SELECT registration_type, COUNT(*) as count 
+        FROM registrations 
+        GROUP BY registration_type
+      `)
+    ]);
     
     const stats = {
-      total: await Registration.countDocuments(),
-      verified: await Registration.countDocuments({ isVerified: true }),
-      pending: await Registration.countDocuments({ paymentStatus: 'pending' }),
-      completed: await Registration.countDocuments({ paymentStatus: 'completed' }),
-      byType: {
-        earlyBird: await Registration.countDocuments({ registrationType: 'early-bird' }),
-        regular: await Registration.countDocuments({ registrationType: 'regular' }),
-        student: await Registration.countDocuments({ registrationType: 'student' })
-      }
+      total: statsQueries[0]?.total || 0,
+      verified: statsQueries[1]?.verified || 0,
+      pending: statsQueries[2]?.pending || 0,
+      completed: statsQueries[3]?.completed || 0,
+      byType: {} as any
     };
+    
+    // Process type stats
+    statsQueries[4].forEach((row: any) => {
+      stats.byType[row.registration_type] = row.count;
+    });
+    
+    // Transform registrations to match frontend expectations
+    const transformedRegistrations = registrations.map((reg: any) => ({
+      _id: reg.id,
+      firstName: reg.firstName,
+      lastName: reg.lastName,
+      email: reg.email,
+      phone: reg.phone,
+      organization: reg.organization,
+      position: reg.position,
+      district: reg.district,
+      registrationType: reg.registrationType,
+      isVerified: reg.isVerified === 1,
+      registrationDate: reg.registrationDate,
+      paymentStatus: reg.paymentStatus,
+      specialRequirements: reg.specialRequirements,
+      status: reg.status || 'pending',
+      createdAt: reg.createdAt || reg.registrationDate
+    }));
     
     return NextResponse.json({
       success: true,
-      data: registrations,
+      data: transformedRegistrations,
       stats,
-      count: registrations.length
+      count: transformedRegistrations.length
     });
   } catch (error) {
     console.error('Error fetching registrations:', error);
@@ -46,7 +97,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToMongoose();
+    // TODO: Connect to MySQL and handle submission
     
     const body = await request.json();
     
@@ -66,7 +117,13 @@ export async function POST(request: NextRequest) {
     }
     
     // Check if email already exists
-    const existingRegistration = await Registration.findOne({ email: body.email });
+    const db = DatabaseManager.getInstance();
+    
+    const existingRegistration = await db.executeOne(
+      'SELECT id FROM registrations WHERE email = ?',
+      [body.email]
+    );
+    
     if (existingRegistration) {
       return NextResponse.json(
         {
@@ -77,14 +134,36 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Create new registration
-    const registration = new Registration(body);
-    const savedRegistration = await registration.save();
+    // Insert new registration
+    await db.execute(`
+      INSERT INTO registrations (
+        first_name, last_name, email, phone, organization, position, district,
+        registration_type, is_verified, payment_status, special_requirements,
+        status, registration_date, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', ?, 'pending', NOW(), NOW())
+    `, [
+      body.firstName,
+      body.lastName,
+      body.email,
+      body.phone,
+      body.organization,
+      body.position,
+      body.district,
+      body.registrationType,
+      body.specialRequirements || null
+    ]);
     
     return NextResponse.json({
       success: true,
       message: 'Registration created successfully',
-      data: savedRegistration
+      data: {
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+        registrationType: body.registrationType,
+        status: 'pending',
+        registrationDate: new Date().toISOString()
+      }
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating registration:', error);
@@ -101,8 +180,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    await connectToMongoose();
-    
+    const db = DatabaseManager.getInstance();
     const { searchParams } = new URL(request.url);
     const ids = searchParams.get('ids');
     
@@ -114,12 +192,17 @@ export async function DELETE(request: NextRequest) {
     }
 
     const idArray = ids.split(',');
-    const result = await Registration.deleteMany({ _id: { $in: idArray } });
+    const placeholders = idArray.map(() => '?').join(',');
+    
+    await db.execute(
+      `DELETE FROM registrations WHERE id IN (${placeholders})`,
+      idArray
+    );
 
     return NextResponse.json({
       success: true,
-      message: `Successfully deleted ${result.deletedCount} registration(s)`,
-      deletedCount: result.deletedCount
+      message: `Successfully deleted ${idArray.length} registration(s)`,
+      deletedCount: idArray.length
     });
 
   } catch (error) {
@@ -137,8 +220,7 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    await connectToMongoose();
-    
+    const db = DatabaseManager.getInstance();
     const { ids, status } = await request.json();
     
     if (!ids || !status) {
@@ -155,15 +237,16 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const result = await Registration.updateMany(
-      { _id: { $in: ids } },
-      { status, updatedAt: new Date() }
+    const placeholders = ids.map(() => '?').join(',');
+    await db.execute(
+      `UPDATE registrations SET status = ? WHERE id IN (${placeholders})`,
+      [status, ...ids]
     );
 
     return NextResponse.json({
       success: true,
-      message: `Successfully updated ${result.modifiedCount} registration(s)`,
-      updatedCount: result.modifiedCount
+      message: `Successfully updated ${ids.length} registration(s)`,
+      updatedCount: ids.length
     });
 
   } catch (error) {

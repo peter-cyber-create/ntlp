@@ -1,13 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DatabaseManager from '@/lib/databaseManager';
+import DatabaseManager from '@/lib/mysql';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const dbManager = DatabaseManager.getInstance();
-    const stats = await dbManager.getStatistics();
+    const db = DatabaseManager.getInstance();
+    
+    // Get counts for each table
+    const [
+      registrationsCount,
+      contactsCount, 
+      abstractsCount
+    ] = await Promise.all([
+      db.executeOne('SELECT COUNT(*) as count FROM registrations'),
+      db.executeOne('SELECT COUNT(*) as count FROM contacts'),
+      db.executeOne('SELECT COUNT(*) as count FROM abstracts')
+    ]);
+
+    const stats = {
+      registrations: registrationsCount?.count || 0,
+      contacts: contactsCount?.count || 0,
+      abstracts: abstractsCount?.count || 0,
+      totalUsers: (registrationsCount?.count || 0) + (contactsCount?.count || 0)
+    };
     
     return NextResponse.json({
       success: true,
@@ -30,22 +47,24 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { type, data } = await request.json();
-    const dbManager = DatabaseManager.getInstance();
+    const db = DatabaseManager.getInstance();
     
     let result;
     
     switch (type) {
       case 'registration':
-        result = await dbManager.createRegistration(data);
+        result = await db.executeOne(
+          `INSERT INTO registrations (firstName, lastName, email, phone, organization, position, district, registrationType, specialRequirements, createdAt) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+          [data.firstName, data.lastName, data.email, data.phone, data.organization, data.position, data.district, data.registrationType, data.specialRequirements || null]
+        );
         break;
       case 'contact':
-        result = await dbManager.createContact(data);
-        break;
-      case 'speaker':
-        result = await dbManager.createSpeaker(data);
-        break;
-      case 'partner':
-        result = await dbManager.createPartner(data);
+        result = await db.executeOne(
+          `INSERT INTO contacts (name, email, phone, organization, subject, message, status, createdAt) 
+           VALUES (?, ?, ?, ?, ?, ?, 'new', NOW())`,
+          [data.name, data.email, data.phone || null, data.organization || null, data.subject, data.message]
+        );
         break;
       default:
         return NextResponse.json(

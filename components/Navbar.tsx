@@ -27,7 +27,7 @@ export function Navbar() {
 
   const actionItems = [
     { name: 'Submit Abstract', href: '/abstracts', type: 'secondary' },
-    { name: 'Register', href: '/register', type: 'primary' },
+    { name: 'Register Now', href: '/register', type: 'primary' },
   ]
 
   // Handle scroll for floating navbar
@@ -92,14 +92,14 @@ export function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 ${
+                  className={`font-medium px-5 py-2.5 rounded-lg text-sm transition-all duration-200 whitespace-nowrap ${
                     item.type === 'primary'
                       ? shouldUseWhiteText 
-                        ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-lg' 
-                        : 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg'
+                        ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-lg hover:shadow-xl transform hover:scale-105' 
+                        : 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg hover:shadow-xl transform hover:scale-105'
                       : shouldUseWhiteText 
-                        ? 'bg-white/10 border border-white/30 text-white hover:bg-white/20' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                        ? 'bg-orange-500 border border-orange-400 text-white hover:bg-orange-600 shadow-md hover:shadow-lg transform hover:scale-105' 
+                        : 'bg-orange-500 text-white hover:bg-orange-600 border border-orange-400 shadow-md hover:shadow-lg transform hover:scale-105'
                   }`}
                 >
                   {item.name}
@@ -148,10 +148,10 @@ export function Navbar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`block px-4 py-3 rounded-lg font-medium text-center transition-colors ${
+                    className={`block px-4 py-3 rounded-lg font-medium text-center transition-all duration-200 ${
                       item.type === 'primary'
-                        ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                        ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg transform hover:scale-105'
+                        : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md transform hover:scale-105'
                     }`}
                     onClick={() => setIsOpen(false)}
                   >

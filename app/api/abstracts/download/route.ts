@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
-import { connectToMongoose } from '@/lib/mongodb';
-import { Abstract } from '@/lib/models';
+import DatabaseManager from '@/lib/mysql';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
@@ -20,13 +19,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    await connectToMongoose();
+    const db = DatabaseManager.getInstance();
     
     let abstract;
     if (id) {
-      abstract = await Abstract.findById(id);
+      abstract = await db.executeOne(
+        'SELECT * FROM abstracts WHERE id = ?',
+        [id]
+      );
     } else if (filename) {
-      abstract = await Abstract.findOne({ fileName: filename });
+      abstract = await db.executeOne(
+        'SELECT * FROM abstracts WHERE fileName = ?',
+        [filename]
+      );
     }
 
     if (!abstract) {

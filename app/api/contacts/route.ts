@@ -1,30 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToMongoose } from '@/lib/mongodb';
-import { Contact } from '@/lib/models';
+import DatabaseManager from '@/lib/mysql';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    await connectToMongoose();
+    const db = DatabaseManager.getInstance();
     
-    const contacts = await Contact.find({})
-      .sort({ submittedAt: -1 })
-      .limit(50);
+    // Get contacts with pagination
+    const contacts = await db.execute(`
+      SELECT 
+        id,
+        name,
+        email,
+        phone,
+        organization,
+        subject,
+        message,
+        status,
+        submitted_at as submittedAt,
+        responded_at as respondedAt
+      FROM contacts 
+      ORDER BY submitted_at DESC 
+      LIMIT 50
+    `);
+    
+    // Get stats
+    const statsQueries = await Promise.all([
+      db.executeOne('SELECT COUNT(*) as total FROM contacts'),
+      db.executeOne('SELECT COUNT(*) as new FROM contacts WHERE status = ?', ['new']),
+      db.executeOne('SELECT COUNT(*) as inProgress FROM contacts WHERE status = ?', ['in-progress']),
+      db.executeOne('SELECT COUNT(*) as resolved FROM contacts WHERE status = ?', ['resolved'])
+    ]);
     
     const stats = {
-      total: await Contact.countDocuments(),
-      new: await Contact.countDocuments({ status: 'new' }),
-      inProgress: await Contact.countDocuments({ status: 'in-progress' }),
-      resolved: await Contact.countDocuments({ status: 'resolved' })
+      total: statsQueries[0]?.total || 0,
+      new: statsQueries[1]?.new || 0,
+      inProgress: statsQueries[2]?.inProgress || 0,
+      resolved: statsQueries[3]?.resolved || 0
     };
+    
+    // Transform contacts to match frontend expectations
+    const transformedContacts = contacts.map((contact: any) => ({
+      _id: contact.id,
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+      organization: contact.organization,
+      subject: contact.subject,
+      message: contact.message,
+      status: contact.status,
+      submittedAt: contact.submittedAt,
+      respondedAt: contact.respondedAt,
+      createdAt: contact.submittedAt // For backward compatibility
+    }));
     
     return NextResponse.json({
       success: true,
-      data: contacts,
+      data: transformedContacts,
       stats,
-      count: contacts.length
+      count: transformedContacts.length
     });
   } catch (error) {
     console.error('Error fetching contacts:', error);
@@ -41,8 +77,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToMongoose();
-    
+    const db = DatabaseManager.getInstance();
     const body = await request.json();
     
     // Validate required fields
@@ -60,14 +95,30 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Create new contact
-    const contact = new Contact(body);
-    const savedContact = await contact.save();
+    // Insert new contact
+    await db.execute(`
+      INSERT INTO contacts (
+        name, email, phone, organization, subject, message, status, submitted_at
+      ) VALUES (?, ?, ?, ?, ?, ?, 'new', NOW())
+    `, [
+      body.name,
+      body.email,
+      body.phone || null,
+      body.organization || null,
+      body.subject,
+      body.message
+    ]);
     
     return NextResponse.json({
       success: true,
       message: 'Contact message submitted successfully',
-      data: savedContact
+      data: {
+        name: body.name,
+        email: body.email,
+        subject: body.subject,
+        status: 'new',
+        submittedAt: new Date().toISOString()
+      }
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating contact:', error);
@@ -84,8 +135,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    await connectToMongoose();
-    
+    const db = DatabaseManager.getInstance();
     const { searchParams } = new URL(request.url);
     const ids = searchParams.get('ids');
     
@@ -97,12 +147,17 @@ export async function DELETE(request: NextRequest) {
     }
 
     const idArray = ids.split(',');
-    const result = await Contact.deleteMany({ _id: { $in: idArray } });
+    const placeholders = idArray.map(() => '?').join(',');
+    
+    const result = await db.execute(
+      `DELETE FROM contacts WHERE id IN (${placeholders})`,
+      idArray
+    );
 
     return NextResponse.json({
       success: true,
-      message: `Successfully deleted ${result.deletedCount} contact(s)`,
-      deletedCount: result.deletedCount
+      message: `Successfully deleted ${idArray.length} contact(s)`,
+      deletedCount: idArray.length
     });
 
   } catch (error) {
@@ -120,8 +175,7 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    await connectToMongoose();
-    
+    const db = DatabaseManager.getInstance();
     const { ids, status } = await request.json();
     
     if (!ids || !status) {
@@ -138,15 +192,16 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const result = await Contact.updateMany(
-      { _id: { $in: ids } },
-      { status, updatedAt: new Date() }
+    const placeholders = ids.map(() => '?').join(',');
+    const result = await db.execute(
+      `UPDATE contacts SET status = ?, responded_at = NOW() WHERE id IN (${placeholders})`,
+      [status, ...ids]
     );
 
     return NextResponse.json({
       success: true,
-      message: `Successfully updated ${result.modifiedCount} contact(s)`,
-      updatedCount: result.modifiedCount
+      message: `Successfully updated ${ids.length} contact(s)`,
+      updatedCount: ids.length
     });
 
   } catch (error) {

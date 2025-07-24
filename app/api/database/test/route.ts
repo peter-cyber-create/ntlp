@@ -1,32 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase, connectToMongoose } from '@/lib/mongodb';
+import DatabaseManager from '@/lib/mysql';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Test MongoDB native driver connection
-    const { client, db } = await connectToDatabase();
-    const adminDb = client.db('admin');
-    const result = await adminDb.command({ ping: 1 });
-    
-    // Test Mongoose connection
-    await connectToMongoose();
-    
-    // Get database stats
-    const stats = await db.stats();
+    const db = DatabaseManager.getInstance();
+    const healthCheck = await db.healthCheck();
     
     return NextResponse.json({
-      success: true,
-      message: 'Database connection successful',
-      mongodb: {
-        ping: result.ok === 1 ? 'success' : 'failed',
-        database: db.databaseName,
-        collections: stats.collections,
-        dataSize: stats.dataSize,
-        storageSize: stats.storageSize
-      },
+      success: healthCheck.status === 'healthy',
+      message: healthCheck.status === 'healthy' ? 'MySQL connection successful' : 'MySQL connection failed',
+      mysql: healthCheck.details,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -44,22 +30,23 @@ export async function GET() {
 
 export async function POST() {
   try {
-    const { db } = await connectToDatabase();
+    const db = DatabaseManager.getInstance();
     
-    // Create a test document
-    const testCollection = db.collection('test');
+    // Create a test record
     const testDoc = {
       message: 'Hello from Uganda Health Conference!',
       timestamp: new Date(),
       environment: process.env.NODE_ENV
     };
     
-    const result = await testCollection.insertOne(testDoc);
+    await db.execute(`
+      INSERT INTO test_records (message, timestamp, environment)
+      VALUES (?, NOW(), ?)
+    `, [testDoc.message, testDoc.environment]);
     
     return NextResponse.json({
       success: true,
-      message: 'Test document created successfully',
-      insertedId: result.insertedId,
+      message: 'Test record created successfully',
       document: testDoc
     });
   } catch (error) {
