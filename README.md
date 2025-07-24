@@ -28,7 +28,7 @@ A professional Next.js website for The Communicable and Non-Communicable Disease
 - **Real-time Statistics**: Live dashboard with key metrics and KPIs
 
 ### Technical Features
-- **Data Persistence**: LocalStorage-based data management (production-ready for database integration)
+- **MySQL Database**: Robust MySQL database with connection pooling
 - **Interactive Charts**: Registration trends, geographic distribution, ticket analytics
 - **Notification System**: Toast notifications for user feedback
 - **Modal Components**: Reusable modal system for confirmations and forms
@@ -43,9 +43,10 @@ A professional Next.js website for The Communicable and Non-Communicable Disease
 - **Tailwind CSS**: Utility-first CSS framework
 - **Lucide React**: Beautiful, customizable icons
 
-### Analytics & Charts
-- **Recharts**: Data visualization library
-- **Date-fns**: Date manipulation and formatting
+### Database
+- **MySQL**: Production-grade relational database
+- **mysql2**: High-performance MySQL driver for Node.js
+- **Connection Pooling**: Optimized database connections
 
 ### Development
 - **Static Export**: Configured for static site generation

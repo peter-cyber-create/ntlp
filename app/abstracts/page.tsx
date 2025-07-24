@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import { Calendar, Clock, Users, Award, AlertCircle, CheckCircle, Upload, X, FileText } from 'lucide-react'
 import { Toast, ToastContainer, useToast } from '@/components/Toast'
-import { optimizedFetch } from '@/lib/performance'
 import { LoadingButton } from '@/components/LoadingComponents'
 
 export default function AbstractsPage() {
@@ -160,11 +159,11 @@ export default function AbstractsPage() {
         submitData.append('abstractFile', selectedFile)
       }
       
-      // Use optimized fetch with timeout and retry
-      const response = await optimizedFetch('/api/abstracts/', {
+      // Submit the form
+      const response = await fetch('/api/abstracts/', {
         method: 'POST',
         body: submitData
-      }, 15000) // 15 second timeout for file uploads
+      })
 
       const result = await response.json()
 
