@@ -121,26 +121,45 @@ else
     print_warning "Database schema file not found at $APP_DIR/database/schema.sql"
 fi
 
-# Step 11: Create environment file
+# Step 11: Create production environment file
 print_status "Creating production environment file..."
-sudo -u $APP_USER bash -c "cat > $APP_DIR/.env.local << 'EOF'
-# Production Environment Configuration
+sudo -u $APP_USER bash -c "cat > $APP_DIR/.env.production << 'EOF'
+# Production Environment Configuration - NTLP Conference 2025
 NODE_ENV=production
 
-# Database Configuration
+# Application Details
+NEXT_PUBLIC_APP_NAME=\"The Communicable and Non-Communicable Diseases Conference 2025\"
+NEXT_PUBLIC_APP_DESCRIPTION=\"Uganda's premier Communicable and Non-Communicable Diseases Conference 2025 - Integrated Health Systems for a Resilient Future: Harnessing Technology in Combating Diseases\"
+NEXT_PUBLIC_APP_VERSION=\"1.0.0\"
+NEXT_PUBLIC_APP_ENV=\"production\"
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+
+# Event Theme
+NEXT_PUBLIC_EVENT_THEME=\"Integrated Health Systems for a Resilient Future: Harnessing Technology in Combating Diseases\"
+
+# Database Configuration (MySQL Production)
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=$APP_USER
 DB_PASSWORD=secure_password_123!
 DB_NAME=$DB_NAME
+DATABASE_POOL_MAX=30
+DATABASE_POOL_MIN=5
 
-# Application Configuration
-NEXT_PUBLIC_APP_URL=https://your-domain.com
-PORT=3000
-
-# Security
+# Security Configuration (Production)
+NEXT_PUBLIC_CSP_NONCE_ENABLED=true
+NEXT_PUBLIC_RATE_LIMITING_ENABLED=true
 JWT_SECRET=$(openssl rand -base64 32)
 SESSION_SECRET=$(openssl rand -base64 32)
+
+# File Upload Configuration
+MAX_FILE_SIZE=10485760
+UPLOAD_DIR=public/uploads/abstracts
+
+# SSL and Security
+FORCE_HTTPS=true
+SECURE_COOKIES=true
+PORT=3000
 EOF"
 
 # Step 12: Configure PM2
@@ -339,7 +358,7 @@ echo ""
 echo "==================== NEXT STEPS ===================="
 echo ""
 print_warning "1. Copy your application files to $APP_DIR"
-print_warning "2. Update $APP_DIR/.env.local with your actual domain and secrets"
+print_warning "2. Update $APP_DIR/.env.production with your actual domain and secrets"
 print_warning "3. Configure SSL certificates in Nginx"
 print_warning "4. Update database password in production"
 print_warning "5. Test the application: http://your-server-ip"

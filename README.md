@@ -48,7 +48,7 @@ A professional Next.js website for The Communicable and Non-Communicable Disease
 - **mysql2**: High-performance MySQL driver for Node.js
 - **Connection Pooling**: Optimized database connections
 
-### Development
+### Production
 - **Static Export**: Configured for static site generation
 - **ESLint**: Code quality and consistency
 - **PostCSS**: CSS processing
@@ -58,14 +58,15 @@ A professional Next.js website for The Communicable and Non-Communicable Disease
 ### Prerequisites
 
 - Node.js 18+ installed on your machine
-- npm or yarn package manager
+- npm package manager
+- MySQL 8.0+ database server
 
 ### Installation
 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd tb
+cd ntlp-conference-2025
 ```
 
 2. Install dependencies:
@@ -73,19 +74,33 @@ cd tb
 npm install
 ```
 
-3. Start the development server:
+3. Set up MySQL database:
 ```bash
-npm run dev
+./setup-mysql.sh
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+4. Build and start the production server:
+```bash
+npm run build
+npm start
+```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ### Available Scripts
 
-- `npm run dev` - Start development server
 - `npm run build` - Build for production
-- `npm run start` - Start production server
+- `npm start` - Start production server
 - `npm run export` - Export static site
+
+## 🚀 Ubuntu Server Deployment
+
+For production deployment on Ubuntu server:
+
+```bash
+chmod +x deploy-ubuntu.sh
+./deploy-ubuntu.sh
+```
 
 ## 🏗️ Project Structure
 
