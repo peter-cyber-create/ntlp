@@ -16,8 +16,8 @@ export function Footer() {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="font-bold text-xl">
-                The Communicable and Non-Communicable Diseases Conference
+              <span className="font-bold text-xl block">
+                The Communicable and Non-Communicable Diseases Conference 2025
               </span>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
@@ -60,7 +60,7 @@ export function Footer() {
         
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2025 The Communicable and Non-Communicable Diseases Conference. All rights reserved.
+            © 2025 The Communicable and Non-Communicable Diseases Conference 2025. All rights reserved.
           </p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <a href="#" className="text-gray-400 hover:text-primary-400 transition-colors">Twitter</a>
