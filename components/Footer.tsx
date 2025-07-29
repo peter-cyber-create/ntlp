@@ -16,8 +16,10 @@ export function Footer() {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="font-bold text-xl block">
-                The Communicable and Non-Communicable Diseases Conference 2025
+              <span className="font-bold text-sm sm:text-base lg:text-lg leading-tight block">
+                <span className="block">The Communicable</span>
+                <span className="block">and Non-Communicable Diseases</span>
+                <span className="block">Conference <span className="font-extrabold">2025</span></span>
               </span>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">

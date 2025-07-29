@@ -43,7 +43,7 @@ export function Navbar() {
   return (
     <nav className={`floating-nav ${isScrolled ? 'nav-scrolled' : 'nav-transparent'}`}>
       <div className="container mx-auto px-4 relative">
-        <div className="flex justify-between items-center h-24 py-2">
+        <div className="flex justify-between items-center min-h-[7.5rem] py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
@@ -55,8 +55,9 @@ export function Navbar() {
             </div>
             <div className="flex flex-col min-w-0">
               <span className={`font-bold text-sm sm:text-base lg:text-lg leading-tight transition-colors ${shouldUseWhiteText ? 'text-white' : 'text-gray-900'}`}>
-                <span className="block">The Communicable and Non-Communicable</span>
-                <span className="block">Diseases Conference <span className="font-extrabold">2025</span></span>
+                <span className="block">The Communicable</span>
+                <span className="block">and Non-Communicable Diseases</span>
+                <span className="block">Conference <span className="font-extrabold">2025</span></span>
               </span>
               <span className={`text-xs sm:text-sm font-medium transition-colors ${shouldUseWhiteText ? 'text-primary-200' : 'text-gray-600'}`}>
                 Ministry of Health Uganda
