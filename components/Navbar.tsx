@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
@@ -43,11 +43,7 @@ export function Navbar() {
   return (
     <nav className={`floating-nav ${isScrolled ? 'nav-scrolled' : 'nav-transparent'}`}>
       <div className="container mx-auto px-4 relative">
-<<<<<<< HEAD
-        <div className="flex justify-between items-center h-32 py-4">
-=======
         <div className="flex justify-between items-center min-h-[7.5rem] py-4">
->>>>>>> master
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
@@ -59,13 +55,9 @@ export function Navbar() {
             </div>
             <div className="flex flex-col min-w-0">
               <span className={`font-bold text-sm sm:text-base lg:text-lg leading-tight transition-colors ${shouldUseWhiteText ? 'text-white' : 'text-gray-900'}`}>
-<<<<<<< HEAD
-                The Communicable and Non-Communicable Diseases Conference 2025
-=======
                 <span className="block">The Communicable</span>
                 <span className="block">and Non-Communicable Diseases</span>
                 <span className="block">Conference <span className="font-extrabold">2025</span></span>
->>>>>>> master
               </span>
               <span className={`text-xs sm:text-sm font-medium transition-colors ${shouldUseWhiteText ? 'text-primary-200' : 'text-gray-600'}`}>
                 Ministry of Health Uganda

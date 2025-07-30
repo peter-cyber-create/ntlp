@@ -14,7 +14,7 @@ export default function SpeakersPage() {
       title: 'MINISTER FOR HEALTH',
       company: 'Republic of Uganda',
       bio: 'Leading Uganda\'s health sector with extensive experience in public health policy and healthcare system strengthening.',
-      image: '/placeholder-speaker.jpg',
+      image: '/images/ruth.jpeg',
       expertise: ['Healthcare Policy', 'Public Health', 'Digital Health Systems'],
       country: 'Uganda'
     },
@@ -24,8 +24,18 @@ export default function SpeakersPage() {
       title: 'DIRECTOR GENERAL HEALTH SERVICES',
       company: 'Ministry of Health Uganda',
       bio: 'Overseeing health service delivery across Uganda with focus on health system strengthening and quality improvement.',
-      image: '/placeholder-speaker.jpg',
+      image: '/images/charles.jpeg',
       expertise: ['Health Services', 'Public Health', 'Health Administration'],
+      country: 'Uganda'
+    },
+    {
+      id: 3,
+      name: 'DR. DIANA ATWIINE',
+      title: 'PERMANENT SECRETARY',
+      company: 'Ministry of Health Uganda',
+      bio: 'Driving innovation and efficiency in Uganda\'s health sector as Permanent Secretary.',
+      image: '/images/diana.jpeg',
+      expertise: ['Health Administration', 'Policy', 'Innovation'],
       country: 'Uganda'
     }
   ]
@@ -89,12 +99,12 @@ export default function SpeakersPage() {
             {speakers.map((speaker) => (
               <div key={speaker.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                 {/* Speaker Image Placeholder */}
-                <div className="h-64 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                  <div className="w-24 h-24 bg-primary-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-2xl font-bold">
-                      {speaker.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
+                <div className="h-64 flex items-center justify-center bg-gray-100">
+                  <img
+                    src={speaker.image}
+                    alt={speaker.name}
+                    className="w-32 h-32 object-cover rounded-full shadow-lg border-4 border-white"
+                  />
                 </div>
 
                 <div className="p-6">

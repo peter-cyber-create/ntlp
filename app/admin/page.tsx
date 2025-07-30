@@ -1,6 +1,7 @@
+
 'use client'
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import { Eye, EyeOff, Lock, User, Shield } from 'lucide-react'
 
@@ -26,18 +27,8 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     setError('')
 
-<<<<<<< HEAD
-    // Simple authentication - in production, this would be server-side
-    if (formData.username === 'admin' && formData.password === 'conference2025') {
-      localStorage.setItem('adminAuth', 'true')
-      window.location.href = '/admin/dashboard'
-    } else {
-      setError('Invalid credentials. Please try again.')
-    }
-=======
     // TODO: Implement secure server-side authentication here
     setError('Authentication is disabled. Please contact the administrator to enable secure login.')
->>>>>>> master
     
     setIsLoading(false)
   }
@@ -126,13 +117,7 @@ export default function AdminLoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-<<<<<<< HEAD
-            <p className="text-xs text-gray-500">
-              Demo credentials: admin / conference2025
-            </p>
-=======
             {/* Credentials removed for security. */}
->>>>>>> master
           </div>
         </div>
 

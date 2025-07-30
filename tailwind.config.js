@@ -41,6 +41,15 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      keyframes: {
+        zoom: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.08)' },
+        },
+      },
+      animation: {
+        zoom: 'zoom 4s ease-in-out infinite',
+      },
     },
   },
   plugins: [],
