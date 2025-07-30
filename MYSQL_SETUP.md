@@ -6,11 +6,19 @@
 
 ```sql
 -- Create the main database
+<<<<<<< HEAD
 CREATE DATABASE IF NOT EXISTS ntlp_conference_2025 
 CHARACTER SET utf8mb4 
 COLLATE utf8mb4_unicode_ci;
 
 USE ntlp_conference_2025;
+=======
+CREATE DATABASE IF NOT EXISTS conference 
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;
+
+USE conference;
+>>>>>>> master
 
 -- Create users table for admin authentication
 CREATE TABLE users (
@@ -291,7 +299,11 @@ CREATE TABLE settings (
 ```sql
 -- Insert default admin user (password: admin123 - should be changed immediately)
 INSERT INTO users (email, password_hash, role) VALUES 
+<<<<<<< HEAD
 ('admin@ntlpconference.ug', '$2b$12$LQv3c1yqBw3HhU4oXGY9Ce2T1/OxD/Zc4tKqJ3aQmGqL4kVYnqE5K', 'admin');
+=======
+('conference@health.go.ug', 'c1#BhZ*xQa%', 'admin');
+>>>>>>> master
 
 -- Insert basic system settings
 INSERT INTO settings (setting_key, setting_value, setting_type, description, category, is_public) VALUES
@@ -321,10 +333,17 @@ Update your `.env.local` file:
 
 ```env
 # Database Configuration
+<<<<<<< HEAD
 DATABASE_URL="mysql://username:password@localhost:3306/ntlp_conference_2025"
 DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=ntlp_conference_2025
+=======
+DATABASE_URL="mysql://username:password@localhost:3306/conference"
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=conference
+>>>>>>> master
 DB_USER=your_username
 DB_PASSWORD=your_password
 
@@ -384,16 +403,26 @@ CONFERENCE_VENUE="Speke Resort Munyonyo, Kampala, Uganda"
    ```sql
    mysql -u root -p
    
+<<<<<<< HEAD
    CREATE DATABASE ntlp_conference_2025 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    CREATE USER 'ntlp_user'@'localhost' IDENTIFIED BY 'secure_password_here';
    GRANT ALL PRIVILEGES ON ntlp_conference_2025.* TO 'ntlp_user'@'localhost';
+=======
+   CREATE DATABASE conference CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE USER 'ntlp_user'@'localhost' IDENTIFIED BY 'secure_password_here';
+   GRANT ALL PRIVILEGES ON conference.* TO 'ntlp_user'@'localhost';
+>>>>>>> master
    FLUSH PRIVILEGES;
    EXIT;
    ```
 
 4. **Run the Schema Script**
    ```bash
+<<<<<<< HEAD
    mysql -u ntlp_user -p ntlp_conference_2025 < database_schema.sql
+=======
+   mysql -u ntlp_user -p conference < database_schema.sql
+>>>>>>> master
    ```
 
 5. **Install Node.js Dependencies**
@@ -409,7 +438,11 @@ CONFERENCE_VENUE="Speke Resort Munyonyo, Kampala, Uganda"
 
 ```sql
 -- Daily backup script
+<<<<<<< HEAD
 mysqldump -u ntlp_user -p ntlp_conference_2025 > backup_$(date +%Y%m%d).sql
+=======
+mysqldump -u ntlp_user -p conference > backup_$(date +%Y%m%d).sql
+>>>>>>> master
 
 -- Weekly cleanup of old audit logs (keep 3 months)
 DELETE FROM audit_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 3 MONTH);

@@ -72,6 +72,7 @@
 ### 1. Environment Setup
 ```bash
 # Production environment variables
+<<<<<<< HEAD
 DB_HOST=your-mysql-host
 DB_PORT=3306
 DB_USER=your-mysql-username
@@ -79,6 +80,15 @@ DB_PASSWORD=your-mysql-password
 DB_NAME=ntlp_conference_2025
 DATABASE_POOL_MAX=20
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
+=======
+DB_HOST=172.27.0.10
+DB_PORT=3306
+DB_USER=conference
+DB_PASSWORD=
+DB_NAME=conference
+DATABASE_POOL_MAX=20
+NEXT_PUBLIC_SITE_URL=
+>>>>>>> master
 NODE_ENV=production
 ```
 
@@ -100,6 +110,65 @@ vercel --prod
 ```bash
 npm run build
 npm start
+<<<<<<< HEAD
+=======
+```
+
+## Important Notes for Server Deployment
+
+- Ensure your MySQL server (172.27.0.10) is configured for remote access:
+    - In `/etc/mysql/mysql.conf.d/mysqld.cnf`, set `bind-address = 0.0.0.0`.
+    - Grant privileges for your database user:
+      ```sql
+      GRANT ALL PRIVILEGES ON conference.* TO 'conference'@'%' IDENTIFIED BY 'your_password_here';
+      FLUSH PRIVILEGES;
+      ```
+    - Open port 3306 in your firewall: `sudo ufw allow 3306/tcp`
+
+- For web server (172.27.0.9) and database server communication:
+    - Confirm both servers can ping each other.
+    - Use correct credentials in your `.env` file:
+      ```
+      DB_HOST=172.27.0.10
+      DB_PORT=3306
+      DB_USER=conference
+      DB_PASSWORD=your_password_here
+      DB_NAME=conference
+      ```
+
+- Nginx configuration for HTTP-only (no SSL, IP-based):
+    - Remove all SSL and HTTPS redirect blocks.
+    - Use only this block in your Nginx site config:
+      ```nginx
+      server {
+          listen 80;
+          server_name 172.27.0.9;
+          root /var/www/ntlp-conference;
+          index index.html;
+          location / {
+              try_files $uri $uri/ =404;
+          }
+      }
+      ```
+    - Set correct permissions:
+      ```bash
+      sudo chown -R www-data:www-data /var/www/ntlp-conference
+      sudo find /var/www/ntlp-conference -type d -exec chmod 755 {} \;
+      sudo find /var/www/ntlp-conference -type f -exec chmod 644 {} \;
+      ```
+
+- To test MySQL connectivity from the web server:
+    ```bash
+    mysql -u conference -p -h 172.27.0.10 conference
+    ```
+
+- If you see `403 Forbidden` in your browser:
+    - Check file and directory permissions for `/var/www/ntlp-conference`.
+    - Ensure `index.html` exists and is readable.
+    - Reload Nginx after any config changes: `sudo systemctl reload nginx`
+
+---
+>>>>>>> master
 # Configure reverse proxy (nginx/apache)
 ```
 

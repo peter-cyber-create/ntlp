@@ -65,7 +65,11 @@ print_status "Installing MySQL Server..."
 sudo apt install -y mysql-server
 
 # Start and enable MySQL
+<<<<<<< HEAD
 sudo systemctl start mysql
+=======
+                        sudo systemctl start mysql
+>>>>>>> master
 sudo systemctl enable mysql
 
 print_success "MySQL Server installed and started"

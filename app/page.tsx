@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { Calendar, MapPin, Users, Award, ArrowRight } from 'lucide-react'
+<<<<<<< HEAD
 
 import VideoBackground from '../components/VideoBackground'
 
@@ -68,6 +69,18 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+=======
+import VideoBackground from '../components/VideoBackground'
+
+export default function HomePage() {
+  return (
+    <div>
+      {/* Hero Section with Video Background */}
+      <VideoBackground 
+        className="min-h-screen flex items-center justify-center -mt-32 pt-32"
+        fallbackImage="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+      >
+>>>>>>> master
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24 text-center text-white">
           <div className="max-w-5xl mx-auto">
             <div className="mb-6 sm:mb-8">
@@ -125,7 +138,11 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+<<<<<<< HEAD
       {/* End Hero Section */}
+=======
+      </VideoBackground>
+>>>>>>> master
 
       {/* Key Features */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
