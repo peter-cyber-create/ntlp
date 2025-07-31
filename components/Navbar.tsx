@@ -43,10 +43,10 @@ export function Navbar() {
 
   return (
     <nav className={
-      `floating-nav bg-white/80 shadow-md backdrop-blur-md border-b border-primary-200 fixed top-4 left-1/2 -translate-x-1/2 rounded-2xl max-w-5xl w-[95vw] mx-auto z-50 transition-all duration-300 py-2 px-4 flex items-center`
+      `floating-nav bg-white/80 shadow-md backdrop-blur-md border-b border-primary-200 fixed top-4 left-1/2 -translate-x-1/2 rounded-2xl max-w-[98vw] lg:max-w-[1600px] w-full mx-auto z-50 transition-all duration-300 py-2 px-6 flex items-center`
     }>
-      <div className="flex justify-between items-center w-full">
-        <div className="flex justify-between items-center min-h-[7.5rem] py-4">
+      <div className="flex justify-between items-center w-full flex-nowrap">
+        <div className="flex justify-between items-center min-h-[4.5rem] py-2 w-full flex-nowrap gap-2">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
@@ -69,42 +69,31 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6">
+          <div className="hidden lg:flex items-center space-x-4">
             {/* Main Navigation */}
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`font-medium text-sm transition-all duration-200 border-b-2 border-transparent hover:border-primary-400 ${
-                    pathname === item.href
-                      ? shouldUseWhiteText 
-                        ? 'text-primary-200 border-primary-200' 
-                        : 'text-primary-600 border-primary-600'
-                      : shouldUseWhiteText 
-                        ? 'text-white hover:text-primary-200' 
-                        : 'text-gray-700 hover:text-gray-900'
-                  }`}
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-150 hover:bg-primary-100 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-400 ${pathname === item.href ? 'bg-primary-600 text-white shadow-md scale-105 ring-2 ring-primary-400' : shouldUseBlackText ? 'text-gray-900' : 'text-primary-100'}`}
                 >
                   {item.name}
                 </Link>
               ))}
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-3 ml-6 pl-6 border-l border-gray-300/50">
+            {/* Separator */}
+            <div className="h-8 w-px bg-primary-200 mx-4 hidden lg:block" />
+            {/* Action Buttons (Desktop) */}
+            <div className="flex items-center space-x-2">
               {actionItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`font-medium px-5 py-2.5 rounded-lg text-sm transition-all duration-200 whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-400 text-center ${
                     item.type === 'primary'
-                      ? shouldUseWhiteText 
-                        ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-lg hover:shadow-xl transform hover:scale-105' 
-                        : 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg hover:shadow-xl transform hover:scale-105'
-                      : shouldUseWhiteText 
-                        ? 'bg-orange-500 border border-orange-400 text-white hover:bg-orange-600 shadow-md hover:shadow-lg transform hover:scale-105' 
-                        : 'bg-orange-500 text-white hover:bg-orange-600 border border-orange-400 shadow-md hover:shadow-lg transform hover:scale-105'
+                      ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg'
+                      : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md'
                   }`}
                 >
                   {item.name}
@@ -135,7 +124,7 @@ export function Navbar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+                    className={`block px-4 py-3 rounded-lg font-medium transition-colors transform hover:scale-105 ${
                       pathname === item.href
                         ? 'bg-primary-50 text-primary-700 border-l-4 border-primary-500'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-primary-600'
@@ -153,10 +142,10 @@ export function Navbar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`block px-4 py-3 rounded-lg font-medium text-center transition-all duration-200 ${
+                    className={`block px-4 py-3 rounded-lg font-medium text-center transition-all duration-200 transform hover:scale-105 ${
                       item.type === 'primary'
-                        ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg transform hover:scale-105'
-                        : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md transform hover:scale-105'
+                        ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg'
+                        : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md'
                     }`}
                     onClick={() => setIsOpen(false)}
                   >

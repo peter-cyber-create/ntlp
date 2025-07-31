@@ -230,8 +230,8 @@ export default function AbstractsPage() {
                 className="w-40 h-40 object-cover rounded-xl shadow-xl mb-3 animate-zoom"
               />
               <div className="flex gap-4">
-                <a href="/images/abstract.jpg" target="_blank" rel="noopener noreferrer" className="btn-primary px-4 py-2 rounded-lg font-semibold">View</a>
-                <a href="/images/abstract.jpg" download className="btn-secondary px-4 py-2 rounded-lg font-semibold">Download</a>
+                <a href="/images/abstract.jpg" target="_blank" rel="noopener noreferrer" className="btn-primary px-4 py-2 rounded-lg font-semibold transform hover:scale-105 transition-transform duration-200">View</a>
+                <a href="/images/abstract.jpg" download className="btn-secondary px-4 py-2 rounded-lg font-semibold transform hover:scale-105 transition-transform duration-200">Download</a>
               </div>
             </div>
             <p className="text-lg text-primary-100 max-w-2xl mx-auto">
@@ -245,7 +245,7 @@ export default function AbstractsPage() {
       <section className="section-padding bg-gray-50">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                 <FileText className="mr-3 text-primary-600" />
                 Submission Guidelines
@@ -680,7 +680,7 @@ export default function AbstractsPage() {
                         className="hidden"
                       />
                       <span className="mt-4 inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors">
-                        Choose File
+                        <span className="font-semibold">Choose File</span>
                       </span>
                     </label>
                     {selectedFile && (
@@ -750,7 +750,7 @@ export default function AbstractsPage() {
                 <LoadingButton
                   type="submit"
                   isLoading={isSubmitting}
-                  className="bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 transition-all duration-200"
+                  className="bg-gradient-to-r from-primary-500 to-primary-700 text-white px-8 py-4 rounded-xl font-bold text-base shadow-lg hover:from-primary-600 hover:to-primary-800 transform hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:scale-105 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
                 >
                   {isSubmitting ? 'Submitting Abstract...' : 'Submit Abstract'}
                 </LoadingButton>

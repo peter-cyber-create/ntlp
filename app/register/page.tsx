@@ -22,47 +22,65 @@ export default function RegisterPage() {
 
   const ticketTypes = [
     {
-      id: 'student',
-      name: 'Student',
+      id: 'undergrad',
+      name: 'Undergraduate Student',
       price: 'UGX 100,000',
-      description: 'Special rate for students (ID required)',
+      description: 'For undergraduate students (ID required)',
       features: [
         'All 3 days access',
         'Conference materials',
         'Certificate of attendance',
-        'Student networking session',
-        'Access to proceedings'
-      ],
-      deadline: 'March 10, 2025'
+        'Student networking session'
+      ]
     },
     {
-      id: 'early-bird',
-      name: 'Early Bird',
-      price: 'UGX 250,000',
-      originalPrice: 'UGX 350,000',
-      description: 'Limited time offer - Save UGX 100,000',
+      id: 'grad',
+      name: 'Graduate Student',
+      price: 'UGX 150,000',
+      description: 'For graduate students (ID required)',
       features: [
         'All 3 days access',
-        'Welcome reception',
-        'Networking lunch',
         'Conference materials',
-        'Certificate of attendance'
-      ],
-      deadline: 'January 31, 2025'
+        'Certificate of attendance',
+        'Student networking session'
+      ]
     },
     {
-      id: 'regular',
-      name: 'Regular',
+      id: 'local',
+      name: 'Uganda / East Africa (Non-Student)',
       price: 'UGX 350,000',
-      description: 'Standard conference registration',
+      description: 'For non-student participants from Uganda or East Africa',
       features: [
         'All 3 days access',
         'Welcome reception',
         'Networking lunch',
         'Conference materials',
         'Certificate of attendance'
-      ],
-      deadline: 'March 10, 2025'
+      ]
+    },
+    {
+      id: 'intl',
+      name: 'International Delegate',
+      price: 'USD 300',
+      description: 'For international participants',
+      features: [
+        'All 3 days access',
+        'Welcome reception',
+        'Networking lunch',
+        'Conference materials',
+        'Certificate of attendance'
+      ]
+    },
+    {
+      id: 'online',
+      name: 'Online Participation',
+      price: 'USD 50 / UGX 180,000',
+      description: 'For virtual/online attendance',
+      features: [
+        'Live stream access',
+        'Conference materials (digital)',
+        'Certificate of attendance (digital)'
+      ]
     }
   ]
 
@@ -229,20 +247,17 @@ export default function RegisterPage() {
               {ticketTypes.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className={`bg-white rounded-2xl shadow-lg p-8 cursor-pointer transition-all duration-300 ${
-                    selectedTicket === ticket.id
-                      ? 'ring-4 ring-primary-500 transform scale-105'
-                      : 'hover:shadow-xl hover:transform hover:scale-105'
-                  }`}
+                  className={`bg-white rounded-2xl shadow-lg p-8 cursor-pointer transition-all duration-300 transform hover:scale-105 focus-within:scale-105 focus-within:ring-2 focus-within:ring-primary-400 ${selectedTicket === ticket.id ? 'ring-4 ring-primary-500 scale-105' : 'hover:shadow-xl'}`}
                   onClick={() => handleTicketSelect(ticket.id)}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={ticket.name}
                 >
                   <div className="text-center mb-6">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">{ticket.name}</h3>
                     <div className="flex items-center justify-center space-x-2 mb-2">
                       <span className="text-4xl font-bold text-primary-600">{ticket.price}</span>
-                      {ticket.originalPrice && (
-                        <span className="text-xl text-gray-400 line-through">{ticket.originalPrice}</span>
-                      )}
+                      {/* No originalPrice for new ticket types */}
                     </div>
                     <p className="text-gray-600">{ticket.description}</p>
                   </div>
@@ -266,7 +281,7 @@ export default function RegisterPage() {
                         <Check className="text-white" size={16} />
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-2">Registration deadline: {ticket.deadline}</p>
+                    {/* No deadline for new ticket types */}
                   </div>
                 </div>
               ))}
@@ -279,7 +294,7 @@ export default function RegisterPage() {
       <section className="section-padding">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8">
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 transition-all duration-200 hover:scale-105 active:scale-95 focus-within:scale-105 focus-within:ring-2 focus-within:ring-primary-400 focus:outline-none">
               <h2 className="text-2xl font-bold text-gray-900 mb-8">Registration Details</h2>
               
               {!selectedTicket && (
@@ -480,14 +495,13 @@ export default function RegisterPage() {
                 type="submit"
                 disabled={isSubmitting}
                 onClick={(e) => {
-                  console.log('Button clicked!', e)
                   if (!selectedTicket) {
                     e.preventDefault()
                     showWarning('Please select a ticket type first!')
                     return
                   }
                 }}
-                className="w-full btn-primary flex items-center justify-center space-x-2 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full btn-primary flex items-center justify-center space-x-2 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-transform duration-200"
               >
                 {isSubmitting ? (
                   <>
