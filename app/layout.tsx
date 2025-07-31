@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import UgandaStripe from '../components/UgandaStripe'
 import { ConditionalLayout } from '../components/ConditionalLayout'
 import React from 'react'
+import type { ReactNode } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,20 +21,25 @@ export const metadata = {
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
     'mobile-web-app-capable': 'yes'
+  },
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/favicon.ico',
+    apple: '/icon.png',
   }
-}
+};
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-}
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+type RootLayoutProps = {
+  children: ReactNode;
+};
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <head>
