@@ -12,8 +12,9 @@ export function Navbar() {
   
   // Only use white text on homepage when not scrolled, black everywhere else by default
   const isHomepage = pathname === '/'
-  const shouldUseWhiteText = isHomepage && !isScrolled
-  const shouldUseBlackText = !isHomepage || isScrolled
+  // Always use a visible background and dark text on homepage for contrast
+  const shouldUseWhiteText = false
+  const shouldUseBlackText = true
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -41,8 +42,10 @@ export function Navbar() {
   }, [])
 
   return (
-    <nav className={`floating-nav ${isScrolled ? 'nav-scrolled' : 'nav-transparent'}`}>
-      <div className="container mx-auto px-4 relative">
+    <nav className={
+      `floating-nav bg-white/80 shadow-md backdrop-blur-md border-b border-primary-200 fixed top-4 left-1/2 -translate-x-1/2 rounded-2xl max-w-5xl w-[95vw] mx-auto z-50 transition-all duration-300 py-2 px-4 flex items-center`
+    }>
+      <div className="flex justify-between items-center w-full">
         <div className="flex justify-between items-center min-h-[7.5rem] py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
