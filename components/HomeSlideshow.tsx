@@ -44,6 +44,10 @@ export default function HomeSlideshow() {
           src={slide.src}
           alt={slide.alt}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${idx === current ? 'opacity-100' : 'opacity-0'}`}
+          loading="lazy"
+          decoding="async"
+          width="1920"
+          height="1080"
         />
       ))}
       {/* Dots */}
