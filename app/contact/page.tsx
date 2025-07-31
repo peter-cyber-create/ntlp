@@ -58,9 +58,9 @@ export default function ContactPage() {
         <div className="flex flex-col md:flex-row gap-10">
           {/* Contact Info */}
           <div className="flex-1 flex flex-col gap-6 justify-center items-center bg-primary-50 border border-primary-200 rounded-2xl p-6 shadow-md">
-            <div className="flex items-center gap-3 text-primary-800"><Mail className="w-6 h-6" /> <span className="font-semibold">info@ntlp-conference.org</span></div>
+            <div className="flex items-center gap-3 text-primary-800"><Mail className="w-6 h-6" /> <span className="font-semibold">conference@health.go.ug</span></div>
             <div className="flex items-center gap-3 text-primary-800"><Phone className="w-6 h-6" /> <span className="font-semibold">+256 123 456 789</span></div>
-            <div className="flex items-center gap-3 text-primary-800"><MapPin className="w-6 h-6" /> <span className="font-semibold">Kampala Serena Hotel, Uganda</span></div>
+            <div className="flex items-center gap-3 text-primary-800"><MapPin className="w-6 h-6" /> <span className="font-semibold">Speke Resort Munyonyo, Uganda</span></div>
             <div className="flex items-center gap-3 text-primary-800"><Clock className="w-6 h-6" /> <span className="font-semibold">Mon-Fri: 8am - 5pm</span></div>
           </div>
           {/* Contact Form */}
