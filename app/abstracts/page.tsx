@@ -213,20 +213,29 @@ export default function AbstractsPage() {
     }
   }
 
+
   return (
     <div>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      
-      {/* Hero Section */}
+
+      {/* Abstract Download/View Section */}
       <section className="bg-gradient-to-r from-primary-600 to-primary-800 text-white section-padding">
         <div className="container">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Submit Your Abstract
-            </h1>
-            <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-              Share your research and expertise at Uganda's premier health conference. 
-              Submit your abstract for oral presentation or poster session.
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">Conference Abstract</h2>
+            <div className="flex flex-col items-center justify-center mb-6">
+              <img
+                src="/images/abstract.jpg"
+                alt="Conference Abstract"
+                className="w-40 h-40 object-cover rounded-xl shadow-xl mb-3 animate-zoom"
+              />
+              <div className="flex gap-4">
+                <a href="/images/abstract.jpg" target="_blank" rel="noopener noreferrer" className="btn-primary px-4 py-2 rounded-lg font-semibold">View</a>
+                <a href="/images/abstract.jpg" download className="btn-secondary px-4 py-2 rounded-lg font-semibold">Download</a>
+              </div>
+            </div>
+            <p className="text-lg text-primary-100 max-w-2xl mx-auto">
+              Download or view the official conference abstract. For more details, submit your own abstract below.
             </p>
           </div>
         </div>

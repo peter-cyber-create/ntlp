@@ -10,8 +10,8 @@ export default function SpeakersPage() {
   const speakers = [
     {
       id: 1,
-      name: 'DR JANE RUTH ACENG',
-      title: 'MINISTER FOR HEALTH',
+      name: 'Dr Jane Ruth Aceng',
+      title: 'Minister For Health',
       company: 'Republic of Uganda',
       bio: 'Leading Uganda\'s health sector with extensive experience in public health policy and healthcare system strengthening.',
       image: '/images/ruth.jpeg',
@@ -20,8 +20,8 @@ export default function SpeakersPage() {
     },
     {
       id: 2,
-      name: 'DR. CHARLES OLARO',
-      title: 'DIRECTOR GENERAL HEALTH SERVICES',
+      name: 'Dr. Charles Olaro',
+      title: 'Director General Health Services',
       company: 'Ministry of Health Uganda',
       bio: 'Overseeing health service delivery across Uganda with focus on health system strengthening and quality improvement.',
       image: '/images/charles.jpeg',
@@ -30,8 +30,8 @@ export default function SpeakersPage() {
     },
     {
       id: 3,
-      name: 'DR. DIANA ATWIINE',
-      title: 'PERMANENT SECRETARY',
+      name: 'Dr. Diana Atwiine',
+      title: 'Permanent Secretary',
       company: 'Ministry of Health Uganda',
       bio: 'Driving innovation and efficiency in Uganda\'s health sector as Permanent Secretary.',
       image: '/images/diana.jpeg',
