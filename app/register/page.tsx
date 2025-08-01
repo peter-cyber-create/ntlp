@@ -9,15 +9,15 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toasts, removeToast, showSuccess, showError, showWarning } = useToast()
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
     organization: '',
     position: '',
     district: '',
     registrationType: 'regular' as 'early-bird' | 'regular' | 'student',
-    specialRequirements: ''
+    special_needs: ''
   })
 
   const ticketTypes = [
@@ -127,7 +127,7 @@ export default function RegisterPage() {
     }
 
     // Check if all required fields are filled
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'organization', 'position', 'district']
+    const requiredFields = ['first_name', 'last_name', 'email', 'phone', 'organization', 'position', 'district']
     const emptyFields = requiredFields.filter(field => !formData[field as keyof typeof formData])
     
     if (emptyFields.length > 0) {
@@ -136,12 +136,12 @@ export default function RegisterPage() {
     }
 
     // Validate field formats
-    if (!validateName(formData.firstName)) {
+    if (!validateName(formData.first_name)) {
       showError('First name must contain only letters and be at least 2 characters long')
       return
     }
 
-    if (!validateName(formData.lastName)) {
+    if (!validateName(formData.last_name)) {
       showError('Last name must contain only letters and be at least 2 characters long')
       return
     }
@@ -170,7 +170,7 @@ export default function RegisterPage() {
     console.log('Sending registration data:', { ...formData, registrationType: selectedTicket })
     
     try {
-      const response = await fetch('/api/registrations', {
+      const response = await fetch('http://localhost:5000/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,15 +189,15 @@ export default function RegisterPage() {
         showSuccess('Registration submitted successfully! You will receive a confirmation email shortly.', 8000)
         // Reset form
         setFormData({
-          firstName: '',
-          lastName: '',
+          first_name: '',
+          last_name: '',
           email: '',
           phone: '',
           organization: '',
           position: '',
           district: '',
           registrationType: 'regular',
-          specialRequirements: ''
+          special_needs: ''
         })
         setSelectedTicket('')
       } else {
@@ -307,7 +307,7 @@ export default function RegisterPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-2">
                     First Name *
                     <span className="text-xs text-gray-500 block font-normal">
                       Enter your legal first name as it appears on official documents
@@ -315,10 +315,10 @@ export default function RegisterPage() {
                   </label>
                   <input
                     type="text"
-                    id="firstName"
-                    name="firstName"
+                    id="first_name"
+                    name="first_name"
                     required
-                    value={formData.firstName}
+                    value={formData.first_name}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="Enter your first name"
@@ -326,7 +326,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-2">
                     Last Name *
                     <span className="text-xs text-gray-500 block font-normal">
                       Enter your legal surname as it appears on official documents
@@ -334,10 +334,10 @@ export default function RegisterPage() {
                   </label>
                   <input
                     type="text"
-                    id="lastName"
-                    name="lastName"
+                    id="last_name"
+                    name="last_name"
                     required
-                    value={formData.lastName}
+                    value={formData.last_name}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="Enter your last name"
@@ -461,9 +461,9 @@ export default function RegisterPage() {
                 </label>
                 <textarea
                   id="specialRequirements"
-                  name="specialRequirements"
+                  name="special_needs"
                   rows={3}
-                  value={formData.specialRequirements}
+                  value={formData.special_needs}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Please let us know about any special requirements, dietary restrictions, or accessibility needs"

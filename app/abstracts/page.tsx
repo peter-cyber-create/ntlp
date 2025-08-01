@@ -326,7 +326,7 @@ export default function AbstractsPage() {
                       required
                       value={formData.title}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-400 hover:bg-primary-50 transition-all duration-200"
                       placeholder="Enter your abstract title"
                     />
                   </div>
@@ -345,7 +345,7 @@ export default function AbstractsPage() {
                         required
                         value={formData.presentationType}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-400 hover:bg-primary-50 transition-all duration-200"
                       >
                         <option value="oral">Oral Presentation</option>
                         <option value="poster">Poster Presentation</option>
@@ -515,7 +515,7 @@ export default function AbstractsPage() {
                   rows={4}
                   value={formData.coAuthors}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-400 hover:bg-primary-50 transition-all duration-200"
                   placeholder="John Doe, Makerere University&#10;Jane Smith, Ministry of Health"
                 />
               </div>
