@@ -52,6 +52,14 @@ export default function AdminDashboard() {
   const [contactStats, setContactStats] = useState<any>({})
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  // Notification helper function
+  const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setNotification({ message, type })
+    setTimeout(() => setNotification(null), 5000)
+  }
 
   useEffect(() => {
     // Check authentication
@@ -273,7 +281,9 @@ export default function AdminDashboard() {
   }
 
   const handleSingleDelete = async (id: string, type: 'contact' | 'registration' | 'abstract') => {
-    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
+    const confirmMessage = `Are you sure you want to permanently delete this ${type}? This action cannot be undone.`;
+    if (window.confirm(confirmMessage)) {
+      setIsProcessing(true);
       try {
         const endpoint = type === 'contact' ? '/api/contacts/' : 
                         type === 'registration' ? '/api/registrations/' : '/api/abstracts/';
@@ -285,6 +295,7 @@ export default function AdminDashboard() {
         if (response.ok) {
           const result = await response.json();
           console.log(`Successfully deleted ${type}`);
+          showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully`, 'success');
           
           // Refresh data
           if (type === 'abstract') {
@@ -383,6 +394,7 @@ export default function AdminDashboard() {
 
   // Abstract-specific handlers
   const handleAbstractStatusUpdate = async (id: string, newStatus: 'accepted' | 'rejected' | 'pending' | 'under-review') => {
+    setIsProcessing(true);
     try {
       const response = await fetch(`/api/abstracts/`, {
         method: 'PUT',
@@ -392,36 +404,41 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           id,
           status: newStatus,
-          reviewComments: `Status updated to ${newStatus} by admin`
+          reviewComments: `Status updated to ${newStatus} by admin on ${new Date().toLocaleString()}`
         })
       })
 
       if (response.ok) {
+        showNotification(`Abstract status updated to ${newStatus}`, 'success');
         // Refresh abstracts data
         loadAbstractsData()
       } else {
-        console.error('Failed to update abstract status')
+        console.error('Failed to update abstract status');
+        showNotification('Failed to update abstract status', 'error');
       }
     } catch (error) {
-      console.error('Error updating abstract status:', error)
+      console.error('Error updating abstract status:', error);
+      showNotification('Error updating abstract status', 'error');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleAbstractDownload = (abstract: any) => {
     if (abstract.id && abstract.fileName) {
-      // Use the new download API endpoint with trailing slash
-      const downloadUrl = `/api/abstracts/download/?filename=${abstract.fileName}`;
+      // Use the new download API endpoint with ID for better filename generation
+      const downloadUrl = `/api/abstracts/download/?id=${abstract.id}`;
       
       // Create a temporary link to trigger download
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = abstract.fileName;
+      // Don't set download attribute, let the server handle the filename
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      console.log(`Downloaded: ${abstract.fileName}`);
+      console.log(`Downloaded: ${abstract.fileName} by ${abstract.authors}`);
     } else {
       alert('File information not available for download');
       console.error('Abstract download failed - missing file information:', abstract);
@@ -1079,69 +1096,98 @@ export default function AdminDashboard() {
                         <br />
                         <span className="text-xs text-gray-500">{abstract.email}</span>
                       </td>
-                      <td className="py-4 px-6 text-gray-600">{abstract.category}</td>
+                      <td className="py-4 px-6 text-gray-600">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
+                          abstract.category === 'research' ? 'bg-blue-100 text-blue-800' :
+                          abstract.category === 'case-study' ? 'bg-green-100 text-green-800' :
+                          abstract.category === 'review' ? 'bg-purple-100 text-purple-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {abstract.category}
+                        </span>
+                      </td>
                       <td className="py-4 px-6">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(abstract.status)}`}>
-                          {abstract.status}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
+                          abstract.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          abstract.status === 'under-review' ? 'bg-blue-100 text-blue-800' :
+                          abstract.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                            abstract.status === 'pending' ? 'bg-yellow-400' :
+                            abstract.status === 'under-review' ? 'bg-blue-400' :
+                            abstract.status === 'accepted' ? 'bg-green-400' :
+                            'bg-red-400'
+                          }`}></div>
+                          {abstract.status.replace('-', ' ')}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-gray-600">
                         {new Date(abstract.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-6">
-                        <div className="flex space-x-2">
+                        <div className="flex items-center space-x-1">
+                          {/* View Details */}
                           <button 
                             onClick={() => handleViewItem(abstract, 'abstract')}
-                            className="p-1 text-gray-600 hover:text-blue-600"
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
                             title="View Details"
                           >
-                            <Eye size={16} />
+                            <Eye size={12} className="mr-1" />
+                            View
                           </button>
-                          <button 
-                            onClick={() => handleEditItem(abstract, 'abstract')}
-                            className="p-1 text-gray-600 hover:text-green-600"
-                            title="Edit Status"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button 
-                            onClick={() => handleAbstractPreview(abstract)}
-                            className="p-1 text-gray-600 hover:text-indigo-600"
-                            title="Preview File"
-                          >
-                            <ExternalLink size={16} />
-                          </button>
+                          
+                          {/* Download */}
                           <button 
                             onClick={() => handleAbstractDownload(abstract)}
-                            className="p-1 text-gray-600 hover:text-purple-600"
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-purple-600 bg-purple-50 rounded hover:bg-purple-100 transition-colors"
                             title="Download File"
                           >
-                            <Download size={16} />
+                            <Download size={12} className="mr-1" />
+                            Download
                           </button>
+                          
+                          {/* Status Actions */}
                           {abstract.status === 'pending' && (
                             <>
                               <button 
                                 onClick={() => handleAbstractStatusUpdate(abstract.id, 'accepted')}
-                                className="p-1 text-gray-600 hover:text-green-600"
-                                title="Accept"
+                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors"
+                                title="Accept Abstract"
                               >
-                                <CheckCircle size={16} />
+                                <CheckCircle size={12} className="mr-1" />
+                                Accept
                               </button>
                               <button 
                                 onClick={() => handleAbstractStatusUpdate(abstract.id, 'rejected')}
-                                className="p-1 text-gray-600 hover:text-red-600"
-                                title="Reject"
+                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                                title="Reject Abstract"
                               >
-                                <X size={16} />
+                                <X size={12} className="mr-1" />
+                                Reject
                               </button>
                             </>
                           )}
+                          
+                          {/* Edit Status */}
+                          <button 
+                            onClick={() => handleEditItem(abstract, 'abstract')}
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 transition-colors"
+                            title="Edit Status"
+                          >
+                            <Edit size={12} className="mr-1" />
+                            Edit
+                          </button>
+                          
+                          {/* Delete */}
                           <button 
                             onClick={() => handleSingleDelete(abstract.id.toString(), 'abstract')}
-                            className="p-1 text-gray-600 hover:text-red-600"
-                            title="Delete"
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                            title="Delete Abstract"
+                            disabled={isProcessing}
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={12} className="mr-1" />
+                            Delete
                           </button>
                         </div>
                       </td>
@@ -1716,6 +1762,35 @@ ABSTRACT STATUS:
 
         {/* Main Content */}
         <main className="flex-1 p-4 sm:p-6 lg:ml-0 min-h-screen">
+          {/* Professional Header */}
+          <div className="mb-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">NTLP Conference 2025 - Admin Dashboard</h1>
+                <p className="text-gray-600 mt-1">
+                  Manage registrations, abstracts, and conference communications
+                </p>
+              </div>
+              <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-4 text-sm">
+                <div className="bg-blue-50 px-3 py-2 rounded-lg">
+                  <span className="text-blue-600 font-medium">
+                    {registrationsData.length} Registrations
+                  </span>
+                </div>
+                <div className="bg-green-50 px-3 py-2 rounded-lg">
+                  <span className="text-green-600 font-medium">
+                    {abstractsData.length} Abstracts
+                  </span>
+                </div>
+                <div className="bg-purple-50 px-3 py-2 rounded-lg">
+                  <span className="text-purple-600 font-medium">
+                    {contactsData.length} Contacts
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'registrations' && renderRegistrations()}
           {activeTab === 'abstracts' && renderAbstracts()}
@@ -1861,6 +1936,37 @@ ABSTRACT STATUS:
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification System */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+          notification.type === 'success' ? 'bg-green-100 border-green-500 text-green-800' :
+          notification.type === 'error' ? 'bg-red-100 border-red-500 text-red-800' :
+          'bg-blue-100 border-blue-500 text-blue-800'
+        } border-l-4`}>
+          <div className="flex items-center justify-between">
+            <span className="font-medium">{notification.message}</span>
+            <button
+              onClick={() => setNotification(null)}
+              className="ml-4 text-gray-400 hover:text-gray-600"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Processing Overlay */}
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <span className="text-gray-700">Processing...</span>
             </div>
           </div>
         </div>

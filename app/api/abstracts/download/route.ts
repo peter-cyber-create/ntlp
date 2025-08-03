@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import DatabaseManager from '@/lib/mysql';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,9 +13,52 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing filename or id parameter' }, { status: 400 });
     }
 
-    // If we have an ID, we would normally look it up in the database
-    // For now, we'll use the filename directly
-    const targetFilename = filename || `abstract_${id}.pdf`;
+    let targetFilename = filename;
+    let downloadFilename = filename;
+    let abstractData = null;
+
+    // If we have an ID, look up the abstract in the database
+    if (id) {
+      const db = DatabaseManager.getInstance();
+      const abstracts = await db.execute(`
+        SELECT id, title, authors, fileName
+        FROM abstracts 
+        WHERE id = ?
+        LIMIT 1
+      `, [id]);
+
+      if (abstracts.length > 0) {
+        abstractData = abstracts[0];
+        targetFilename = abstractData.fileName;
+      }
+    } else if (filename) {
+      // If only filename provided, try to find the abstract by filename
+      const db = DatabaseManager.getInstance();
+      const abstracts = await db.execute(`
+        SELECT id, title, authors, fileName
+        FROM abstracts 
+        WHERE fileName = ?
+        LIMIT 1
+      `, [filename]);
+
+      if (abstracts.length > 0) {
+        abstractData = abstracts[0];
+      }
+    }
+
+    // Create a professional filename if we have abstract data
+    if (abstractData && targetFilename) {
+      const authorName = abstractData.authors ? abstractData.authors.split(',')[0].trim() : 'Unknown';
+      const title = abstractData.title ? abstractData.title.substring(0, 30).replace(/[^a-zA-Z0-9\s]/g, '').trim() : 'Abstract';
+      const fileExt = path.extname(targetFilename);
+      
+      // Format: "AuthorName - AbstractTitle.pdf"
+      downloadFilename = `${authorName} - ${title}${fileExt}`;
+    }
+
+    if (!targetFilename) {
+      return NextResponse.json({ error: 'File not found' }, { status: 404 });
+    }
     
     // Check both possible upload locations
     const possiblePaths = [
@@ -42,17 +86,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Determine content type based on file extension
-    const ext = path.extname(targetFilename).toLowerCase();
+    const ext = targetFilename ? path.extname(targetFilename).toLowerCase() : '.pdf';
     const contentType = ext === '.pdf' ? 'application/pdf' : 
                        ext === '.doc' ? 'application/msword' :
                        ext === '.docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
                        'application/octet-stream';
 
-    // Return the file with appropriate headers
+    // Return the file with appropriate headers and professional filename
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${targetFilename}"`,
+        'Content-Disposition': `attachment; filename="${downloadFilename}"`,
         'Content-Length': fileBuffer.length.toString(),
       },
     });
