@@ -51,10 +51,10 @@ export async function GET() {
         payment_currency as paymentCurrency,
         payment_reference as paymentReference,
         status,
-        registration_date as registrationDate,
-        created_at as createdAt
+        createdAt as registrationDate,
+        createdAt
       FROM registrations 
-      ORDER BY registration_date DESC 
+      ORDER BY createdAt DESC 
       LIMIT 50
     `);
     
@@ -65,9 +65,9 @@ export async function GET() {
       db.executeOne('SELECT COUNT(*) as pending FROM registrations WHERE payment_status = ?', ['pending']),
       db.executeOne('SELECT COUNT(*) as completed FROM registrations WHERE payment_status = ?', ['completed']),
       db.execute(`
-        SELECT registration_type, COUNT(*) as count 
+        SELECT registrationType, COUNT(*) as count 
         FROM registrations 
-        GROUP BY registration_type
+        GROUP BY registrationType
       `)
     ]);
     
@@ -81,7 +81,7 @@ export async function GET() {
     
     // Process type stats
     statsQueries[4].forEach((row: any) => {
-      stats.byType[row.registration_type] = row.count;
+      stats.byType[row.registrationType] = row.count;
     });
     
     // Transform registrations to match frontend expectations
@@ -128,12 +128,22 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json();
     
-    // Validate required fields based on frontend form
-    const requiredFields = ['first_name', 'last_name', 'email', 'phone', 'organization', 'position', 'district', 'registrationType'];
+    // Validate required fields based on frontend form (accept both camelCase and snake_case)
+    const requiredFields = [
+      { key: 'firstName', alt: 'first_name' },
+      { key: 'lastName', alt: 'last_name' }, 
+      { key: 'email' }, 
+      { key: 'phone' }, 
+      { key: 'organization' }, 
+      { key: 'position' }, 
+      { key: 'district' }, 
+      { key: 'registrationType' }
+    ];
+    
     const missingFields = requiredFields.filter(field => {
-      const value = field === 'registrationType' ? body.registrationType : body[field];
+      const value = body[field.key] || body[field.alt || field.key];
       return !value || (typeof value === 'string' && value.trim() === '');
-    });
+    }).map(field => field.key);
     
     if (missingFields.length > 0) {
       return NextResponse.json(
