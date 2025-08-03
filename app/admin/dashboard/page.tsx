@@ -495,20 +495,19 @@ export default function AdminDashboard() {
     const csvData = selectedAbstractData.map(abstract => {
       return [
         `"${abstract.title}"`,
-        `"${abstract.primaryAuthor.firstName} ${abstract.primaryAuthor.lastName}"`,
-        `"${abstract.primaryAuthor.email}"`,
-        `"${abstract.primaryAuthor.institution || abstract.primaryAuthor.affiliation || ''}"`,
+        `"${abstract.authors}"`,
+        `"${abstract.email}"`,
+        `"${abstract.institution || ''}"`,
         `"${abstract.category}"`,
-        `"${abstract.presentationType}"`,
         `"${abstract.status}"`,
-        `"${new Date(abstract.submittedAt).toLocaleDateString()}"`,
+        `"${new Date(abstract.createdAt).toLocaleDateString()}"`,
         `"${abstract.fileName || 'N/A'}"`,
         `"${abstract.keywords || ''}"`,
         `"${abstract.abstract.substring(0, 100)}..."`
       ].join(',');
     }).join('\n');
 
-    const csvContent = `Title,Author,Email,Institution,Category,Type,Status,Submitted,File,Keywords,Abstract Preview\n${csvData}`;
+    const csvContent = `Title,Author,Email,Institution,Category,Status,Submitted,File,Keywords,Abstract Preview\n${csvData}`;
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -862,9 +861,8 @@ export default function AdminDashboard() {
     const filteredAbstracts = abstractsData.filter(abstract => {
       const matchesSearch = searchTerm === '' || 
         abstract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        abstract.primaryAuthor.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        abstract.primaryAuthor.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        abstract.primaryAuthor.email.toLowerCase().includes(searchTerm.toLowerCase())
+        abstract.authors.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        abstract.email.toLowerCase().includes(searchTerm.toLowerCase())
       
       const matchesStatus = filterStatus === 'all' || abstract.status === filterStatus
       
@@ -976,9 +974,9 @@ export default function AdminDashboard() {
             <button 
               onClick={() => {
                 const csv = abstractsData.map(a => 
-                  `"${a.title}","${a.primaryAuthor.firstName} ${a.primaryAuthor.lastName}","${a.primaryAuthor.email}","${a.category}","${a.presentationType}","${a.status}","${new Date(a.submittedAt).toLocaleDateString()}"`
+                  `"${a.title}","${a.authors}","${a.email}","${a.category}","${a.status}","${new Date(a.createdAt).toLocaleDateString()}"`
                 ).join('\n')
-                const blob = new Blob([`Title,Author,Email,Category,Type,Status,Submitted\n${csv}`], { type: 'text/csv' })
+                const blob = new Blob([`Title,Author,Email,Category,Status,Submitted\n${csv}`], { type: 'text/csv' })
                 const url = window.URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
@@ -1053,7 +1051,6 @@ export default function AdminDashboard() {
                     <th className="text-left py-3 px-6 font-medium text-gray-900">Title</th>
                     <th className="text-left py-3 px-6 font-medium text-gray-900">Author</th>
                     <th className="text-left py-3 px-6 font-medium text-gray-900">Category</th>
-                    <th className="text-left py-3 px-6 font-medium text-gray-900">Type</th>
                     <th className="text-left py-3 px-6 font-medium text-gray-900">Status</th>
                     <th className="text-left py-3 px-6 font-medium text-gray-900">Submitted</th>
                     <th className="text-left py-3 px-6 font-medium text-gray-900">Actions</th>
@@ -1080,19 +1077,18 @@ export default function AdminDashboard() {
                         {abstract.title}
                       </td>
                       <td className="py-4 px-6 text-gray-600">
-                        {abstract.primaryAuthor.firstName} {abstract.primaryAuthor.lastName}
+                        {abstract.authors}
                         <br />
-                        <span className="text-xs text-gray-500">{abstract.primaryAuthor.email}</span>
+                        <span className="text-xs text-gray-500">{abstract.email}</span>
                       </td>
                       <td className="py-4 px-6 text-gray-600">{abstract.category}</td>
-                      <td className="py-4 px-6 text-gray-600 capitalize">{abstract.presentationType}</td>
                       <td className="py-4 px-6">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(abstract.status)}`}>
                           {abstract.status}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-gray-600">
-                        {new Date(abstract.submittedAt).toLocaleDateString()}
+                        {new Date(abstract.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex space-x-2">
@@ -1483,19 +1479,18 @@ export default function AdminDashboard() {
               onClick={() => {
                 const csvData = abstractsData.map(abstract => [
                   `"${abstract.title}"`,
-                  `"${abstract.primaryAuthor.firstName} ${abstract.primaryAuthor.lastName}"`,
-                  `"${abstract.primaryAuthor.email}"`,
-                  `"${abstract.primaryAuthor.institution || abstract.primaryAuthor.affiliation || ''}"`,
+                  `"${abstract.authors}"`,
+                  `"${abstract.email}"`,
+                  `"${abstract.institution || ''}"`,
                   `"${abstract.category}"`,
-                  `"${abstract.presentationType}"`,
                   `"${abstract.status}"`,
-                  `"${new Date(abstract.submittedAt).toLocaleDateString()}"`,
+                  `"${new Date(abstract.createdAt).toLocaleDateString()}"`,
                   `"${abstract.fileName || 'N/A'}"`,
                   `"${abstract.keywords || ''}"`,
                   `"${abstract.abstract.replace(/"/g, '""')}"`
                 ].join(','));
                 
-                const csvContent = `Title,Author,Email,Institution,Category,Type,Status,Submitted,File,Keywords,Abstract\n${csvData.join('\n')}`;
+                const csvContent = `Title,Author,Email,Institution,Category,Status,Submitted,File,Keywords,Abstract\n${csvData.join('\n')}`;
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
