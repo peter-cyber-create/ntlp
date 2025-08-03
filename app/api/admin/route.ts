@@ -8,22 +8,52 @@ export async function GET() {
   try {
     const db = DatabaseManager.getInstance();
     
-    // Get counts for each table
+    // Get detailed statistics
     const [
       registrationsCount,
       contactsCount, 
-      abstractsCount
+      abstractsCount,
+      paymentStats,
+      registrationTypes,
+      recentRegistrations
     ] = await Promise.all([
       db.executeOne('SELECT COUNT(*) as count FROM registrations'),
       db.executeOne('SELECT COUNT(*) as count FROM contacts'),
-      db.executeOne('SELECT COUNT(*) as count FROM abstracts')
+      db.executeOne('SELECT COUNT(*) as count FROM abstracts'),
+      db.execute(`
+        SELECT 
+          payment_status,
+          COUNT(*) as count,
+          SUM(payment_amount) as total_amount,
+          payment_currency
+        FROM registrations 
+        GROUP BY payment_status, payment_currency
+      `),
+      db.execute(`
+        SELECT 
+          registrationType,
+          COUNT(*) as count
+        FROM registrations 
+        GROUP BY registrationType
+      `),
+      db.execute(`
+        SELECT 
+          firstName, lastName, email, registrationType, 
+          payment_amount, payment_currency, createdAt
+        FROM registrations 
+        ORDER BY createdAt DESC 
+        LIMIT 10
+      `)
     ]);
 
     const stats = {
       registrations: registrationsCount?.count || 0,
       contacts: contactsCount?.count || 0,
       abstracts: abstractsCount?.count || 0,
-      totalUsers: (registrationsCount?.count || 0) + (contactsCount?.count || 0)
+      totalUsers: (registrationsCount?.count || 0) + (contactsCount?.count || 0),
+      paymentBreakdown: paymentStats || [],
+      registrationTypes: registrationTypes || [],
+      recentRegistrations: recentRegistrations || []
     };
     
     return NextResponse.json({

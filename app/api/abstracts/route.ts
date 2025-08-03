@@ -14,31 +14,22 @@ export async function GET() {
       SELECT 
         id,
         title,
-        abstract_text,
+        abstract,
         keywords,
         category,
-        presentation_type,
-        primary_author_first_name,
-        primary_author_last_name,
-        primary_author_email,
-        primary_author_institution,
-        primary_author_department,
-        primary_author_position,
-        primary_author_phone,
-        primary_author_country,
-        file_name,
-        file_path,
-        file_size,
-        file_type,
+        authors,
+        email,
+        institution,
+        phone,
+        fileName,
+        filePath,
+        fileSize,
         status,
-        review_comments,
-        conflict_of_interest,
-        funding_source,
-        ethical_approval,
-        submitted_at,
-        created_at
+        reviewComments,
+        createdAt,
+        updatedAt
       FROM abstracts 
-      ORDER BY submitted_at DESC
+      ORDER BY createdAt DESC
     `);
     
     return NextResponse.json({
@@ -56,45 +47,29 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const db = DatabaseManager.getInstance();
-  
   try {
     const formData = await request.formData();
     
-    // Extract all required fields according to new schema
+    // Extract form fields to match database structure
     const title = formData.get('title') as string;
-    const abstract_text = formData.get('abstract_text') as string;
+    const abstract = formData.get('abstract') as string;
     const keywords = formData.get('keywords') as string;
     const category = formData.get('category') as string;
-    const presentation_type = formData.get('presentation_type') as string;
-    
-    // Primary author information
-    const primary_author_first_name = formData.get('primary_author_first_name') as string;
-    const primary_author_last_name = formData.get('primary_author_last_name') as string;
-    const primary_author_email = formData.get('primary_author_email') as string;
-    const primary_author_institution = formData.get('primary_author_institution') as string;
-    const primary_author_department = formData.get('primary_author_department') as string;
-    const primary_author_position = formData.get('primary_author_position') as string;
-    const primary_author_phone = formData.get('primary_author_phone') as string;
-    const primary_author_country = formData.get('primary_author_country') as string || 'Uganda';
-    
-    // Optional metadata
-    const conflict_of_interest = formData.get('conflict_of_interest') as string;
-    const funding_source = formData.get('funding_source') as string;
-    const ethical_approval = formData.get('ethical_approval') === 'true';
+    const authors = formData.get('authors') as string;
+    const email = formData.get('email') as string;
+    const institution = formData.get('institution') as string;
+    const phone = formData.get('phone') as string;
     
     const file = formData.get('file') as File;
 
     // Validate required fields
     const requiredFields = {
       title,
-      abstract_text,
+      abstract,
       category,
-      presentation_type,
-      primary_author_first_name,
-      primary_author_last_name,
-      primary_author_email,
-      primary_author_institution
+      authors,
+      email,
+      institution
     };
 
     const missingFields = Object.entries(requiredFields)
@@ -110,8 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate enum values
-    const validCategories = ['communicable_diseases', 'non_communicable_diseases', 'health_systems', 'digital_health', 'research_methodology'];
-    const validPresentationTypes = ['oral', 'poster'];
+    const validCategories = ['research', 'case-study', 'review', 'policy'];
 
     if (!validCategories.includes(category)) {
       return NextResponse.json({
@@ -121,27 +95,21 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    if (!validPresentationTypes.includes(presentation_type)) {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid presentation type',
-        validPresentationTypes
-      }, { status: 400 });
-    }
-
     // Validate email format
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(primary_author_email)) {
+    if (!emailRegex.test(email)) {
       return NextResponse.json({
         success: false,
         error: 'Invalid email format'
       }, { status: 400 });
     }
 
+    const db = DatabaseManager.getInstance();
+
     // Check for duplicate submission by same author with same title
     const existingAbstract = await db.executeOne(
-      'SELECT id FROM abstracts WHERE primary_author_email = ? AND title = ?',
-      [primary_author_email, title]
+      'SELECT id FROM abstracts WHERE email = ? AND title = ?',
+      [email, title]
     );
 
     if (existingAbstract) {
@@ -155,13 +123,12 @@ export async function POST(request: NextRequest) {
     let fileName = null;
     let filePath = null;
     let fileSize = null;
-    let fileType = null;
     
     if (file && file.size > 0) {
       const timestamp = Date.now();
-      const lastNameSlug = primary_author_last_name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const authorSlug = authors.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
       const fileExtension = path.extname(file.name);
-      fileName = `abstract_${timestamp}_${lastNameSlug}${fileExtension}`;
+      fileName = `abstract_${timestamp}_${authorSlug}${fileExtension}`;
       
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
@@ -169,7 +136,6 @@ export async function POST(request: NextRequest) {
       const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'abstracts');
       filePath = path.join(uploadDir, fileName);
       fileSize = file.size;
-      fileType = file.type;
       
       // Ensure upload directory exists
       try {
@@ -187,21 +153,12 @@ export async function POST(request: NextRequest) {
     // Insert the abstract
     const result = await db.execute(`
       INSERT INTO abstracts (
-        title, abstract_text, keywords, category, presentation_type,
-        primary_author_first_name, primary_author_last_name, primary_author_email,
-        primary_author_institution, primary_author_department, primary_author_position,
-        primary_author_phone, primary_author_country,
-        file_name, file_path, file_size, file_type,
-        conflict_of_interest, funding_source, ethical_approval,
-        status, submitted_at, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())
+        title, abstract, keywords, category, authors, email, institution, phone,
+        fileName, filePath, fileSize, status, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())
     `, [
-      title, abstract_text, keywords, category, presentation_type,
-      primary_author_first_name, primary_author_last_name, primary_author_email,
-      primary_author_institution, primary_author_department, primary_author_position,
-      primary_author_phone, primary_author_country,
-      fileName, filePath, fileSize, fileType,
-      conflict_of_interest, funding_source, ethical_approval
+      title, abstract, keywords, category, authors, email, institution, phone,
+      fileName || 'no-file', filePath || null, fileSize || 0
     ]) as any;
 
     return NextResponse.json({ 
@@ -210,9 +167,9 @@ export async function POST(request: NextRequest) {
       data: {
         id: result.insertId || Date.now(),
         title,
-        primary_author_email,
+        email,
         category,
-        presentation_type,
+        authors,
         status: 'pending',
         submitted_at: new Date().toISOString()
       }

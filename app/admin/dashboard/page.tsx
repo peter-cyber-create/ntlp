@@ -50,11 +50,24 @@ export default function AdminDashboard() {
   const [registrationStats, setRegistrationStats] = useState<any>({})
   const [contactsData, setContactsData] = useState<any[]>([])
   const [contactStats, setContactStats] = useState<any>({})
+  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
 
   useEffect(() => {
     // Check authentication
-    const isAuthenticated = localStorage.getItem('adminAuth')
-    if (!isAuthenticated) {
+    const isAuthenticated = localStorage.getItem('admin_authenticated')
+    const sessionTime = localStorage.getItem('admin_session')
+    
+    if (!isAuthenticated || !sessionTime) {
+      window.location.href = '/admin'
+      return
+    }
+    
+    // Check if session is still valid (24 hours)
+    const sessionAge = Date.now() - parseInt(sessionTime)
+    if (sessionAge > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem('admin_authenticated')
+      localStorage.removeItem('admin_session')
       window.location.href = '/admin'
       return
     }
@@ -195,8 +208,8 @@ export default function AdminDashboard() {
     
     return registrationsData.filter(reg => {
       const matchesSearch = searchTerm === '' || 
-        reg.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reg.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (reg.first_name || reg.firstName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (reg.last_name || reg.lastName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         reg.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         reg.organization.toLowerCase().includes(searchTerm.toLowerCase())
       
@@ -205,11 +218,16 @@ export default function AdminDashboard() {
       return matchesSearch && matchesStatus
     }).map(reg => ({
       id: reg._id,
-      name: `${reg.firstName} ${reg.lastName}`,
+      name: `${reg.first_name || reg.firstName} ${reg.last_name || reg.lastName}`,
       email: reg.email,
+      phone: reg.phone,
+      organization: reg.organization,
+      position: reg.position,
+      district: reg.district,
       ticket: reg.registrationType || 'Standard',
+      paymentStatus: reg.paymentStatus || 'pending',
       date: new Date(reg.createdAt).toLocaleDateString(),
-      status: reg.status
+      status: reg.status || 'pending'
     }))
   }
 
@@ -287,61 +305,20 @@ export default function AdminDashboard() {
 
   // View handlers
   const handleViewItem = (item: any, type: 'contact' | 'registration' | 'abstract') => {
-    let content = '';
-    let title = '';
-
-    switch (type) {
-      case 'contact':
-        title = `Contact Message from ${item.name}`;
-        content = `
-Name: ${item.name}
-Email: ${item.email}
-Subject: ${item.subject}
-Status: ${item.status}
-Date: ${new Date(item.createdAt).toLocaleString()}
-
-Message:
-${item.message}
-        `;
-        break;
-      case 'registration':
-        title = `Registration Details - ${item.name}`;
-        content = `
-Name: ${item.name}
-Email: ${item.email}
-Phone: ${item.phone}
-Institution: ${item.institution}
-Position: ${item.position}
-Session Track: ${item.sessionTrack}
-Status: ${item.status}
-Registration Date: ${new Date(item.registrationDate).toLocaleString()}
-Ticket Number: ${item.ticket}
-
-Dietary Requirements: ${item.dietaryRequirements || 'None'}
-Special Needs: ${item.specialNeeds || 'None'}
-        `;
-        break;
-      case 'abstract':
-        title = `Abstract Details - ${item.title}`;
-        content = `
-Title: ${item.title}
-Author: ${item.primaryAuthor.firstName} ${item.primaryAuthor.lastName}
-Email: ${item.primaryAuthor.email}
-Institution: ${item.primaryAuthor.institution}
-Category: ${item.category}
-Presentation Type: ${item.presentationType}
-Status: ${item.status}
-Submitted: ${new Date(item.submittedAt).toLocaleString()}
-
-Abstract:
-${item.abstractText}
-
-${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` : ''}
-        `;
-        break;
+    // Find the full user data from registrationsData
+    if (type === 'registration') {
+      const fullUserData = registrationsData.find(reg => reg._id === item.id);
+      setSelectedUser({
+        ...fullUserData,
+        type: 'registration'
+      });
+    } else {
+      setSelectedUser({
+        ...item,
+        type
+      });
     }
-
-    alert(content);
+    setShowDetailModal(true);
   };
 
   // Edit handlers (for now using prompts, could be enhanced with modals)
@@ -779,9 +756,10 @@ ${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` :
                 </th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Name</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Email</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Ticket</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Organization</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Ticket Type</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Payment</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Date</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Status</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Actions</th>
               </tr>
             </thead>
@@ -804,13 +782,22 @@ ${item.conflictOfInterest ? `Conflict of Interest: ${item.conflictOfInterest}` :
                   </td>
                   <td className="py-4 px-6 font-medium text-gray-900">{reg.name}</td>
                   <td className="py-4 px-6 text-gray-600">{reg.email}</td>
-                  <td className="py-4 px-6 text-gray-600">{reg.ticket}</td>
-                  <td className="py-4 px-6 text-gray-600">{reg.date}</td>
+                  <td className="py-4 px-6 text-gray-600">{reg.organization}</td>
                   <td className="py-4 px-6">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(reg.status)}`}>
-                      {reg.status}
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                      {reg.ticket}
                     </span>
                   </td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      reg.paymentStatus === 'completed' ? 'bg-green-100 text-green-800' :
+                      reg.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {reg.paymentStatus}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 text-gray-600">{reg.date}</td>
                   <td className="py-4 px-6">
                     <div className="flex space-x-2">
                       <button 
@@ -1752,6 +1739,139 @@ ABSTRACT STATUS:
           )}
         </main>
       </div>
+
+      {/* Detailed View Modal */}
+      {showDetailModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {selectedUser.type === 'registration' ? 'Registration Details' : 
+                   selectedUser.type === 'abstract' ? 'Abstract Details' : 'Contact Details'}
+                </h2>
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {selectedUser.type === 'registration' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                      <p className="text-gray-900">{selectedUser.first_name} {selectedUser.last_name}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <p className="text-gray-900">{selectedUser.email}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                      <p className="text-gray-900">{selectedUser.phone}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+                      <p className="text-gray-900">{selectedUser.organization}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                      <p className="text-gray-900">{selectedUser.position}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
+                      <p className="text-gray-900">{selectedUser.district}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Registration Type</label>
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                        {selectedUser.registrationType}
+                      </span>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                      <span className={`px-2 py-1 rounded-full text-sm font-medium ${
+                        selectedUser.paymentStatus === 'completed' ? 'bg-green-100 text-green-800' :
+                        selectedUser.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {selectedUser.paymentStatus}
+                      </span>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Registration Date</label>
+                      <p className="text-gray-900">{new Date(selectedUser.createdAt).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                      <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
+                        {selectedUser.status}
+                      </span>
+                    </div>
+                  </div>
+                  {selectedUser.specialRequirements && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Special Requirements</label>
+                      <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedUser.specialRequirements}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {selectedUser.type === 'abstract' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <p className="text-gray-900 font-medium">{selectedUser.title}</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Authors</label>
+                      <p className="text-gray-900">{selectedUser.authors}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <p className="text-gray-900">{selectedUser.email}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Institution</label>
+                      <p className="text-gray-900">{selectedUser.institution}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                        {selectedUser.category}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Abstract</label>
+                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedUser.abstract}</p>
+                  </div>
+                  {selectedUser.keywords && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
+                      <p className="text-gray-900">{selectedUser.keywords}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

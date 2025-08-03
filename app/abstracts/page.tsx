@@ -143,6 +143,24 @@ export default function AbstractsPage() {
     return true
   }
 
+  const mapCategoryToAPI = (frontendCategory: string) => {
+    const mapping: { [key: string]: string } = {
+      'Communicable Diseases': 'research',
+      'Non-Communicable Diseases': 'research',
+      'Health Systems Strengthening': 'policy',
+      'Digital Health & Technology': 'research',
+      'Public Health Policy': 'policy',
+      'Community Health': 'research',
+      'Maternal & Child Health': 'research',
+      'Mental Health': 'research',
+      'Health Economics': 'research',
+      'Health Research & Innovation': 'research',
+      'Environmental Health': 'research',
+      'Health Emergency Preparedness': 'policy'
+    }
+    return mapping[frontendCategory] || 'research'
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -154,9 +172,19 @@ export default function AbstractsPage() {
     
     try {
       const submitData = new FormData()
-      submitData.append('abstractData', JSON.stringify(formData))
+      
+      // Map frontend fields to API expected fields
+      submitData.append('title', formData.title)
+      submitData.append('abstract', formData.abstract)
+      submitData.append('keywords', formData.keywords)
+      submitData.append('category', mapCategoryToAPI(formData.category))
+      submitData.append('authors', `${formData.primaryAuthor.firstName} ${formData.primaryAuthor.lastName}${formData.coAuthors ? ', ' + formData.coAuthors : ''}`)
+      submitData.append('email', formData.primaryAuthor.email)
+      submitData.append('institution', formData.primaryAuthor.affiliation)
+      submitData.append('phone', formData.primaryAuthor.phone)
+      
       if (selectedFile) {
-        submitData.append('abstractFile', selectedFile)
+        submitData.append('file', selectedFile)
       }
       
       // Submit the form
