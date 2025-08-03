@@ -80,8 +80,8 @@ export default function AdminDashboard() {
     try {
       // Load data in parallel for better performance
       const [regResponse, contactResponse] = await Promise.all([
-        fetch('/api/registrations').catch(() => null),
-        fetch('/api/contacts').catch(() => null)
+        fetch('/api/registrations/').catch(() => null),
+        fetch('/api/contacts/').catch(() => null)
       ]);
       
       let regData, contactData;
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
   const loadAbstractsData = async () => {
     setLoadingAbstracts(true)
     try {
-      const response = await fetch('/api/abstracts')
+      const response = await fetch('/api/abstracts/')
       if (response.ok) {
         const result = await response.json()
         setAbstractsData(result.data || [])
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
 
   const handleStatusUpdate = async (id: string, newStatus: string) => {
     try {
-      const response = await fetch('/api/registrations', {
+      const response = await fetch('/api/registrations/', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -275,8 +275,8 @@ export default function AdminDashboard() {
   const handleSingleDelete = async (id: string, type: 'contact' | 'registration' | 'abstract') => {
     if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
       try {
-        const endpoint = type === 'contact' ? '/api/contacts' : 
-                        type === 'registration' ? '/api/registrations' : '/api/abstracts';
+        const endpoint = type === 'contact' ? '/api/contacts/' : 
+                        type === 'registration' ? '/api/registrations/' : '/api/abstracts/';
         
         const response = await fetch(`${endpoint}?ids=${id}`, {
           method: 'DELETE',
@@ -327,19 +327,19 @@ export default function AdminDashboard() {
       case 'contact':
         const newContactStatus = prompt(`Edit Contact Status for ${item.name}:`, item.status);
         if (newContactStatus && newContactStatus !== item.status) {
-          await updateItemStatus(item._id, newContactStatus, 'contact');
+          await updateItemStatus(item.id || item._id, newContactStatus, 'contact');
         }
         break;
       case 'registration':
         const newRegStatus = prompt(`Edit Registration Status for ${item.name}:`, item.status);
         if (newRegStatus && newRegStatus !== item.status) {
-          await handleStatusUpdate(item._id, newRegStatus);
+          await handleStatusUpdate(item.id || item._id, newRegStatus);
         }
         break;
       case 'abstract':
         const newAbstractStatus = prompt(`Edit Abstract Status for "${item.title}":`, item.status);
-        if (newAbstractStatus && newAbstractStatus !== item.status && (newAbstractStatus === 'accepted' || newAbstractStatus === 'rejected')) {
-          await handleAbstractStatusUpdate(item._id, newAbstractStatus as 'accepted' | 'rejected');
+        if (newAbstractStatus && newAbstractStatus !== item.status && (newAbstractStatus === 'accepted' || newAbstractStatus === 'rejected' || newAbstractStatus === 'pending' || newAbstractStatus === 'under-review')) {
+          await handleAbstractStatusUpdate(item.id || item._id, newAbstractStatus as 'accepted' | 'rejected' | 'pending' | 'under-review');
         }
         break;
     }
@@ -348,8 +348,8 @@ export default function AdminDashboard() {
   // Generic status update function
   const updateItemStatus = async (id: string, newStatus: string, type: 'contact' | 'registration' | 'abstract') => {
     try {
-      const endpoint = type === 'contact' ? '/api/contacts' : 
-                      type === 'registration' ? '/api/registrations' : '/api/abstracts';
+      const endpoint = type === 'contact' ? '/api/contacts/' : 
+                      type === 'registration' ? '/api/registrations/' : '/api/abstracts/';
       
       const response = await fetch(endpoint, {
         method: 'PUT',
@@ -382,9 +382,9 @@ export default function AdminDashboard() {
   };
 
   // Abstract-specific handlers
-  const handleAbstractStatusUpdate = async (id: string, newStatus: 'accepted' | 'rejected') => {
+  const handleAbstractStatusUpdate = async (id: string, newStatus: 'accepted' | 'rejected' | 'pending' | 'under-review') => {
     try {
-      const response = await fetch(`/api/abstracts`, {
+      const response = await fetch(`/api/abstracts/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -408,22 +408,20 @@ export default function AdminDashboard() {
   };
 
   const handleAbstractDownload = (abstract: any) => {
-    if (abstract._id || abstract.fileName) {
-      // Primary method: Use secure API endpoint
-      const downloadUrl = abstract._id 
-        ? `/api/abstracts/download/?id=${abstract._id}`
-        : `/api/abstracts/download/?filename=${abstract.fileName}`;
+    if (abstract.id && abstract.fileName) {
+      // Use the new download API endpoint with trailing slash
+      const downloadUrl = `/api/abstracts/download/?filename=${abstract.fileName}`;
       
       // Create a temporary link to trigger download
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = abstract.fileName || `abstract_${abstract._id}.pdf`;
+      link.download = abstract.fileName;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      console.log(`Downloaded: ${abstract.fileName || abstract._id}`);
+      console.log(`Downloaded: ${abstract.fileName}`);
     } else {
       alert('File information not available for download');
       console.error('Abstract download failed - missing file information:', abstract);
@@ -432,8 +430,8 @@ export default function AdminDashboard() {
 
   const handleAbstractPreview = (abstract: any) => {
     if (abstract.fileName) {
-      // Use direct file access for preview
-      const previewUrl = `/uploads-abstracts/${abstract.fileName}`;
+      // Use direct file access for preview from the public directory
+      const previewUrl = `/uploads/abstracts/${abstract.fileName}`;
       window.open(previewUrl, '_blank');
     } else {
       alert('File not available for preview');
@@ -1123,14 +1121,14 @@ export default function AdminDashboard() {
                           {abstract.status === 'pending' && (
                             <>
                               <button 
-                                onClick={() => handleAbstractStatusUpdate(abstract._id, 'accepted')}
+                                onClick={() => handleAbstractStatusUpdate(abstract.id, 'accepted')}
                                 className="p-1 text-gray-600 hover:text-green-600"
                                 title="Accept"
                               >
                                 <CheckCircle size={16} />
                               </button>
                               <button 
-                                onClick={() => handleAbstractStatusUpdate(abstract._id, 'rejected')}
+                                onClick={() => handleAbstractStatusUpdate(abstract.id, 'rejected')}
                                 className="p-1 text-gray-600 hover:text-red-600"
                                 title="Reject"
                               >
@@ -1139,7 +1137,7 @@ export default function AdminDashboard() {
                             </>
                           )}
                           <button 
-                            onClick={() => handleSingleDelete(abstract._id, 'abstract')}
+                            onClick={() => handleSingleDelete(abstract.id.toString(), 'abstract')}
                             className="p-1 text-gray-600 hover:text-red-600"
                             title="Delete"
                           >
@@ -1345,7 +1343,7 @@ export default function AdminDashboard() {
     if (selectedContacts.length === 0) return;
     
     try {
-      const response = await fetch('/api/contacts', {
+      const response = await fetch('/api/contacts/', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
