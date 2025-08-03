@@ -36,15 +36,15 @@ export async function GET() {
     const registrations = await db.execute(`
       SELECT 
         id,
-        first_name,
-        last_name,
+        firstName,
+        lastName,
         email,
         phone,
         organization,
         position,
         district,
-        registration_type as registrationType,
-        special_requirements as specialRequirements,
+        registrationType,
+        specialRequirements,
         is_verified as isVerified,
         payment_status as paymentStatus,
         payment_amount as paymentAmount,
@@ -87,8 +87,8 @@ export async function GET() {
     // Transform registrations to match frontend expectations
     const transformedRegistrations = registrations.map((reg: any) => ({
       _id: reg.id,
-      first_name: reg.first_name,
-      last_name: reg.last_name,
+      first_name: reg.firstName,
+      last_name: reg.lastName,
       email: reg.email,
       phone: reg.phone,
       organization: reg.organization,
@@ -98,7 +98,7 @@ export async function GET() {
       isVerified: reg.isVerified === 1,
       registrationDate: reg.registrationDate,
       paymentStatus: reg.paymentStatus,
-      specialRequirements: reg.specialRequirements,
+      specialRequirements: reg.specialRequirements || reg.specialrequirements,
       status: reg.status || 'pending',
       createdAt: reg.createdAt || reg.registrationDate
     }));
@@ -191,35 +191,35 @@ export async function POST(request: NextRequest) {
     
     // Insert new registration
     const registrationData = {
-      first_name: body.first_name,
-      last_name: body.last_name,
+      firstName: body.firstName || body.first_name,
+      lastName: body.lastName || body.last_name,
       email: body.email,
       phone: body.phone,
       organization: body.organization,
       position: body.position,
       district: body.district,
-      registration_type: body.registrationType,
-      special_requirements: body.special_needs || null, // Map special_needs to special_requirements
+      registrationType: body.registrationType,
+      specialRequirements: body.special_needs || body.specialRequirements || null,
       payment_amount: getTicketPrice(body.registrationType),
       payment_currency: getTicketCurrency(body.registrationType)
     };
 
     const result = await db.execute(`
       INSERT INTO registrations (
-        first_name, last_name, email, phone, organization, position, district,
-        registration_type, special_requirements, is_verified, payment_status, 
-        payment_amount, payment_currency, status, registration_date, created_at
+        firstName, lastName, email, phone, organization, position, district,
+        registrationType, specialRequirements, is_verified, payment_status, 
+        payment_amount, payment_currency, status, createdAt, updatedAt
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', ?, ?, 'pending', NOW(), NOW())
     `, [
-      registrationData.first_name,
-      registrationData.last_name,
+      registrationData.firstName,
+      registrationData.lastName,
       registrationData.email,
       registrationData.phone,
       registrationData.organization,
       registrationData.position,
       registrationData.district,
-      registrationData.registration_type,
-      registrationData.special_requirements,
+      registrationData.registrationType,
+      registrationData.specialRequirements,
       registrationData.payment_amount,
       registrationData.payment_currency
     ]) as any;
@@ -232,10 +232,10 @@ export async function POST(request: NextRequest) {
       message: 'Registration created successfully',
       data: {
         id: newRegistrationId,
-        first_name: registrationData.first_name,
-        last_name: registrationData.last_name,
+        firstName: registrationData.firstName,
+        lastName: registrationData.lastName,
         email: registrationData.email,
-        registrationType: registrationData.registration_type,
+        registrationType: registrationData.registrationType,
         district: registrationData.district,
         organization: registrationData.organization,
         payment_amount: registrationData.payment_amount,
