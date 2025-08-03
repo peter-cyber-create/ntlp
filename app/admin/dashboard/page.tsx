@@ -294,22 +294,25 @@ export default function AdminDashboard() {
 
         if (response.ok) {
           const result = await response.json();
-          console.log(`Successfully deleted ${type}`);
+          console.log(`Successfully deleted ${type}:`, result);
           showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully`, 'success');
           
-          // Refresh data
+          // Refresh data immediately
           if (type === 'abstract') {
             loadAbstractsData();
           } else {
             loadRealData();
           }
         } else {
-          console.error(`Failed to delete ${type}:`, response.statusText);
-          alert(`Failed to delete ${type}. Please try again.`);
+          const errorData = await response.json().catch(() => null);
+          console.error(`Failed to delete ${type}:`, response.statusText, errorData);
+          showNotification(`Failed to delete ${type}. ${errorData?.error || 'Please try again.'}`, 'error');
         }
       } catch (error) {
         console.error(`Error deleting ${type}:`, error);
-        alert(`Error deleting ${type}. Please try again.`);
+        showNotification(`Error deleting ${type}. Please check your connection and try again.`, 'error');
+      } finally {
+        setIsProcessing(false);
       }
     }
   }
@@ -392,7 +395,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // Abstract-specific handlers
+  // Abstract-specific handlers with real-time updates
   const handleAbstractStatusUpdate = async (id: string, newStatus: 'accepted' | 'rejected' | 'pending' | 'under-review') => {
     setIsProcessing(true);
     try {
@@ -409,16 +412,28 @@ export default function AdminDashboard() {
       })
 
       if (response.ok) {
-        showNotification(`Abstract status updated to ${newStatus}`, 'success');
-        // Refresh abstracts data
-        loadAbstractsData()
+        const result = await response.json();
+        showNotification(`Abstract ${newStatus === 'accepted' ? 'accepted' : newStatus === 'rejected' ? 'rejected' : 'status updated'} successfully`, 'success');
+        
+        // Update the local state immediately for real-time feel
+        setAbstractsData(prevData => 
+          prevData.map(abstract => 
+            abstract.id === id 
+              ? { ...abstract, status: newStatus, updatedAt: new Date().toISOString() }
+              : abstract
+          )
+        );
+        
+        // Refresh data to sync with server
+        setTimeout(() => loadAbstractsData(), 100);
       } else {
-        console.error('Failed to update abstract status');
-        showNotification('Failed to update abstract status', 'error');
+        const errorData = await response.json().catch(() => null);
+        console.error('Failed to update abstract status:', errorData);
+        showNotification(`Failed to update abstract status. ${errorData?.error || 'Please try again.'}`, 'error');
       }
     } catch (error) {
       console.error('Error updating abstract status:', error);
-      showNotification('Error updating abstract status', 'error');
+      showNotification('Error updating abstract status. Please check your connection.', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -846,31 +861,155 @@ export default function AdminDashboard() {
     </div>
   )
 
-  const renderAnalytics = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
-        <div className="flex gap-3">
-          <button className="btn-secondary text-sm">
-            <Download size={16} className="mr-2" />
-            Export Report
-          </button>
-          <button className="btn-secondary text-sm">
-            <Calendar size={16} className="mr-2" />
-            Date Range
-          </button>
+  const renderAnalytics = () => {
+    // Calculate real-time statistics
+    const totalRegistrations = registrationsData.length;
+    const totalAbstracts = abstractsData.length;
+    const totalContacts = contactsData.length;
+    
+    const registrationsByStatus = registrationsData.reduce((acc, reg) => {
+      acc[reg.status] = (acc[reg.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const abstractsByStatus = abstractsData.reduce((acc, abs) => {
+      acc[abs.status] = (acc[abs.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const abstractsByCategory = abstractsData.reduce((acc, abs) => {
+      acc[abs.category] = (acc[abs.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
+          <div className="text-sm text-gray-500">
+            Communicable and Non-Communicable Diseases Conference
+          </div>
+        </div>
+        
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm">Total Registrations</p>
+                <p className="text-3xl font-bold">{totalRegistrations}</p>
+              </div>
+              <Users className="h-8 w-8 text-blue-200" />
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm">Total Abstracts</p>
+                <p className="text-3xl font-bold">{totalAbstracts}</p>
+              </div>
+              <FileText className="h-8 w-8 text-green-200" />
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm">Contact Inquiries</p>
+                <p className="text-3xl font-bold">{totalContacts}</p>
+              </div>
+              <Mail className="h-8 w-8 text-purple-200" />
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-orange-100 text-sm">Accepted Abstracts</p>
+                <p className="text-3xl font-bold">{abstractsByStatus.accepted || 0}</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-orange-200" />
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Registration Status Chart */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Registration Status</h3>
+            <div className="space-y-3">
+              {Object.entries(registrationsByStatus).map(([status, count]) => (
+                <div key={status} className="flex items-center justify-between">
+                  <span className="capitalize text-gray-600">{status}</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-gray-200 rounded-full h-2 w-24">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full" 
+                        style={{ width: `${((count as number) / totalRegistrations) * 100}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{count as number}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Abstract Categories Chart */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Abstract Categories</h3>
+            <div className="space-y-3">
+              {Object.entries(abstractsByCategory).map(([category, count]) => (
+                <div key={category} className="flex items-center justify-between">
+                  <span className="capitalize text-gray-600">{category.replace('-', ' ')}</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-gray-200 rounded-full h-2 w-24">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full" 
+                        style={{ width: `${((count as number) / totalAbstracts) * 100}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{count as number}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+          <div className="space-y-3">
+            {abstractsData.slice(0, 5).map((abstract) => (
+              <div key={abstract.id} className="flex items-center space-x-3 py-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  abstract.status === 'accepted' ? 'bg-green-500' :
+                  abstract.status === 'rejected' ? 'bg-red-500' :
+                  abstract.status === 'under-review' ? 'bg-yellow-500' :
+                  'bg-gray-500'
+                }`}></div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-900">{abstract.title}</p>
+                  <p className="text-xs text-gray-500">by {abstract.authors}</p>
+                </div>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  abstract.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                  abstract.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                  abstract.status === 'under-review' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {abstract.status.replace('-', ' ')}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      
-      {dataManager && (
-        <AnalyticsCharts 
-          registrations={dataManager.getRegistrations()}
-          contacts={dataManager.getContactSubmissions()}
-          speakers={dataManager.getSpeakerApplications()}
-        />
-      )}
-    </div>
-  )
+    );
+  }
 
   const renderAbstracts = () => {
     const filteredAbstracts = abstractsData.filter(abstract => {
@@ -1348,10 +1487,17 @@ export default function AdminDashboard() {
     const selectedIds = type === 'contacts' ? selectedContacts : 
                        type === 'registrations' ? selectedRegistrations : selectedAbstracts;
     
-    if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0) {
+      showNotification(`No ${type} selected for deletion`, 'info');
+      return;
+    }
     
-    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} selected ${type}?`)) {
+    const confirmMessage = `Are you sure you want to delete ${selectedIds.length} selected ${type}? This action cannot be undone.`;
+    if (window.confirm(confirmMessage)) {
       try {
+        // Show loading notification
+        showNotification(`Deleting ${selectedIds.length} ${type}...`, 'info');
+        
         const endpoint = type === 'contacts' ? '/api/contacts' : 
                         type === 'registrations' ? '/api/registrations' : '/api/abstracts';
         
@@ -1361,7 +1507,8 @@ export default function AdminDashboard() {
 
         if (response.ok) {
           const result = await response.json();
-          console.log(`Successfully deleted ${result.deletedCount} ${type}`);
+          const deletedCount = result.deletedCount || selectedIds.length;
+          showNotification(`Successfully deleted ${deletedCount} ${type}`, 'success');
           
           // Clear selections
           if (type === 'contacts') setSelectedContacts([]);
@@ -1375,20 +1522,25 @@ export default function AdminDashboard() {
             loadRealData();
           }
         } else {
-          console.error(`Failed to delete ${type}:`, response.statusText);
-          alert(`Failed to delete ${type}. Please try again.`);
+          const errorData = await response.json().catch(() => null);
+          showNotification(`Failed to delete ${type}. ${errorData?.error || 'Please try again.'}`, 'error');
         }
       } catch (error) {
         console.error(`Error deleting ${type}:`, error);
-        alert(`Error deleting ${type}. Please try again.`);
+        showNotification(`Error deleting ${type}. Please check your connection and try again.`, 'error');
       }
     }
   }
 
   const handleBatchMarkRead = async (type: 'contacts') => {
-    if (selectedContacts.length === 0) return;
+    if (selectedContacts.length === 0) {
+      showNotification('No contacts selected', 'info');
+      return;
+    }
     
     try {
+      showNotification(`Updating ${selectedContacts.length} contacts...`, 'info');
+      
       const response = await fetch('/api/contacts/', {
         method: 'PUT',
         headers: {
@@ -1402,18 +1554,19 @@ export default function AdminDashboard() {
 
       if (response.ok) {
         const result = await response.json();
-        console.log(`Successfully updated ${result.updatedCount} contacts`);
+        const updatedCount = result.updatedCount || selectedContacts.length;
+        showNotification(`Successfully updated ${updatedCount} contacts`, 'success');
         setSelectedContacts([]);
         
         // Refresh data
         if (dataManager) loadDashboardData(dataManager);
       } else {
-        console.error('Failed to update contacts:', response.statusText);
-        alert('Failed to update contacts. Please try again.');
+        const errorData = await response.json().catch(() => null);
+        showNotification(`Failed to update contacts. ${errorData?.error || 'Please try again.'}`, 'error');
       }
     } catch (error) {
       console.error('Error updating contacts:', error);
-      alert('Error updating contacts. Please try again.');
+      showNotification('Error updating contacts. Please check your connection and try again.', 'error');
     }
   }
 
@@ -1627,7 +1780,7 @@ export default function AdminDashboard() {
               const timestamp = new Date().toISOString().split('T')[0];
               
               // Create summary report
-              const summary = `NTLP Conference 2025 - Data Export Summary
+              const summary = `Communicable and Non-Communicable Diseases Conference 2025 - Data Export Summary
 Generated: ${new Date().toLocaleString()}
 
 STATISTICS:
@@ -1766,7 +1919,7 @@ ABSTRACT STATUS:
           <div className="mb-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">NTLP Conference 2025 - Admin Dashboard</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Communicable and Non-Communicable Diseases Conference 2025 - Admin Dashboard</h1>
                 <p className="text-gray-600 mt-1">
                   Manage registrations, abstracts, and conference communications
                 </p>

@@ -188,7 +188,7 @@ export async function PUT(request: NextRequest) {
   const db = DatabaseManager.getInstance();
   
   try {
-    const { id, status, review_comments, reviewer_id } = await request.json();
+    const { id, status, reviewComments, review_comments } = await request.json();
     
     if (!id || !status) {
       return NextResponse.json({ 
@@ -197,8 +197,8 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Validate status
-    const validStatuses = ['pending', 'under_review', 'accepted', 'rejected'];
+    // Validate status - match database schema
+    const validStatuses = ['pending', 'under-review', 'accepted', 'rejected'];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({
         success: false,
@@ -211,20 +211,14 @@ export async function PUT(request: NextRequest) {
     const updateFields = ['status = ?'];
     const updateValues = [status];
 
-    if (review_comments) {
-      updateFields.push('review_comments = ?');
-      updateValues.push(review_comments);
+    // Handle review comments (support both field names)
+    const comments = reviewComments || review_comments;
+    if (comments) {
+      updateFields.push('reviewComments = ?');
+      updateValues.push(comments);
     }
 
-    if (reviewer_id) {
-      updateFields.push('reviewer_id = ?');
-      updateValues.push(reviewer_id);
-    }
-
-    if (status !== 'pending') {
-      updateFields.push('reviewed_at = NOW()');
-    }
-
+    updateFields.push('updatedAt = NOW()');
     updateValues.push(id);
 
     await db.execute(
@@ -250,38 +244,60 @@ export async function DELETE(request: NextRequest) {
   
   try {
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const idsParam = searchParams.get('ids') || searchParams.get('id');
     
-    if (!id) {
+    if (!idsParam) {
       return NextResponse.json({ 
         success: false,
-        error: 'Missing abstract ID' 
+        error: 'Missing abstract ID(s)' 
       }, { status: 400 });
     }
 
-    // Get abstract info before deletion (for file cleanup)
-    const abstract = await db.executeOne(
-      'SELECT file_path FROM abstracts WHERE id = ?',
-      [id]
-    );
+    // Handle both single ID and comma-separated IDs
+    const ids = idsParam.split(',').map(id => id.trim()).filter(id => id);
+    
+    if (ids.length === 0) {
+      return NextResponse.json({ 
+        success: false,
+        error: 'No valid IDs provided' 
+      }, { status: 400 });
+    }
 
-    // Delete the abstract
-    await db.execute('DELETE FROM abstracts WHERE id = ?', [id]);
+    let deletedCount = 0;
 
-    // TODO: Add file cleanup if needed
-    // if (abstract?.file_path) {
-    //   // Delete physical file
-    // }
+    // Process each ID
+    for (const id of ids) {
+      try {
+        // Get abstract info before deletion (for file cleanup)
+        const abstract = await db.executeOne(
+          'SELECT filePath FROM abstracts WHERE id = ?',
+          [id]
+        );
+
+        // Delete the abstract
+        const result = await db.execute('DELETE FROM abstracts WHERE id = ?', [id]);
+        if (result) deletedCount++;
+
+        // TODO: Add file cleanup if needed
+        // if (abstract?.filePath) {
+        //   // Delete physical file
+        // }
+      } catch (idError) {
+        console.error(`Error deleting abstract ${id}:`, idError);
+        // Continue with other IDs
+      }
+    }
     
     return NextResponse.json({ 
       success: true,
-      message: 'Abstract deleted successfully' 
+      message: `Successfully deleted ${deletedCount} abstract(s)`,
+      deletedCount
     });
   } catch (error) {
-    console.error('Error deleting abstract:', error);
+    console.error('Error deleting abstracts:', error);
     return NextResponse.json({ 
       success: false,
-      error: 'Failed to delete abstract' 
+      error: 'Failed to delete abstracts' 
     }, { status: 500 });
   }
 }

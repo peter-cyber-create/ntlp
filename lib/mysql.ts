@@ -23,12 +23,12 @@ class DatabaseManager {
     this.config = {
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '3306'),
-      user: process.env.DB_USER || 'ntlp_user', // Changed default to match backend config
-      password: process.env.DB_PASSWORD || 'secure_password_here', // Changed default to match backend config
-      database: process.env.DB_NAME || 'ntlp_conference_2025',
-      connectionLimit: parseInt(process.env.DATABASE_CONNECTION_LIMIT || '10'), // Matching Docker backend config
-      queueLimit: parseInt(process.env.DATABASE_QUEUE_LIMIT || '0'), // Matching Docker backend config
-      waitForConnections: process.env.DATABASE_WAIT_FOR_CONNECTIONS === 'true' ? true : true, // Matching Docker backend config
+      user: process.env.DB_USER || 'conf_user', // Updated default to match new config
+      password: process.env.DB_PASSWORD || 'toor', // Updated default to match new config
+      database: process.env.DB_NAME || 'conf',
+      connectionLimit: parseInt(process.env.DATABASE_CONNECTION_LIMIT || '10'), // Matching config
+      queueLimit: parseInt(process.env.DATABASE_QUEUE_LIMIT || '0'), // Matching config
+      waitForConnections: process.env.DATABASE_WAIT_FOR_CONNECTIONS === 'true' ? true : true, // Matching config
       acquireTimeout: 60000,
       timeout: 60000,
       charset: 'utf8mb4'

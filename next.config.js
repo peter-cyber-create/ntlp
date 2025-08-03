@@ -1,12 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove export output to enable custom headers
+  // Single-server deployment configuration
   trailingSlash: true,
   images: {
-    unoptimized: true
+    unoptimized: true,
+    domains: ['172.27.0.9'] // Allow images from production server
   },
   experimental: {
     esmExternals: false
+  },
+  
+  // Production optimization
+  compress: true,
+  poweredByHeader: false,
+  
+  // Environment-specific configuration
+  env: {
+    CUSTOM_SERVER_IP: '172.27.0.9'
   },
   // Security headers following OWASP guidelines
   async headers() {

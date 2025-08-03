@@ -1,9 +1,16 @@
--- Uganda National Health Conference 2025 Database Schema
--- MySQL Database Setup
+-- Setup script for Conference 2025 Database
+-- MySQL/MariaDB Database Setup
 
 -- Create database
-CREATE DATABASE IF NOT EXISTS ntlp_conference_2025 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE ntlp_conference_2025;
+CREATE DATABASE IF NOT EXISTS conf CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Create user and grant privileges
+CREATE USER IF NOT EXISTS 'conf_user'@'localhost' IDENTIFIED BY 'toor';
+GRANT ALL PRIVILEGES ON conf.* TO 'conf_user'@'localhost';
+FLUSH PRIVILEGES;
+
+-- Use the database
+USE conf;
 
 -- Table: registrations
 CREATE TABLE IF NOT EXISTS registrations (
@@ -125,5 +132,14 @@ CREATE TABLE IF NOT EXISTS admin_users (
   INDEX idx_active (isActive)
 );
 
+-- Insert some sample data for testing
+INSERT IGNORE INTO contacts (name, email, subject, message, status) VALUES
+('John Doe', 'john@example.com', 'Conference Inquiry', 'I would like to know more about the conference schedule.', 'new'),
+('Jane Smith', 'jane@example.com', 'Registration Question', 'Can I register as a student participant?', 'new'),
+('Dr. Brown', 'brown@university.edu', 'Speaker Application', 'I am interested in presenting my research on communicable diseases.', 'in-progress');
+
 -- Show all tables
 SHOW TABLES;
+
+-- Show user info
+SELECT 'Database setup completed successfully!' AS status;

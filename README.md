@@ -76,7 +76,7 @@ npm install
 
 3. Set up MySQL database:
 ```bash
-./setup-mysql.sh
+./scripts/setup-mysql.sh
 ```
 
 4. Build and start the production server:
@@ -95,30 +95,56 @@ npm start
 
 ## 🚀 Ubuntu Server Deployment
 
-For production deployment on Ubuntu server:
+For production deployment on Ubuntu server with Nginx:
 
 ```bash
-chmod +x deploy-ubuntu.sh
-./deploy-ubuntu.sh
+chmod +x scripts/deploy-ubuntu.sh
+./scripts/deploy-ubuntu.sh
 ```
+
+For detailed deployment instructions, see [`docs/UBUNTU_NGINX_DEPLOYMENT.md`](docs/UBUNTU_NGINX_DEPLOYMENT.md)
 
 ## 🏗️ Project Structure
 
 ```
-tb/
+ntlp/
 ├── app/                    # Next.js App Router pages
 │   ├── about/             # About page
+│   ├── admin/             # Admin dashboard
 │   ├── agenda/            # Agenda page
+│   ├── api/               # API routes
 │   ├── contact/           # Contact page
 │   ├── partners/          # Partners page
 │   ├── register/          # Registration page
 │   ├── speakers/          # Speakers page
+│   ├── abstracts/         # Abstract submissions
 │   ├── globals.css        # Global styles
 │   ├── layout.tsx         # Root layout
 │   └── page.tsx           # Homepage
-├── components/            # Reusable components
+├── components/            # Reusable React components
 │   ├── Footer.tsx        # Footer component
-│   └── Navbar.tsx        # Navigation component
+│   ├── Navbar.tsx        # Navigation component
+│   ├── Modal.tsx         # Modal system
+│   ├── Toast.tsx         # Notification system
+│   └── ...               # Other UI components
+├── lib/                  # Utility libraries
+│   ├── mysql.ts          # Database connection
+│   ├── dataManager.ts    # Data management layer
+│   └── security.ts       # Security utilities
+├── database/             # Database files
+│   └── schema.sql        # MySQL database schema
+├── config/               # Configuration files
+│   └── ntlp-conference.conf  # Nginx configuration
+├── scripts/              # Deployment & utility scripts
+│   ├── deploy-ubuntu.sh  # Ubuntu deployment script
+│   └── setup-mysql.sh    # MySQL setup script
+├── docs/                 # Documentation
+│   ├── UBUNTU_NGINX_DEPLOYMENT.md
+│   ├── MYSQL_SETUP.md
+│   └── SINGLE_SERVER_DEPLOYMENT.md
+├── public/               # Static assets
+│   ├── images/           # Image assets
+│   └── uploads/          # File uploads
 ├── next.config.js        # Next.js configuration
 ├── package.json          # Dependencies and scripts
 ├── tailwind.config.js    # Tailwind CSS configuration

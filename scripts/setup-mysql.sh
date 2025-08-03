@@ -1,48 +1,73 @@
 #!/bin/bash
 
-# MySQL Database Setup Script for NTLP Conference 2025
-# This script sets up the MySQL database and tables
+# MySQL Database Setup Script for Conference 2025
+# Single-Server Setup - Database, User, and Tables on 172.27.0.9
 
-echo "🔧 Setting up MySQL database for NTLP Conference 2025..."
+echo "🔧 Setting up MySQL database for Conference 2025 on single server..."
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Database configuration
-DB_NAME="ntlp_conference_2025"
-SCHEMA_FILE="database/schema.sql"
+# Database configuration for single server
+DB_NAME="conf"
+DB_USER="conf_user"
+DB_PASSWORD="toor"
+DB_HOST="127.0.0.1"  # Local MySQL on same server
+SCHEMA_FILE="database/setup.sql"
+SERVER_IP="172.27.0.9"
+
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
 
 # Check if MySQL is running
 if ! command -v mysql &> /dev/null; then
-    echo -e "${RED}❌ MySQL is not installed or not in PATH${NC}"
+    print_error "MySQL is not installed or not in PATH"
     echo "Please install MySQL first:"
     echo "  Ubuntu/Debian: sudo apt install mysql-server"
-    echo "  macOS: brew install mysql"
-    echo "  Windows: Download from https://dev.mysql.com/downloads/mysql/"
+    echo "  CentOS/RHEL: sudo yum install mysql-server"
     exit 1
 fi
 
 # Check if schema file exists
 if [ ! -f "$SCHEMA_FILE" ]; then
-    echo -e "${RED}❌ Schema file not found: $SCHEMA_FILE${NC}"
+    print_error "Schema file not found: $SCHEMA_FILE"
     exit 1
 fi
+
+print_status "Starting MySQL setup for single-server deployment..."
+print_status "Target Server: $SERVER_IP"
+print_status "Database: $DB_NAME"
+print_status "User: $DB_USER"
 
 # Function to run MySQL command
 run_mysql() {
     local command="$1"
     local description="$2"
     
-    echo -e "${YELLOW}🔄 $description...${NC}"
+    print_status "$description..."
     
     if mysql -u root -p -e "$command" 2>/dev/null; then
-        echo -e "${GREEN}✅ $description completed${NC}"
+        print_success "$description completed"
         return 0
     else
-        echo -e "${RED}❌ $description failed${NC}"
+        print_error "$description failed"
         return 1
     fi
 }

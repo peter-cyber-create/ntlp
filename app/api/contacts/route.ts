@@ -19,10 +19,10 @@ export async function GET() {
         subject,
         message,
         status,
-        submitted_at as submittedAt,
-        responded_at as respondedAt
+        createdAt as submittedAt,
+        updatedAt as respondedAt
       FROM contacts 
-      ORDER BY submitted_at DESC 
+      ORDER BY createdAt DESC 
       LIMIT 50
     `);
     
@@ -43,7 +43,7 @@ export async function GET() {
     
     // Transform contacts to match frontend expectations
     const transformedContacts = contacts.map((contact: any) => ({
-      _id: contact.id,
+      _id: contact.id.toString(),
       name: contact.name,
       email: contact.email,
       phone: contact.phone,
@@ -98,8 +98,8 @@ export async function POST(request: NextRequest) {
     // Insert new contact
     await db.execute(`
       INSERT INTO contacts (
-        name, email, phone, organization, subject, message, status, submitted_at
-      ) VALUES (?, ?, ?, ?, ?, ?, 'new', NOW())
+        name, email, phone, organization, subject, message, status
+      ) VALUES (?, ?, ?, ?, ?, ?, 'new')
     `, [
       body.name,
       body.email,
@@ -133,6 +133,55 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PATCH(request: NextRequest) {
+  try {
+    const db = DatabaseManager.getInstance();
+    const body = await request.json();
+    const { id, status } = body;
+    
+    if (!id || !status) {
+      return NextResponse.json(
+        { success: false, message: 'ID and status are required' },
+        { status: 400 }
+      );
+    }
+    
+    // Check if contact exists first
+    const existingContact = await db.executeOne(
+      'SELECT id FROM contacts WHERE id = ?',
+      [id]
+    );
+    
+    if (!existingContact) {
+      return NextResponse.json(
+        { success: false, message: 'Contact not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Update contact status
+    await db.execute(
+      'UPDATE contacts SET status = ? WHERE id = ?',
+      [status, id]
+    );
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Contact status updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating contact:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to update contact status',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const db = DatabaseManager.getInstance();
@@ -147,69 +196,38 @@ export async function DELETE(request: NextRequest) {
     }
 
     const idArray = ids.split(',');
-    const placeholders = idArray.map(() => '?').join(',');
     
-    const result = await db.execute(
+    // Check if contacts exist first
+    const placeholders = idArray.map(() => '?').join(',');
+    const existingContacts = await db.execute(
+      `SELECT id FROM contacts WHERE id IN (${placeholders})`,
+      idArray
+    );
+    
+    if (existingContacts.length === 0) {
+      return NextResponse.json(
+        { success: false, message: 'No contacts found with the provided IDs' },
+        { status: 404 }
+      );
+    }
+    
+    // Delete the contacts
+    await db.execute(
       `DELETE FROM contacts WHERE id IN (${placeholders})`,
       idArray
     );
-
+    
     return NextResponse.json({
       success: true,
-      message: `Successfully deleted ${idArray.length} contact(s)`,
-      deletedCount: idArray.length
+      message: `${existingContacts.length} contact(s) deleted successfully`,
+      deletedCount: existingContacts.length
     });
-
   } catch (error) {
     console.error('Error deleting contacts:', error);
     return NextResponse.json(
       {
         success: false,
         message: 'Failed to delete contacts',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    const db = DatabaseManager.getInstance();
-    const { ids, status } = await request.json();
-    
-    if (!ids || !status) {
-      return NextResponse.json(
-        { success: false, message: 'Contact IDs and status are required' },
-        { status: 400 }
-      );
-    }
-
-    if (!['new', 'in-progress', 'resolved'].includes(status)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid status. Must be new, in-progress, or resolved' },
-        { status: 400 }
-      );
-    }
-
-    const placeholders = ids.map(() => '?').join(',');
-    const result = await db.execute(
-      `UPDATE contacts SET status = ?, responded_at = NOW() WHERE id IN (${placeholders})`,
-      [status, ...ids]
-    );
-
-    return NextResponse.json({
-      success: true,
-      message: `Successfully updated ${ids.length} contact(s)`,
-      updatedCount: ids.length
-    });
-
-  } catch (error) {
-    console.error('Error updating contacts:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to update contacts',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
