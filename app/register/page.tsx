@@ -170,7 +170,7 @@ export default function RegisterPage() {
     console.log('Sending registration data:', { ...formData, registrationType: selectedTicket })
     
     try {
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch('/api/registrations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

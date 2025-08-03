@@ -4,6 +4,30 @@ import DatabaseManager from '@/lib/mysql';
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
+// Helper function to get ticket price based on registration type
+function getTicketPrice(registrationType: string): number {
+  const prices = {
+    'undergrad': 100000, // UGX 100,000
+    'grad': 150000,      // UGX 150,000
+    'local': 350000,     // UGX 350,000
+    'intl': 300,         // USD 300
+    'online': 50         // USD 50 (will be converted to UGX for local users)
+  };
+  return prices[registrationType as keyof typeof prices] || 0;
+}
+
+// Helper function to get currency based on registration type
+function getTicketCurrency(registrationType: string): string {
+  const currencies = {
+    'undergrad': 'UGX',
+    'grad': 'UGX',
+    'local': 'UGX',
+    'intl': 'USD',
+    'online': 'USD' // Can be USD or UGX depending on location
+  };
+  return currencies[registrationType as keyof typeof currencies] || 'UGX';
+}
+
 export async function GET() {
   try {
     const db = DatabaseManager.getInstance();
@@ -12,19 +36,22 @@ export async function GET() {
     const registrations = await db.execute(`
       SELECT 
         id,
-        first_name as firstName,
-        last_name as lastName,
+        first_name,
+        last_name,
         email,
         phone,
         organization,
         position,
         district,
         registration_type as registrationType,
-        is_verified as isVerified,
-        registration_date as registrationDate,
-        payment_status as paymentStatus,
         special_requirements as specialRequirements,
+        is_verified as isVerified,
+        payment_status as paymentStatus,
+        payment_amount as paymentAmount,
+        payment_currency as paymentCurrency,
+        payment_reference as paymentReference,
         status,
+        registration_date as registrationDate,
         created_at as createdAt
       FROM registrations 
       ORDER BY registration_date DESC 
@@ -60,8 +87,8 @@ export async function GET() {
     // Transform registrations to match frontend expectations
     const transformedRegistrations = registrations.map((reg: any) => ({
       _id: reg.id,
-      firstName: reg.firstName,
-      lastName: reg.lastName,
+      first_name: reg.first_name,
+      last_name: reg.last_name,
       email: reg.email,
       phone: reg.phone,
       organization: reg.organization,
@@ -101,9 +128,12 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json();
     
-    // Validate required fields
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'organization', 'position', 'district', 'registrationType'];
-    const missingFields = requiredFields.filter(field => !body[field]);
+    // Validate required fields based on frontend form
+    const requiredFields = ['first_name', 'last_name', 'email', 'phone', 'organization', 'position', 'district', 'registrationType'];
+    const missingFields = requiredFields.filter(field => {
+      const value = field === 'registrationType' ? body.registrationType : body[field];
+      return !value || (typeof value === 'string' && value.trim() === '');
+    });
     
     if (missingFields.length > 0) {
       return NextResponse.json(
@@ -111,6 +141,31 @@ export async function POST(request: NextRequest) {
           success: false,
           message: 'Missing required fields',
           missingFields
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate registration type
+    const validRegistrationTypes = ['undergrad', 'grad', 'local', 'intl', 'online'];
+    if (!validRegistrationTypes.includes(body.registrationType)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Invalid registration type',
+          validTypes: validRegistrationTypes
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(body.email)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Invalid email format'
         },
         { status: 400 }
       );
@@ -135,33 +190,58 @@ export async function POST(request: NextRequest) {
     }
     
     // Insert new registration
-    await db.execute(`
+    const registrationData = {
+      first_name: body.first_name,
+      last_name: body.last_name,
+      email: body.email,
+      phone: body.phone,
+      organization: body.organization,
+      position: body.position,
+      district: body.district,
+      registration_type: body.registrationType,
+      special_requirements: body.special_needs || null, // Map special_needs to special_requirements
+      payment_amount: getTicketPrice(body.registrationType),
+      payment_currency: getTicketCurrency(body.registrationType)
+    };
+
+    const result = await db.execute(`
       INSERT INTO registrations (
         first_name, last_name, email, phone, organization, position, district,
-        registration_type, is_verified, payment_status, special_requirements,
-        status, registration_date, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', ?, 'pending', NOW(), NOW())
+        registration_type, special_requirements, is_verified, payment_status, 
+        payment_amount, payment_currency, status, registration_date, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', ?, ?, 'pending', NOW(), NOW())
     `, [
-      body.firstName,
-      body.lastName,
-      body.email,
-      body.phone,
-      body.organization,
-      body.position,
-      body.district,
-      body.registrationType,
-      body.specialRequirements || null
-    ]);
+      registrationData.first_name,
+      registrationData.last_name,
+      registrationData.email,
+      registrationData.phone,
+      registrationData.organization,
+      registrationData.position,
+      registrationData.district,
+      registrationData.registration_type,
+      registrationData.special_requirements,
+      registrationData.payment_amount,
+      registrationData.payment_currency
+    ]) as any;
+
+    // Get the newly created registration ID
+    const newRegistrationId = result.insertId || Date.now();
     
     return NextResponse.json({
       success: true,
       message: 'Registration created successfully',
       data: {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        email: body.email,
-        registrationType: body.registrationType,
+        id: newRegistrationId,
+        first_name: registrationData.first_name,
+        last_name: registrationData.last_name,
+        email: registrationData.email,
+        registrationType: registrationData.registration_type,
+        district: registrationData.district,
+        organization: registrationData.organization,
+        payment_amount: registrationData.payment_amount,
+        payment_currency: registrationData.payment_currency,
         status: 'pending',
+        payment_status: 'pending',
         registrationDate: new Date().toISOString()
       }
     }, { status: 201 });

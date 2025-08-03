@@ -7,6 +7,8 @@ interface DatabaseConfig {
   password: string;
   database: string;
   connectionLimit: number;
+  queueLimit: number;
+  waitForConnections: boolean;
   acquireTimeout: number;
   timeout: number;
   charset: string;
@@ -21,10 +23,12 @@ class DatabaseManager {
     this.config = {
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '3306'),
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
+      user: process.env.DB_USER || 'ntlp_user', // Changed default to match backend config
+      password: process.env.DB_PASSWORD || 'secure_password_here', // Changed default to match backend config
       database: process.env.DB_NAME || 'ntlp_conference_2025',
-      connectionLimit: parseInt(process.env.DATABASE_POOL_MAX || '20'),
+      connectionLimit: parseInt(process.env.DATABASE_CONNECTION_LIMIT || '10'), // Matching Docker backend config
+      queueLimit: parseInt(process.env.DATABASE_QUEUE_LIMIT || '0'), // Matching Docker backend config
+      waitForConnections: process.env.DATABASE_WAIT_FOR_CONNECTIONS === 'true' ? true : true, // Matching Docker backend config
       acquireTimeout: 60000,
       timeout: 60000,
       charset: 'utf8mb4'

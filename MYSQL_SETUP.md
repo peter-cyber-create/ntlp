@@ -6,19 +6,11 @@
 
 ```sql
 -- Create the main database
-<<<<<<< HEAD
 CREATE DATABASE IF NOT EXISTS ntlp_conference_2025 
 CHARACTER SET utf8mb4 
 COLLATE utf8mb4_unicode_ci;
 
 USE ntlp_conference_2025;
-=======
-CREATE DATABASE IF NOT EXISTS conference 
-CHARACTER SET utf8mb4 
-COLLATE utf8mb4_unicode_ci;
-
-USE conference;
->>>>>>> master
 
 -- Create users table for admin authentication
 CREATE TABLE users (
@@ -38,21 +30,34 @@ CREATE TABLE registrations (
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     phone VARCHAR(20),
-    institution VARCHAR(255),
+    organization VARCHAR(255), -- Changed from institution to match frontend
     position VARCHAR(255),
+    district VARCHAR(100), -- Added district field from frontend
     country VARCHAR(100) DEFAULT 'Uganda',
-    session_track ENUM('communicable_diseases', 'non_communicable_diseases', 'health_systems', 'digital_health') NOT NULL,
-    registration_type ENUM('standard', 'student', 'speaker', 'vip') DEFAULT 'standard',
+    registration_type ENUM('undergrad', 'grad', 'local', 'intl', 'online') NOT NULL, -- Updated to match frontend ticket types
+    special_requirements TEXT, -- Changed from special_needs to match backend field name
     dietary_requirements TEXT,
-    special_needs TEXT,
+    
+    -- Payment and verification fields
+    is_verified BOOLEAN DEFAULT FALSE,
+    payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+    payment_amount DECIMAL(10,2),
+    payment_currency VARCHAR(3) DEFAULT 'UGX',
+    payment_reference VARCHAR(255),
+    
+    -- Status and tracking
     status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
     registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    -- Indexes for performance
     INDEX idx_email (email),
     INDEX idx_status (status),
+    INDEX idx_payment_status (payment_status),
+    INDEX idx_registration_type (registration_type),
     INDEX idx_registration_date (registration_date),
-    INDEX idx_session_track (session_track)
+    INDEX idx_district (district)
 );
 
 -- Create abstracts table
@@ -299,11 +304,7 @@ CREATE TABLE settings (
 ```sql
 -- Insert default admin user (password: admin123 - should be changed immediately)
 INSERT INTO users (email, password_hash, role) VALUES 
-<<<<<<< HEAD
 ('admin@ntlpconference.ug', '$2b$12$LQv3c1yqBw3HhU4oXGY9Ce2T1/OxD/Zc4tKqJ3aQmGqL4kVYnqE5K', 'admin');
-=======
-('conference@health.go.ug', 'c1#BhZ*xQa%', 'admin');
->>>>>>> master
 
 -- Insert basic system settings
 INSERT INTO settings (setting_key, setting_value, setting_type, description, category, is_public) VALUES
@@ -316,7 +317,15 @@ INSERT INTO settings (setting_key, setting_value, setting_type, description, cat
 ('abstract_submission_deadline', '2025-08-15', 'string', 'Abstract submission deadline', 'abstracts', TRUE),
 ('early_bird_deadline', '2025-07-31', 'string', 'Early bird registration deadline', 'registration', TRUE),
 ('max_abstracts_per_author', '3', 'number', 'Maximum abstracts per primary author', 'abstracts', FALSE),
-('conference_capacity', '500', 'number', 'Maximum conference capacity', 'general', FALSE);
+('conference_capacity', '500', 'number', 'Maximum conference capacity', 'general', FALSE),
+
+-- Insert registration pricing information
+('undergrad_price_ugx', '100000', 'number', 'Undergraduate student price in UGX', 'pricing', TRUE),
+('grad_price_ugx', '150000', 'number', 'Graduate student price in UGX', 'pricing', TRUE),
+('local_price_ugx', '350000', 'number', 'Local participant price in UGX', 'pricing', TRUE),
+('intl_price_usd', '300', 'number', 'International participant price in USD', 'pricing', TRUE),
+('online_price_usd', '50', 'number', 'Online participation price in USD', 'pricing', TRUE),
+('online_price_ugx', '180000', 'number', 'Online participation price in UGX', 'pricing', TRUE);
 
 -- Insert sample session tracks
 INSERT INTO sessions (title, description, session_type, track, venue, session_date, start_time, end_time) VALUES
@@ -329,25 +338,22 @@ INSERT INTO sessions (title, description, session_type, track, venue, session_da
 
 ### 3. Environment Configuration
 
-Update your `.env.local` file:
+Update your `.env.local` file to match the ntlp-backend configuration:
 
 ```env
-# Database Configuration
-<<<<<<< HEAD
-DATABASE_URL="mysql://username:password@localhost:3306/ntlp_conference_2025"
+# Database Configuration (Aligned with ntlp-backend Docker setup)
 DB_HOST=localhost
 DB_PORT=3306
+DB_USER=ntlp_user
+DB_PASSWORD=secure_password_here
 DB_NAME=ntlp_conference_2025
-=======
-DATABASE_URL="mysql://username:password@localhost:3306/conference"
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=conference
->>>>>>> master
-DB_USER=your_username
-DB_PASSWORD=your_password
 
-# For production (use connection pooling)
+# MySQL Connection Pool Settings (matching Docker backend config)
+DATABASE_CONNECTION_LIMIT=10
+DATABASE_QUEUE_LIMIT=0
+DATABASE_WAIT_FOR_CONNECTIONS=true
+
+# For production (matching your production environment)
 DATABASE_POOL_MIN=5
 DATABASE_POOL_MAX=20
 
@@ -375,6 +381,10 @@ SESSION_SECRET=your_session_secret_here
 CONFERENCE_NAME="The Communicable and Non-Communicable Diseases Conference 2025"
 CONFERENCE_YEAR=2025
 CONFERENCE_VENUE="Speke Resort Munyonyo, Kampala, Uganda"
+
+# Backend Compatibility (for production deployment at 172.27.0.9)
+BACKEND_PORT=5000
+BACKEND_HOST=localhost
 ```
 
 ### 4. Installation and Setup Procedure
@@ -399,30 +409,28 @@ CONFERENCE_VENUE="Speke Resort Munyonyo, Kampala, Uganda"
    sudo mysql_secure_installation
    ```
 
-3. **Create Database and User**
+3. **Create Database and User (Matching ntlp-backend Docker config)**
    ```sql
    mysql -u root -p
    
-<<<<<<< HEAD
    CREATE DATABASE ntlp_conference_2025 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    CREATE USER 'ntlp_user'@'localhost' IDENTIFIED BY 'secure_password_here';
    GRANT ALL PRIVILEGES ON ntlp_conference_2025.* TO 'ntlp_user'@'localhost';
-=======
-   CREATE DATABASE conference CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   CREATE USER 'ntlp_user'@'localhost' IDENTIFIED BY 'secure_password_here';
-   GRANT ALL PRIVILEGES ON conference.* TO 'ntlp_user'@'localhost';
->>>>>>> master
+   
+   -- For production environment (172.27.0.9)
+   CREATE USER 'ntlp_user'@'172.27.0.9' IDENTIFIED BY 'secure_password_here';
+   GRANT ALL PRIVILEGES ON ntlp_conference_2025.* TO 'ntlp_user'@'172.27.0.9';
+   
    FLUSH PRIVILEGES;
    EXIT;
    ```
 
-4. **Run the Schema Script**
+4. **Run the Schema Script (Aligned with ntlp-backend)**
    ```bash
-<<<<<<< HEAD
    mysql -u ntlp_user -p ntlp_conference_2025 < database_schema.sql
-=======
-   mysql -u ntlp_user -p conference < database_schema.sql
->>>>>>> master
+   
+   # Or run the migration script for existing databases:
+   mysql -u ntlp_user -p ntlp_conference_2025 < database/migration_001_update_registrations.sql
    ```
 
 5. **Install Node.js Dependencies**
@@ -434,15 +442,11 @@ CONFERENCE_VENUE="Speke Resort Munyonyo, Kampala, Uganda"
    - Copy the environment variables above to your `.env.local`
    - Update with your actual database credentials
 
-### 5. Backup and Maintenance
+### 5. Backup and Maintenance (Aligned with ntlp-backend)
 
 ```sql
--- Daily backup script
-<<<<<<< HEAD
+-- Daily backup script (matching your backend database name)
 mysqldump -u ntlp_user -p ntlp_conference_2025 > backup_$(date +%Y%m%d).sql
-=======
-mysqldump -u ntlp_user -p conference > backup_$(date +%Y%m%d).sql
->>>>>>> master
 
 -- Weekly cleanup of old audit logs (keep 3 months)
 DELETE FROM audit_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 3 MONTH);
