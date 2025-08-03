@@ -122,13 +122,50 @@ class ApiClient {
   async getReviews(): Promise<ApiResponse<any[]>> {
     return this.request('/api/reviews');
   }
+
+  // Contacts
+  async getContacts(params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<{ contacts: Contact[]; pagination: any; stats: any }>> {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+    const query = searchParams.toString();
+    return this.request(`/api/contacts${query ? `?${query}` : ''}`);
+  }
+
+  async getContact(id: number): Promise<ApiResponse<Contact>> {
+    return this.request(`/api/contacts/${id}`);
+  }
+
+  async createContact(contact: Omit<Contact, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Contact>> {
+    return this.request('/api/contacts', {
+      method: 'POST',
+      body: JSON.stringify(contact),
+    });
+  }
+
+  async updateContact(id: number, updates: { status?: string; response_message?: string }): Promise<ApiResponse<Contact>> {
+    return this.request(`/api/contacts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  }
+
+  async deleteContact(id: number): Promise<ApiResponse<void>> {
+    return this.request(`/api/contacts/${id}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
-// Export singleton instance
-export const apiClient = new ApiClient();
-export default apiClient;
-
-// Contacts
+// Contacts interface
 export interface Contact {
   id?: number;
   name: string;
@@ -143,45 +180,6 @@ export interface Contact {
   updated_at?: string;
 }
 
-// Add to ApiClient class - insert these methods before the closing brace
-
-// Contacts
-async getContacts(params?: {
-  page?: number;
-  limit?: number;
-}): Promise<ApiResponse<{ contacts: Contact[]; pagination: any; stats: any }>> {
-  const searchParams = new URLSearchParams();
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        searchParams.append(key, value.toString());
-      }
-    });
-  }
-  const query = searchParams.toString();
-  return this.request(`/api/contacts${query ? `?${query}` : ''}`);
-}
-
-async getContact(id: number): Promise<ApiResponse<Contact>> {
-  return this.request(`/api/contacts/${id}`);
-}
-
-async createContact(contact: Omit<Contact, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Contact>> {
-  return this.request('/api/contacts', {
-    method: 'POST',
-    body: JSON.stringify(contact),
-  });
-}
-
-async updateContact(id: number, updates: { status?: string; response_message?: string }): Promise<ApiResponse<Contact>> {
-  return this.request(`/api/contacts/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(updates),
-  });
-}
-
-async deleteContact(id: number): Promise<ApiResponse<void>> {
-  return this.request(`/api/contacts/${id}`, {
-    method: 'DELETE',
-  });
-}
+// Export singleton instance
+export const apiClient = new ApiClient();
+export default apiClient;
