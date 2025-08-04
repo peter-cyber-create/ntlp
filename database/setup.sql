@@ -1,18 +1,21 @@
--- Setup script for Conference 2025 Database
--- MySQL/MariaDB Database Setup
+-- Complete Database Setup for Conference 2025
+-- MySQL/MariaDB Database Setup and Migration
+-- This script creates the database, user, and all tables with the latest schema
 
 -- Create database
 CREATE DATABASE IF NOT EXISTS conf CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Create user and grant privileges
 CREATE USER IF NOT EXISTS 'conf_user'@'localhost' IDENTIFIED BY 'toor';
+CREATE USER IF NOT EXISTS 'conf_user'@'%' IDENTIFIED BY 'toor';
 GRANT ALL PRIVILEGES ON conf.* TO 'conf_user'@'localhost';
+GRANT ALL PRIVILEGES ON conf.* TO 'conf_user'@'%';
 FLUSH PRIVILEGES;
 
 -- Use the database
 USE conf;
 
--- Table: registrations
+-- Table: registrations (Updated with all required fields)
 CREATE TABLE IF NOT EXISTS registrations (
   id INT AUTO_INCREMENT PRIMARY KEY,
   firstName VARCHAR(100) NOT NULL,
@@ -22,13 +25,24 @@ CREATE TABLE IF NOT EXISTS registrations (
   organization VARCHAR(255),
   position VARCHAR(255),
   district VARCHAR(100),
-  registrationType ENUM('early-bird', 'regular', 'student') NOT NULL DEFAULT 'regular',
+  country VARCHAR(100),
+  registrationType ENUM('undergrad', 'grad', 'local', 'intl', 'online') NOT NULL DEFAULT 'local',
   specialRequirements TEXT,
+  dietary_requirements TEXT,
+  is_verified BOOLEAN DEFAULT FALSE,
+  payment_status ENUM('pending', 'completed', 'failed', 'refunded') NOT NULL DEFAULT 'pending',
+  payment_amount DECIMAL(10, 2),
+  payment_currency VARCHAR(3) DEFAULT 'UGX',
+  payment_reference VARCHAR(255),
   status ENUM('pending', 'confirmed', 'cancelled') NOT NULL DEFAULT 'pending',
+  registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_email (email),
   INDEX idx_status (status),
+  INDEX idx_payment_status (payment_status),
+  INDEX idx_registration_type (registrationType),
+  INDEX idx_is_verified (is_verified),
   INDEX idx_created (createdAt)
 );
 
