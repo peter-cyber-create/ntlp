@@ -3,9 +3,12 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import DatabaseManager from '@/lib/mysql';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const filename = searchParams.get('filename');
     const id = searchParams.get('id');
 
