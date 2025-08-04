@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DatabaseManager from '../../../lib/mysql';
+import DatabaseManager from '@/lib/mysql';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
-// Helper function to get price based on registration type
+// Helper function to get ticket price based on registration type
 function getTicketPrice(registrationType: string): number {
   const prices = {
-    'undergrad': 100000,  // UGX
-    'grad': 150000,       // UGX
-    'local': 350000,      // UGX
-    'intl': 300,          // USD
-    'online': 50          // USD
+    'undergrad': 100000, // UGX 100,000
+    'grad': 150000,      // UGX 150,000
+    'local': 350000,     // UGX 350,000
+    'intl': 300,         // USD 300
+    'online': 50         // USD 50 (will be converted to UGX for local users)
   };
-  return prices[registrationType as keyof typeof prices] || 350000;
+  return prices[registrationType as keyof typeof prices] || 0;
 }
 
 // Helper function to get currency based on registration type
@@ -23,7 +23,7 @@ function getTicketCurrency(registrationType: string): string {
     'grad': 'UGX',
     'local': 'UGX',
     'intl': 'USD',
-    'online': 'USD'
+    'online': 'USD' // Can be USD or UGX depending on location
   };
   return currencies[registrationType as keyof typeof currencies] || 'UGX';
 }
@@ -32,23 +32,38 @@ export async function GET() {
   try {
     const db = DatabaseManager.getInstance();
     
-    // Get all registrations
+    // Get registrations with pagination
     const registrations = await db.execute(`
       SELECT 
-        id, firstName, lastName, email, phone, organization, position, district,
-        country, registrationType, specialRequirements, dietary_requirements,
-        is_verified, payment_status, payment_amount, payment_currency, 
-        payment_reference, status, registration_date, createdAt, updatedAt
+        id,
+        firstName,
+        lastName,
+        email,
+        phone,
+        organization,
+        position,
+        district,
+        registrationType,
+        specialRequirements,
+        is_verified as isVerified,
+        payment_status as paymentStatus,
+        payment_amount as paymentAmount,
+        payment_currency as paymentCurrency,
+        payment_reference as paymentReference,
+        status,
+        createdAt as registrationDate,
+        createdAt
       FROM registrations 
-      ORDER BY createdAt DESC
+      ORDER BY createdAt DESC 
+      LIMIT 50
     `);
     
-    // Get statistics
+    // Get stats
     const statsQueries = await Promise.all([
       db.executeOne('SELECT COUNT(*) as total FROM registrations'),
       db.executeOne('SELECT COUNT(*) as verified FROM registrations WHERE is_verified = 1'),
-      db.executeOne('SELECT COUNT(*) as pending FROM registrations WHERE payment_status = "pending"'),
-      db.executeOne('SELECT COUNT(*) as completed FROM registrations WHERE payment_status = "completed"'),
+      db.executeOne('SELECT COUNT(*) as pending FROM registrations WHERE payment_status = ?', ['pending']),
+      db.executeOne('SELECT COUNT(*) as completed FROM registrations WHERE payment_status = ?', ['completed']),
       db.execute(`
         SELECT registrationType, COUNT(*) as count 
         FROM registrations 
@@ -72,38 +87,27 @@ export async function GET() {
     // Transform registrations to match frontend expectations
     const transformedRegistrations = registrations.map((reg: any) => ({
       _id: reg.id,
-      firstName: reg.firstName,
-      lastName: reg.lastName,
+      first_name: reg.firstName,
+      last_name: reg.lastName,
       email: reg.email,
       phone: reg.phone,
       organization: reg.organization,
       position: reg.position,
       district: reg.district,
-      country: reg.country,
       registrationType: reg.registrationType,
-      specialRequirements: reg.specialRequirements,
-      dietary_requirements: reg.dietary_requirements,
-      is_verified: Boolean(reg.is_verified),
-      payment_status: reg.payment_status,
-      payment_amount: reg.payment_amount,
-      payment_currency: reg.payment_currency,
-      payment_reference: reg.payment_reference,
-      status: reg.status,
-      registration_date: reg.registration_date,
-      createdAt: reg.createdAt,
-      updatedAt: reg.updatedAt
+      isVerified: reg.isVerified === 1,
+      registrationDate: reg.registrationDate,
+      paymentStatus: reg.paymentStatus,
+      specialRequirements: reg.specialRequirements || reg.specialrequirements,
+      status: reg.status || 'pending',
+      createdAt: reg.createdAt || reg.registrationDate
     }));
     
     return NextResponse.json({
       success: true,
       data: transformedRegistrations,
       stats,
-      pagination: {
-        total: stats.total,
-        page: 1,
-        limit: 1000,
-        totalPages: 1
-      }
+      count: transformedRegistrations.length
     });
   } catch (error) {
     console.error('Error fetching registrations:', error);
@@ -120,17 +124,26 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // TODO: Connect to MySQL and handle submission
+    
     const body = await request.json();
     
-    // Validate required fields
+    // Validate required fields based on frontend form (accept both camelCase and snake_case)
     const requiredFields = [
-      'firstName', 'lastName', 'email', 'phone', 'organization', 'position', 'district', 'registrationType'
+      { key: 'firstName', alt: 'first_name' },
+      { key: 'lastName', alt: 'last_name' }, 
+      { key: 'email' }, 
+      { key: 'phone' }, 
+      { key: 'organization' }, 
+      { key: 'position' }, 
+      { key: 'district' }, 
+      { key: 'registrationType' }
     ];
     
     const missingFields = requiredFields.filter(field => {
-      const value = body[field];
+      const value = body[field.key] || body[field.alt || field.key];
       return !value || (typeof value === 'string' && value.trim() === '');
-    });
+    }).map(field => field.key);
     
     if (missingFields.length > 0) {
       return NextResponse.json(
@@ -170,6 +183,7 @@ export async function POST(request: NextRequest) {
     
     // Check if email already exists
     const db = DatabaseManager.getInstance();
+    
     const existingRegistration = await db.executeOne(
       'SELECT id FROM registrations WHERE email = ?',
       [body.email]
@@ -187,15 +201,15 @@ export async function POST(request: NextRequest) {
     
     // Insert new registration
     const registrationData = {
-      firstName: body.firstName,
-      lastName: body.lastName,
+      firstName: body.firstName || body.first_name,
+      lastName: body.lastName || body.last_name,
       email: body.email,
       phone: body.phone,
       organization: body.organization,
       position: body.position,
       district: body.district,
       registrationType: body.registrationType,
-      specialRequirements: body.specialRequirements || null,
+      specialRequirements: body.special_needs || body.specialRequirements || null,
       payment_amount: getTicketPrice(body.registrationType),
       payment_currency: getTicketCurrency(body.registrationType)
     };
@@ -254,60 +268,39 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to map frontend registration types to backend types
-function mapRegistrationType(frontendType: string): string {
-  const typeMap: { [key: string]: string } = {
-    'undergrad': 'student',
-    'grad': 'student', 
-    'local': 'professional',
-    'intl': 'professional',
-    'online': 'professional'
-  };
-  
-  return typeMap[frontendType] || 'professional';
-}
-
 export async function DELETE(request: NextRequest) {
   try {
+    const db = DatabaseManager.getInstance();
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const ids = searchParams.get('ids');
     
-    if (!id) {
+    if (!ids) {
       return NextResponse.json(
-        { success: false, message: 'Registration ID is required' },
+        { success: false, message: 'Registration IDs are required' },
         { status: 400 }
       );
     }
+
+    const idArray = ids.split(',');
+    const placeholders = idArray.map(() => '?').join(',');
     
-    const db = DatabaseManager.getInstance();
-    
-    // Check if registration exists
-    const existingRegistration = await db.executeOne(
-      'SELECT id FROM registrations WHERE id = ?',
-      [id]
+    await db.execute(
+      `DELETE FROM registrations WHERE id IN (${placeholders})`,
+      idArray
     );
-    
-    if (!existingRegistration) {
-      return NextResponse.json(
-        { success: false, message: 'Registration not found' },
-        { status: 404 }
-      );
-    }
-    
-    // Delete the registration
-    await db.execute('DELETE FROM registrations WHERE id = ?', [id]);
-    
+
     return NextResponse.json({
       success: true,
-      message: 'Registration deleted successfully'
+      message: `Successfully deleted ${idArray.length} registration(s)`,
+      deletedCount: idArray.length
     });
-    
+
   } catch (error) {
-    console.error('Error deleting registration:', error);
+    console.error('Error deleting registrations:', error);
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to delete registration',
+        message: 'Failed to delete registrations',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
@@ -317,69 +310,41 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { id, status, payment_status, is_verified } = body;
-    
-    if (!id) {
-      return NextResponse.json(
-        { success: false, message: 'Registration ID is required' },
-        { status: 400 }
-      );
-    }
-    
     const db = DatabaseManager.getInstance();
+    const { ids, status } = await request.json();
     
-    // Build update query dynamically based on provided fields
-    const updateFields = [];
-    const updateValues = [];
-    
-    if (status) {
-      updateFields.push('status = ?');
-      updateValues.push(status);
-    }
-    
-    if (payment_status) {
-      updateFields.push('payment_status = ?');
-      updateValues.push(payment_status);
-    }
-    
-    if (typeof is_verified === 'boolean') {
-      updateFields.push('is_verified = ?');
-      updateValues.push(is_verified ? 1 : 0);
-    }
-    
-    if (updateFields.length === 0) {
+    if (!ids || !status) {
       return NextResponse.json(
-        { success: false, message: 'No valid fields to update' },
+        { success: false, message: 'Registration IDs and status are required' },
         { status: 400 }
       );
     }
-    
-    updateFields.push('updatedAt = NOW()');
-    updateValues.push(id);
-    
-    const query = `UPDATE registrations SET ${updateFields.join(', ')} WHERE id = ?`;
-    
-    await db.execute(query, updateValues);
-    
-    // Get updated registration
-    const updatedRegistration = await db.executeOne(
-      'SELECT * FROM registrations WHERE id = ?',
-      [id]
+
+    if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid status. Must be pending, confirmed, or cancelled' },
+        { status: 400 }
+      );
+    }
+
+    const placeholders = ids.map(() => '?').join(',');
+    await db.execute(
+      `UPDATE registrations SET status = ? WHERE id IN (${placeholders})`,
+      [status, ...ids]
     );
-    
+
     return NextResponse.json({
       success: true,
-      message: 'Registration updated successfully',
-      data: updatedRegistration
+      message: `Successfully updated ${ids.length} registration(s)`,
+      updatedCount: ids.length
     });
-    
+
   } catch (error) {
-    console.error('Error updating registration:', error);
+    console.error('Error updating registrations:', error);
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to update registration',
+        message: 'Failed to update registrations',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
