@@ -28,7 +28,7 @@ export default function RegisterPage() {
       originalPrice: 'UGX 350,000',
       description: 'Limited time offer - Save UGX 100,000',
       features: [
-        'All 3 days access',
+        'All 5 days access',
         'Welcome reception',
         'Networking lunch',
         'Conference materials',
@@ -42,13 +42,13 @@ export default function RegisterPage() {
       price: 'UGX 350,000',
       description: 'Standard conference registration',
       features: [
-        'All 3 days access',
+        'All 5 days access',
         'Welcome reception',
         'Networking lunch',
         'Conference materials',
         'Certificate of attendance'
       ],
-      deadline: 'March 10, 2025'
+      deadline: 'November 1st, 2025'
     },
     {
       id: 'student',
@@ -56,12 +56,12 @@ export default function RegisterPage() {
       price: 'UGX 100,000',
       description: 'Special rate for students (ID required)',
       features: [
-        'All 3 days access',
+        'All 5 days access',
         'Conference materials',
         'Certificate of attendance',
         'Student networking session'
       ],
-      deadline: 'March 10, 2025'
+      deadline: 'November 1st, 2025'
     }
   ]
 

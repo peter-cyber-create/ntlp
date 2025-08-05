@@ -30,45 +30,65 @@ export default function PartnersPage() {
 
   const sponsorshipTiers = [
     {
-      name: 'Startup Partner',
-      price: '$5,000',
-      color: 'bg-gradient-to-r from-primary-400 to-primary-600',
+      name: 'Platinum Sponsor/Exhibitor',
+      price: '$10,000',
+      color: 'bg-gradient-to-r from-purple-400 to-purple-600',
+      ideal: 'Major healthcare firms, pharmaceutical companies, diagnostic labs, beverage firms & banking institutions',
       benefits: [
-        'Startup exhibition space',
-        'Pitch competition entry',
-        'Logo on startup materials',
-        '5 complimentary tickets',
-        'Mobile app listing',
-        'Networking access',
-        'Mentorship opportunities'
+        'Prime booth location (largest size)',
+        'Speaking slot (plenary or breakout)',
+        'Logo on all promotional materials',
+        '6 complimentary conference passes',
+        'Feature in post-conference report',
+        'Social media spotlight'
       ]
     },
     {
-      name: 'Silver Sponsor',
-      price: '$15,000',
-      color: 'bg-gradient-to-r from-gray-300 to-gray-500',
-      benefits: [
-        'Standard booth location',
-        'Logo on select materials',
-        'Coffee break sponsorship',
-        '10 complimentary tickets',
-        'Mobile app listing',
-        'Social media mentions',
-        'Newsletter inclusion'
-      ]
-    },
-    {
-      name: 'Gold Sponsor',
-      price: '$25,000',
+      name: 'Gold Sponsor/Exhibitor',
+      price: '$7,000',
       color: 'bg-gradient-to-r from-yellow-400 to-yellow-600',
+      ideal: 'Medical tech companies, NGOs, research institutions',
       benefits: [
         'Premium booth location',
-        'Logo on all materials',
-        'Keynote speaking slot',
-        '20 complimentary tickets',
-        'Mobile app feature',
-        'VIP networking',
-        'Press release mention'
+        'Panel participation opportunity',
+        'Logo on website & program booklet',
+        '4 complimentary passes',
+        'Branded banner at venue'
+      ]
+    },
+    {
+      name: 'Silver Exhibitor',
+      price: '$5,000',
+      color: 'bg-gradient-to-r from-gray-300 to-gray-500',
+      ideal: 'Health startups, regional health agencies, universities',
+      benefits: [
+        'Standard booth',
+        'Logo in program booklet',
+        '2 complimentary passes',
+        'Mention during opening/closing remarks'
+      ]
+    },
+    {
+      name: 'Bronze Exhibitor',
+      price: '$4,000',
+      color: 'bg-gradient-to-r from-orange-400 to-orange-600',
+      ideal: 'Small businesses, advocacy groups, student-led health initiatives',
+      benefits: [
+        'Basic booth',
+        '1 complimentary pass',
+        'Name listed in program booklet'
+      ]
+    },
+    {
+      name: 'Non-Profit/Academic Table',
+      price: '$2,500',
+      color: 'bg-gradient-to-r from-green-400 to-green-600',
+      ideal: 'Non-profits, student groups, academic researchers',
+      benefits: [
+        'Table display space only (shared zone)',
+        'No promotional branding',
+        '1 access badge',
+        'Listing in non-profit section of booklet'
       ]
     }
   ];
@@ -122,12 +142,16 @@ export default function PartnersPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {sponsorshipTiers.map((tier, index) => (
               <div key={index} className="bg-white rounded-2xl p-6 text-gray-900 shadow-md hover:shadow-lg transition-shadow transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400">
                 <div className={`h-3 rounded-t-lg ${tier.color} mb-6`}></div>
                 <h3 className="text-xl font-bold mb-2">{tier.name}</h3>
-                <div className="text-3xl font-bold text-primary-600 mb-6">{tier.price}</div>
+                <div className="text-3xl font-bold text-primary-600 mb-4">{tier.price}</div>
+                <div className="mb-6">
+                  <h4 className="font-semibold text-primary-800 mb-2 text-sm">Ideal For:</h4>
+                  <p className="text-gray-600 text-xs italic">{tier.ideal}</p>
+                </div>
                 <ul className="space-y-3 mb-8">
                   {tier.benefits.map((benefit: string, benefitIndex: number) => (
                     <li key={benefitIndex} className="flex items-start space-x-3 text-sm">

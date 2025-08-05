@@ -539,8 +539,8 @@ CREATE TABLE IF NOT EXISTS analytics_events (
 -- Insert system settings
 INSERT IGNORE INTO system_settings (setting_key, setting_value, setting_type, description, category, is_public) VALUES
 ('conference_name', 'Communicable and Non-Communicable Diseases Conference 2025', 'string', 'Official conference name', 'general', TRUE),
-('conference_start_date', '2025-09-15', 'date', 'Conference start date', 'general', TRUE),
-('conference_end_date', '2025-09-17', 'date', 'Conference end date', 'general', TRUE),
+('conference_start_date', '2025-11-03', 'date', 'Conference start date', 'general', TRUE),
+('conference_end_date', '2025-11-07', 'date', 'Conference end date', 'general', TRUE),
 ('conference_venue', 'Kampala International Conference Centre', 'string', 'Main conference venue', 'general', TRUE),
 ('registration_open', 'true', 'boolean', 'Whether registration is open', 'registration', TRUE),
 ('abstract_submission_open', 'true', 'boolean', 'Whether abstract submission is open', 'abstracts', TRUE),

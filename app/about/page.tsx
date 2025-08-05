@@ -104,14 +104,14 @@ export default function AboutPage() {
               What to Expect
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Three days of intensive learning, networking, and collaboration with Uganda's 
+              Five days of intensive learning, networking, and collaboration with Uganda's 
               most influential healthcare leaders and experts, hosted by the Ministry of Health Uganda 
               at the prestigious Speke Resort Munyonyo.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-xl shadow-lg">
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Day 1: Innovation Showcase</h3>
+              <h3 className="text-xl font-semibold mb-4 text-gray-900">Days 1-2: Innovation Showcase</h3>
               <ul className="space-y-3 text-gray-600">
                 <li>• Keynote presentations from industry leaders</li>
                 <li>• Startup pitch competitions</li>
@@ -120,7 +120,7 @@ export default function AboutPage() {
               </ul>
             </div>
             <div className="bg-white p-8 rounded-xl shadow-lg">
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Day 2: Deep Dive Sessions</h3>
+              <h3 className="text-xl font-semibold mb-4 text-gray-900">Days 3-4: Deep Dive Sessions</h3>
               <ul className="space-y-3 text-gray-600">
                 <li>• Regulatory landscape discussions</li>
                 <li>• Technical workshops</li>
@@ -129,7 +129,7 @@ export default function AboutPage() {
               </ul>
             </div>
             <div className="bg-white p-8 rounded-xl shadow-lg">
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Day 3: Future Planning</h3>
+              <h3 className="text-xl font-semibold mb-4 text-gray-900">Day 5: Future Planning</h3>
               <ul className="space-y-3 text-gray-600">
                 <li>• Strategic partnership meetings</li>
                 <li>• Investment matching sessions</li>

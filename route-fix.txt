@@ -1,0 +1,130 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { readFile } from 'fs/promises';
+import path from 'path';
+import DatabaseManager from '@/lib/mysql';
+
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = request.nextUrl;
+    const filename = searchParams.get('filename');
+    const id = searchParams.get('id');
+
+    if (!filename && !id) {
+      return NextResponse.json({ error: 'Missing filename or id parameter' }, { status: 400 });
+    }
+
+    let targetFilename = filename;
+    let downloadFilename = filename;
+
+    // If id is provided, look up the abstract in database
+    if (id && !filename) {
+      const db = DatabaseManager.getInstance();
+      const result = await db.query('SELECT fileName, title, authors FROM abstracts WHERE id = ?', [id]);
+      
+      if (result.length === 0) {
+        return NextResponse.json({ error: 'Abstract not found' }, { status: 404 });
+      }
+
+      const abstract = result[0];
+      targetFilename = abstract.fileName;
+      
+      // Create a professional download filename
+      const sanitizedTitle = abstract.title
+        .replace(/[^a-zA-Z0-9\s-]/g, '')
+        .replace(/\s+/g, '_')
+        .substring(0, 50);
+      
+      const sanitizedAuthors = abstract.authors
+        .split(',')[0]
+        .trim()
+        .replace(/[^a-zA-Z0-9\s-]/g, '')
+        .replace(/\s+/g, '_')
+        .substring(0, 20);
+      
+      const fileExtension = path.extname(targetFilename);
+      downloadFilename = `${sanitizedAuthors}_${sanitizedTitle}${fileExtension}`;
+    }
+
+    // Construct file path - check both possible locations
+    const uploadDir = path.join(process.cwd(), 'uploads', 'abstracts');
+    const publicUploadDir = path.join(process.cwd(), 'public', 'uploads', 'abstracts');
+    
+    let filePath = path.join(uploadDir, targetFilename);
+    let fileExists = false;
+    
+    try {
+      await readFile(filePath);
+      fileExists = true;
+    } catch {
+      // Try the public uploads directory
+      filePath = path.join(publicUploadDir, targetFilename);
+      try {
+        await readFile(filePath);
+        fileExists = true;
+      } catch {
+        fileExists = false;
+      }
+    }
+
+    if (!fileExists) {
+      return NextResponse.json({ error: 'File not found' }, { status: 404 });
+    }
+
+    // Security check: ensure the file is within allowed directories
+    const normalizedPath = path.resolve(filePath);
+    const allowedDir1 = path.resolve(uploadDir);
+    const allowedDir2 = path.resolve(publicUploadDir);
+    
+    if (!normalizedPath.startsWith(allowedDir1) && !normalizedPath.startsWith(allowedDir2)) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
+    // Read the file
+    const fileBuffer = await readFile(filePath);
+    
+    // Update download count if this was accessed by id
+    if (id) {
+      try {
+        const db = DatabaseManager.getInstance();
+        await db.query('UPDATE abstracts SET download_count = download_count + 1 WHERE id = ?', [id]);
+      } catch (error) {
+        console.error('Failed to update download count:', error);
+      }
+    }
+
+    // Determine content type
+    const ext = path.extname(targetFilename).toLowerCase();
+    let contentType = 'application/octet-stream';
+    
+    switch (ext) {
+      case '.pdf':
+        contentType = 'application/pdf';
+        break;
+      case '.doc':
+        contentType = 'application/msword';
+        break;
+      case '.docx':
+        contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        break;
+      case '.txt':
+        contentType = 'text/plain';
+        break;
+    }
+
+    // Return the file with appropriate headers
+    return new NextResponse(fileBuffer, {
+      headers: {
+        'Content-Type': contentType,
+        'Content-Disposition': `attachment; filename="${downloadFilename}"`,
+        'Content-Length': fileBuffer.length.toString(),
+      },
+    });
+
+  } catch (error) {
+    console.error('Error downloading abstract:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

@@ -3,22 +3,26 @@ import { Calendar, MapPin, Users } from 'lucide-react'
 import HomeSlideshow from '../components/HomeSlideshow'
 import { Navbar } from '../components/Navbar'
 
+export const metadata = {
+  title: 'The Communicable and Non-Communicable Diseases Conference 2025',
+  description: 'Uganda\'s premier national health conference organized by the Ministry of Health. Join health professionals and leaders addressing critical health challenges.',
+  keywords: 'uganda health conference, ministry of health uganda, national health, communicable diseases, non-communicable diseases, health policy, conference 2025',
+  openGraph: {
+    title: 'The Communicable and Non-Communicable Diseases Conference 2025',
+    description: 'Uganda\'s premier national health conference organized by the Ministry of Health.',
+    images: ['/images/uganda-coat-of-arms.png'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The Communicable and Non-Communicable Diseases Conference 2025',
+    description: 'Uganda\'s premier national health conference organized by the Ministry of Health.',
+  },
+}
+
 export default function HomePage() {
   return (
     <>
-      {/* SEO Meta Tags */}
-      <head>
-        <title>The Communicable and Non-Communicable Diseases Conference 2025</title>
-        <meta name="description" content="Uganda's premier national health conference organized by the Ministry of Health. Theme: Integrated Health Systems for a Resilient Future: Harnessing Technology in Combating Diseases." />
-        <meta name="keywords" content="uganda health conference, ministry of health uganda, national health, communicable diseases, non-communicable diseases, health policy, conference 2025" />
-        <meta property="og:title" content="The Communicable and Non-Communicable Diseases Conference 2025" />
-        <meta property="og:description" content="Uganda's premier national health conference organized by the Ministry of Health." />
-        <meta property="og:image" content="/images/uganda-coat-of-arms.png" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="The Communicable and Non-Communicable Diseases Conference 2025" />
-        <meta name="twitter:description" content="Uganda's premier national health conference organized by the Ministry of Health." />
-      </head>
       {/* Hero Section with Slideshow, Overlay, and Title */}
       <section className="relative min-h-[70vh] flex flex-col justify-center items-center overflow-hidden border-b border-primary-900">
         <div className="absolute inset-0 z-0 w-full h-full">
@@ -27,13 +31,11 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent" />
         </div>
         <div className="relative z-10 flex flex-col items-center justify-center w-full h-full pt-16 pb-8 animate-fade-in">
-          <img src="/images/uganda-coat-of-arms.png" alt="Uganda Coat of Arms" className="w-16 h-16 mb-4 drop-shadow-lg" loading="lazy" decoding="async" width="64" height="64" />
           <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-2 tracking-tight leading-tight drop-shadow-xl animate-slide-up">
             The Communicable and Non-Communicable Diseases Conference 2025
           </h1>
           <p className="text-primary-200 text-base sm:text-xl font-medium mb-4 animate-fade-in delay-200 text-center max-w-2xl">
-            Integrated Health Systems for a Resilient Future<br />
-            <span className="text-primary-400">Harnessing Technology in Combating Diseases</span>
+            November 3-7, 2025 • Kampala, Uganda
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center animate-fade-in delay-300">
             <Link href="/register" className="btn-primary px-6 py-2.5 rounded-lg font-semibold text-base shadow-lg hover:scale-105 transition-transform duration-200">
@@ -107,7 +109,7 @@ export default function HomePage() {
             <div className="flex flex-col items-center bg-primary-950/80 border border-primary-700 rounded-2xl p-6 shadow-md w-full sm:w-1/3">
               <Calendar className="w-8 h-8 text-primary-400 mb-2" />
               <span className="text-lg font-bold text-primary-100">Dates</span>
-              <span className="text-primary-200 mt-1">March 12-14, 2025</span>
+              <span className="text-primary-200 mt-1">November 3-7, 2025</span>
             </div>
             <div className="flex flex-col items-center bg-primary-950/80 border border-primary-700 rounded-2xl p-6 shadow-md w-full sm:w-1/3">
               <MapPin className="w-8 h-8 text-primary-400 mb-2" />

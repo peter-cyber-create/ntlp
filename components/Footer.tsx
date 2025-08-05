@@ -24,13 +24,6 @@ export function Footer() {
             <p className="text-gray-300 mb-4 max-w-md">
               Bringing together Uganda's healthcare professionals and leaders for integrated health systems and technology-driven solutions against communicable and non-communicable diseases.
             </p>
-            <div className="space-y-2 text-sm text-gray-400">
-              <p>🏛️ Ministry of Health Uganda</p>
-              <p>📍 Plot 6, Lourdel Road, Nakasero, Kampala, Uganda</p>
-              <p>🏨 Conference Venue: Speke Resort Munyonyo</p>
-              <p>📧 info@health.go.ug</p>
-              <p>📞 +256 800 200 200 (MOH Call Centre)</p>
-            </div>
           </div>
 
           {/* Quick Links */}

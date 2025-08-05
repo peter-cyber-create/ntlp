@@ -27,7 +27,7 @@ export default function RegisterPage() {
       price: 'UGX 100,000',
       description: 'For undergraduate students (ID required)',
       features: [
-        'All 3 days access',
+        'All 5 days access',
         'Conference materials',
         'Certificate of attendance',
         'Student networking session'
@@ -39,7 +39,7 @@ export default function RegisterPage() {
       price: 'UGX 150,000',
       description: 'For graduate students (ID required)',
       features: [
-        'All 3 days access',
+        'All 5 days access',
         'Conference materials',
         'Certificate of attendance',
         'Student networking session'
@@ -51,7 +51,7 @@ export default function RegisterPage() {
       price: 'UGX 350,000',
       description: 'For non-student participants from Uganda or East Africa',
       features: [
-        'All 3 days access',
+        'All 5 days access',
         'Welcome reception',
         'Networking lunch',
         'Conference materials',
@@ -64,7 +64,7 @@ export default function RegisterPage() {
       price: 'USD 300',
       description: 'For international participants',
       features: [
-        'All 3 days access',
+        'All 5 days access',
         'Welcome reception',
         'Networking lunch',
         'Conference materials',
@@ -247,7 +247,7 @@ export default function RegisterPage() {
               {ticketTypes.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className={`bg-white rounded-2xl shadow-lg p-8 cursor-pointer transition-all duration-300 transform hover:scale-105 focus-within:scale-105 focus-within:ring-2 focus-within:ring-primary-400 ${selectedTicket === ticket.id ? 'ring-4 ring-primary-500 scale-105' : 'hover:shadow-xl'}`}
+                  className={`bg-white rounded-2xl shadow-lg p-8 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] focus-within:scale-[1.02] focus-within:ring-2 focus-within:ring-primary-400 ${selectedTicket === ticket.id ? 'ring-4 ring-primary-500 scale-[1.02]' : 'hover:shadow-lg'}`}
                   onClick={() => handleTicketSelect(ticket.id)}
                   tabIndex={0}
                   role="button"
@@ -294,7 +294,7 @@ export default function RegisterPage() {
       <section className="section-padding">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 transition-all duration-200 hover:scale-105 active:scale-95 focus-within:scale-105 focus-within:ring-2 focus-within:ring-primary-400 focus:outline-none">
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400 focus:outline-none">
               <h2 className="text-2xl font-bold text-gray-900 mb-8">Registration Details</h2>
               
               {!selectedTicket && (
@@ -501,7 +501,7 @@ export default function RegisterPage() {
                     return
                   }
                 }}
-                className="w-full btn-primary flex items-center justify-center space-x-2 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-transform duration-200"
+                className="w-full btn-primary flex items-center justify-center space-x-2 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] transition-transform duration-200"
               >
                 {isSubmitting ? (
                   <>

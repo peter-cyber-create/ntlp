@@ -7,7 +7,7 @@ export const metadata = {
 }
 
 const agendaData = {
-  'Day 1 - August 25': [
+  'Day 1 - November 3rd': [
     {
       time: '8:00 - 9:00',
       title: 'Registration & Check-in',
@@ -38,7 +38,37 @@ const agendaData = {
       description: 'Awards ceremony and gala dinner'
     }
   ],
-  'Day 3 - August 27': [
+  'Day 2 - November 4th': [
+    {
+      time: '9:00 - 9:30',
+      title: 'Morning Networking',
+      type: 'networking',
+      location: 'Main Lobby',
+      description: 'Day 2 networking and coffee'
+    },
+    {
+      time: '9:30 - 11:00',
+      title: 'Research Presentations',
+      type: 'presentation',
+      location: 'Main Auditorium',
+      description: 'Latest research in communicable and non-communicable diseases'
+    },
+    {
+      time: '11:30 - 12:30',
+      title: 'Technology Panel',
+      type: 'panel',
+      location: 'Conference Hall A',
+      description: 'Digital health innovations and implementations'
+    },
+    {
+      time: '14:00 - 15:30',
+      title: 'Workshop Sessions',
+      type: 'workshop',
+      location: 'Various Rooms',
+      description: 'Interactive workshops on health system strengthening'
+    }
+  ],
+    'Day 3 - November 5th': [
     {
       time: '9:00 - 9:30',
       title: 'Morning Session',
@@ -90,7 +120,7 @@ const agendaData = {
       description: 'Final networking and goodbyes'
     }
   ],
-  'Day 4 - August 28': [
+  'Day 4 - November 6th': [
     {
       time: '9:00 - 10:00',
       title: 'Final Plenary Session',
@@ -104,6 +134,29 @@ const agendaData = {
       type: 'presentation',
       location: 'Main Auditorium',
       description: 'Summary and next steps'
+    }
+  ],
+  'Day 5 - November 7th': [
+    {
+      time: '9:00 - 10:00',
+      title: 'Final Keynote',
+      type: 'keynote',
+      location: 'Main Auditorium',
+      description: 'Looking forward: Future of health systems in Uganda'
+    },
+    {
+      time: '10:30 - 11:30',
+      title: 'Action Planning Session',
+      type: 'workshop',
+      location: 'Conference Hall A',
+      description: 'Developing concrete action plans for implementation'
+    },
+    {
+      time: '12:00 - 13:00',
+      title: 'Closing Ceremony',
+      type: 'keynote',
+      location: 'Main Auditorium',
+      description: 'Official conference closing and next steps'
     }
   ]
 };

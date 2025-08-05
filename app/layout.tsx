@@ -8,8 +8,9 @@ import type { ReactNode } from 'react'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: 'The Communicable and Non-Communicable Diseases Conference 2025',
-  description: 'Join Uganda\'s premier national health conference organized by the Ministry of Health. Integerated Health Systems for a Resilient Future: Harnessing Technology in Combating Diseases.',
+  description: 'Join Uganda\'s premier national health conference organized by the Ministry of Health. Addressing critical health challenges through collaboration and innovation.',
   keywords: ['uganda health conference', 'ministry of health uganda', 'national health', 'communicable diseases', 'non-communicable diseases', 'health policy'],
   robots: 'index, follow',
   // Security and performance meta tags
