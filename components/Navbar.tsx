@@ -135,18 +135,21 @@ export function Navbar() {
               aria-hidden="true"
             />
             {/* Mobile menu */}
-            <div className="lg:hidden absolute left-0 right-0 top-full mt-2 mx-3 sm:mx-4 bg-white/98 backdrop-blur-sm rounded-xl shadow-2xl z-50 border border-gray-200">
+            <div className="lg:hidden absolute left-0 right-0 top-full mt-2 mx-3 sm:mx-4 bg-white/98 backdrop-blur-sm rounded-xl shadow-2xl z-50 border-2 border-primary-200">
               <div className="p-4 sm:p-6 space-y-1">
                 {/* Main Navigation */}
-                <div className="space-y-1 mb-4">
+                <div className="space-y-2 mb-4">
+                  <div className="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-3 px-4">
+                    Navigation
+                  </div>
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`block px-4 py-3 rounded-lg font-medium transition-colors transform hover:scale-105 touch-target ${
+                      className={`block px-4 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 touch-target ${
                         pathname === item.href
-                          ? 'bg-primary-50 text-primary-700 border-l-4 border-primary-500'
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-primary-600'
+                          ? 'bg-primary-600 text-white shadow-lg border-l-4 border-primary-400'
+                          : 'bg-primary-50 text-primary-800 hover:bg-primary-100 hover:text-primary-900 border-l-4 border-transparent hover:border-primary-300'
                       }`}
                       onClick={() => setIsOpen(false)}
                     >
@@ -156,15 +159,18 @@ export function Navbar() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-3 pt-4 border-t border-gray-200">
+                <div className="space-y-3 pt-4 border-t border-primary-200">
+                  <div className="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-3 px-4">
+                    Quick Actions
+                  </div>
                   {actionItems.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`block px-4 py-3 rounded-lg font-medium text-center transition-all duration-200 transform hover:scale-105 touch-target ${
+                      className={`block px-4 py-3 rounded-lg font-semibold text-center transition-all duration-200 transform hover:scale-105 touch-target shadow-md ${
                         item.type === 'primary'
-                          ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg'
-                          : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md'
+                          ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg border-2 border-primary-600 hover:border-primary-700'
+                          : 'bg-orange-500 text-white hover:bg-orange-600 border-2 border-orange-500 hover:border-orange-600'
                       }`}
                       onClick={() => setIsOpen(false)}
                     >
