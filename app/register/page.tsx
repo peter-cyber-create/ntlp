@@ -306,45 +306,57 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
               {ticketTypes.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className={`bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] focus-within:scale-[1.02] focus-within:ring-2 focus-within:ring-primary-400 touch-target ${selectedTicket === ticket.id ? 'ring-4 ring-primary-500 scale-[1.02]' : 'hover:shadow-lg'}`}
+                  className={`bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border-2 p-3 sm:p-4 lg:p-6 cursor-pointer transition-all duration-200 hover:shadow-xl ${
+                    selectedTicket === ticket.id 
+                      ? 'border-primary-500 bg-primary-50 shadow-xl ring-2 ring-primary-500/30' 
+                      : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
+                  }`}
                   onClick={() => handleTicketSelect(ticket.id)}
                   tabIndex={0}
                   role="button"
                   aria-label={ticket.name}
                 >
-                  <div className="text-center mb-6">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{ticket.name}</h3>
-                    <div className="flex items-center justify-center space-x-2 mb-2">
-                      <span className="text-4xl font-bold text-primary-600">{ticket.price}</span>
-                      {/* No originalPrice for new ticket types */}
+                  {/* Header Section */}
+                  <div className="text-center mb-4 sm:mb-5">
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2 leading-tight">{ticket.name}</h3>
+                    <div className="mb-3">
+                      <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-600">{ticket.price}</span>
                     </div>
-                    <p className="text-gray-600">{ticket.description}</p>
+                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{ticket.description}</p>
                   </div>
 
-                  <ul className="space-y-3 mb-8">
-                    {ticket.features.map((feature, index) => (
-                      <li key={index} className="flex items-center space-x-3">
-                        <Check className="text-green-500 flex-shrink-0" size={20} />
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Features Section */}
+                  <div className="mb-4 sm:mb-6">
+                    <ul className="space-y-2 sm:space-y-3">
+                      {ticket.features.map((feature, index) => (
+                        <li key={index} className="flex items-start space-x-3">
+                          <Check className="text-green-500 flex-shrink-0 mt-0.5" size={16} />
+                          <span className="text-sm sm:text-base text-gray-700 leading-relaxed">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-                  <div className="text-center">
-                    <div className={`inline-flex items-center justify-center w-6 h-6 rounded-full border-2 ${
+                  {/* Selection Indicator */}
+                  <div className="text-center pt-3 border-t border-gray-200">
+                    <div className={`inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 transition-all duration-200 ${
                       selectedTicket === ticket.id
-                        ? 'bg-primary-600 border-primary-600'
-                        : 'border-gray-300'
+                        ? 'bg-primary-600 border-primary-600 shadow-lg'
+                        : 'border-gray-300 hover:border-primary-400'
                     }`}>
                       {selectedTicket === ticket.id && (
                         <Check className="text-white" size={16} />
                       )}
                     </div>
-                    {/* No deadline for new ticket types */}
+                    <p className={`text-xs sm:text-sm mt-2 font-medium ${
+                      selectedTicket === ticket.id ? 'text-primary-600' : 'text-gray-500'
+                    }`}>
+                      {selectedTicket === ticket.id ? 'Selected' : 'Select this option'}
+                    </p>
                   </div>
                 </div>
               ))}

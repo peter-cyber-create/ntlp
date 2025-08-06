@@ -135,18 +135,18 @@ export function Navbar() {
               aria-hidden="true"
             />
             {/* Mobile menu */}
-            <div className="lg:hidden absolute left-0 right-0 top-full mt-2 mx-3 sm:mx-4 bg-white/98 backdrop-blur-sm rounded-xl shadow-2xl z-50 border-2 border-primary-200">
-              <div className="p-4 sm:p-6 space-y-1">
+            <div className="lg:hidden absolute left-0 right-0 top-full mt-2 mx-2 sm:mx-4 bg-white/98 backdrop-blur-sm rounded-xl shadow-2xl z-50 border-2 border-primary-200 max-h-[85vh] overflow-y-auto">
+              <div className="p-3 sm:p-4 space-y-1">
                 {/* Main Navigation */}
-                <div className="space-y-2 mb-4">
-                  <div className="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-3 px-4">
+                <div className="space-y-1 mb-3">
+                  <div className="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-2 px-3">
                     Navigation
                   </div>
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`block px-4 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 touch-target ${
+                      className={`block px-3 py-2.5 rounded-lg font-medium transition-all duration-200 text-sm ${
                         pathname === item.href
                           ? 'bg-primary-600 text-white shadow-lg border-l-4 border-primary-400'
                           : 'bg-primary-50 text-primary-800 hover:bg-primary-100 hover:text-primary-900 border-l-4 border-transparent hover:border-primary-300'
@@ -159,15 +159,15 @@ export function Navbar() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-3 pt-4 border-t border-primary-200">
-                  <div className="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-3 px-4">
+                <div className="space-y-2 pt-3 border-t border-primary-200">
+                  <div className="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-2 px-3">
                     Quick Actions
                   </div>
                   {actionItems.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`block px-4 py-3 rounded-lg font-semibold text-center transition-all duration-200 transform hover:scale-105 touch-target shadow-md ${
+                      className={`block px-3 py-2.5 rounded-lg font-semibold text-center transition-all duration-200 text-sm shadow-md ${
                         item.type === 'primary'
                           ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg border-2 border-primary-600 hover:border-primary-700'
                           : 'bg-orange-500 text-white hover:bg-orange-600 border-2 border-orange-500 hover:border-orange-600'

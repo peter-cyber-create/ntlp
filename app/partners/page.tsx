@@ -14,18 +14,6 @@ export default function PartnersPage() {
       description: 'Uganda’s premier health sciences college, leading research, training, and innovation in health.',
       website: 'https://chs.mak.ac.ug/'
     },
-    {
-      name: 'World Health Organization (WHO)',
-      logo: '/images/who-logo.png',
-      description: 'The UN health agency coordinating international health efforts worldwide.',
-      website: 'https://www.who.int/uganda'
-    },
-    {
-      name: 'Infectious Diseases Institute (IDI)',
-      logo: '/images/idi-logo.png',
-      description: 'Makerere University-based institute providing clinical care, research and training.',
-      website: 'https://www.idi.mak.ac.ug'
-    }
   ];
 
   const sponsorshipTiers = [
@@ -144,7 +132,7 @@ export default function PartnersPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {sponsorshipTiers.map((tier, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 text-gray-900 shadow-md hover:shadow-lg transition-shadow transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400 flex flex-col">
+              <div key={index} className="bg-white rounded-2xl p-6 text-gray-900 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400 flex flex-col">
                 <div className={`h-3 rounded-t-lg ${tier.color} mb-6`}></div>
                 <h3 className="text-xl font-bold mb-2">{tier.name}</h3>
                 <div className="text-3xl font-bold text-primary-600 mb-4">{tier.price}</div>
