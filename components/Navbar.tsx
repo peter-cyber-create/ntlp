@@ -54,7 +54,7 @@ export function Navbar() {
 
   return (
     <nav className={
-      `floating-nav bg-white/80 shadow-md backdrop-blur-md border-b border-primary-200 fixed top-[10px] sm:top-[20px] left-1/2 -translate-x-1/2 rounded-xl sm:rounded-2xl max-w-[96vw] sm:max-w-[98vw] lg:max-w-[1600px] w-full mx-auto z-40 transition-all duration-300 py-1 sm:py-2 px-3 sm:px-6 flex items-center`
+      `floating-nav bg-white sm:bg-white/80 shadow-md backdrop-blur-md border-b border-primary-200 fixed top-[10px] sm:top-[20px] left-1/2 -translate-x-1/2 rounded-xl sm:rounded-2xl max-w-[96vw] sm:max-w-[98vw] lg:max-w-[1600px] w-full mx-auto z-40 transition-all duration-300 py-1 sm:py-2 px-3 sm:px-6 flex items-center`
     }>
       <div className="flex justify-between items-center w-full flex-nowrap">
         <div className="flex justify-between items-center min-h-[3.5rem] sm:min-h-[4.5rem] py-1 sm:py-2 w-full flex-nowrap gap-1 sm:gap-2">
