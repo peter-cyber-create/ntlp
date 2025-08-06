@@ -123,7 +123,6 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Form submitted!', { formData, selectedTicket })
     
     // Check if ticket is selected
     if (!selectedTicket) {
@@ -204,7 +203,6 @@ export default function RegisterPage() {
     }
 
     setIsSubmitting(true)
-    console.log('Sending registration data:', { ...formData, registrationType: selectedTicket })
     
     try {
       const response = await fetch('/api/registrations', {
@@ -218,9 +216,7 @@ export default function RegisterPage() {
         }),
       })
 
-      console.log('Response status:', response.status)
       const result = await response.json()
-      console.log('Response data:', result)
 
       if (result.success) {
         const registrationId = `REG-${Date.now()}`
