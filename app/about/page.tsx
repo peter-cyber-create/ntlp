@@ -10,14 +10,14 @@ export default function AboutPage() {
   return (
     <div className="bg-primary-50 min-h-screen pb-10">
       {/* Hero Section */}
-      <section className="relative w-full bg-gradient-to-r from-primary-600 to-primary-800 text-white py-14 px-2 sm:px-0">
-        <div className="flex justify-center mb-10">
-          <div className="h-1 w-24 bg-gradient-to-r from-primary-500 via-primary-400 to-primary-700 rounded-full opacity-70" />
+      <section className="relative w-full bg-gradient-to-r from-primary-600 to-primary-800 text-white py-8 sm:py-14 px-3 sm:px-6">
+        <div className="flex justify-center mb-6 sm:mb-10">
+          <div className="h-1 w-16 sm:w-24 bg-gradient-to-r from-primary-500 via-primary-400 to-primary-700 rounded-full opacity-70" />
         </div>
-        <div className="max-w-5xl mx-auto text-center rounded-2xl shadow-2xl bg-primary-900/95 p-7 sm:p-12 border border-primary-800 flex flex-col gap-7 transition-transform duration-200 hover:scale-[1.01]">
+        <div className="max-w-5xl mx-auto text-center rounded-xl sm:rounded-2xl shadow-2xl bg-primary-900/95 p-4 sm:p-7 md:p-12 border border-primary-800 flex flex-col gap-4 sm:gap-7 transition-transform duration-200 hover:scale-[1.01]">
           {/* Uganda Coat of Arms */}
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full p-3">
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full p-2 sm:p-3">
               <img 
                 src="/images/uganda-coat-of-arms.png" 
                 alt="Uganda Coat of Arms" 
@@ -25,28 +25,28 @@ export default function AboutPage() {
               />
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-primary-100 drop-shadow">About the Conference</h1>
-          <div className="mb-6">
-            <div className="inline-flex items-center px-4 py-2 bg-primary-500/20 border border-primary-300/30 rounded-full text-primary-100 text-sm font-medium">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 sm:mb-4 tracking-tight text-primary-100 drop-shadow leading-tight">About the Conference</h1>
+          <div className="mb-4 sm:mb-6">
+            <div className="inline-flex items-center px-3 sm:px-4 py-2 bg-primary-500/20 border border-primary-300/30 rounded-full text-primary-100 text-xs sm:text-sm font-medium text-center">
               Organized by Ministry of Health & Makerere University School of Public Health
             </div>
           </div>
-          <p className="text-xl text-primary-100 max-w-4xl mx-auto leading-relaxed mb-6">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-primary-100 max-w-4xl mx-auto leading-relaxed mb-4 sm:mb-6 px-2">
             Welcome to the National Annual Communicable and Non-Communicable Diseases (NACNDC) Conference and the 19th Joint Annual Scientific Health (JASH) Conference 2025. 
             This is a joint national event organized by Ministry of Health and Makerere University School of Public Health to bring together healthcare leaders, researchers, policymakers, and innovators under one roof to tackle the country's major health challenges.
           </p>
-          <div className="mt-6 p-6 bg-primary-800/50 rounded-lg max-w-4xl mx-auto">
-            <p className="text-primary-100 font-medium text-center mb-4">
-              The conference will take place from <span className="font-bold text-white">3rd to 7th November 2025</span> at <span className="font-bold text-white">Speke Resort Munyonyo</span>, and will be held alongside the <span className="font-bold text-white">100-year celebration of Makerere University College of Health Sciences</span>.
+          <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-primary-800/50 rounded-lg max-w-4xl mx-auto">
+            <p className="text-primary-100 font-medium text-center mb-3 sm:mb-4 text-sm sm:text-base">
+              The conference will take place from <span className="font-bold text-white">3rd - 7th November, 2025</span> at <span className="font-bold text-white">Speke Resort Munyonyo</span>, and will be held alongside the <span className="font-bold text-white">100-year celebration of Makerere University College of Health Sciences</span>.
             </p>
-            <div className="flex flex-wrap justify-center gap-4 mt-4">
-              <div className="flex items-center gap-2 bg-primary-700/50 px-3 py-2 rounded-lg">
-                <Calendar className="w-4 h-4" />
-                <span className="text-sm font-medium">Nov 3-7, 2025</span>
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mt-3 sm:mt-4">
+              <div className="flex items-center gap-1 sm:gap-2 bg-primary-700/50 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg">
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="text-xs sm:text-sm font-medium">3rd - 7th November, 2025</span>
               </div>
-              <div className="flex items-center gap-2 bg-primary-700/50 px-3 py-2 rounded-lg">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm font-medium">Speke Resort Munyonyo</span>
+              <div className="flex items-center gap-1 sm:gap-2 bg-primary-700/50 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg">
+                <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="text-xs sm:text-sm font-medium">Speke Resort Munyonyo</span>
               </div>
               <div className="flex items-center gap-2 bg-primary-700/50 px-3 py-2 rounded-lg">
                 <GraduationCap className="w-4 h-4" />

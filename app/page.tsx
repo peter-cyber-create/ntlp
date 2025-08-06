@@ -24,27 +24,27 @@ export default function HomePage() {
   return (
     <>
       {/* Hero Section with Slideshow, Overlay, and Title */}
-      <section className="relative min-h-[70vh] flex flex-col justify-center items-center overflow-hidden border-b border-primary-900">
+      <section className="relative min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] flex flex-col justify-center items-center overflow-hidden border-b border-primary-900">
         <div className="absolute inset-0 z-0 w-full h-full">
           <HomeSlideshow />
           {/* Gradient overlay for readability */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent" />
         </div>
-        <div className="relative z-10 flex flex-col items-center justify-center w-full h-full pt-16 pb-8 animate-fade-in">
-          <h1 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-2 tracking-tight leading-tight drop-shadow-xl animate-slide-up text-center px-4">
+        <div className="relative z-10 flex flex-col items-center justify-center w-full h-full pt-16 pb-8 px-3 sm:px-4 md:px-6 animate-fade-in">
+          <h1 className="text-white text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-extrabold mb-3 sm:mb-4 tracking-tight leading-tight drop-shadow-xl animate-slide-up text-center max-w-7xl">
             NATIONAL ANNUAL COMMUNICABLE AND NON COMMUNICABLE DISEASES (NACNDC) AND 19TH JOINT SCIENTIFIC HEALTH(JASH) CONFERENCE 2025
           </h1>
-          <h2 className="text-primary-200 text-lg sm:text-xl md:text-2xl font-bold mb-2 animate-fade-in delay-100 text-center max-w-4xl px-4">
+          <h2 className="text-primary-200 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-3 sm:mb-4 animate-fade-in delay-100 text-center max-w-5xl px-2">
             UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES
           </h2>
-          <p className="text-primary-200 text-base sm:text-xl font-medium mb-4 animate-fade-in delay-200 text-center max-w-2xl">
-            November 3-7, 2025 • Speke Resort Munyonyo, Uganda
+          <p className="text-primary-200 text-sm sm:text-base md:text-lg lg:text-xl font-medium mb-4 sm:mb-6 animate-fade-in delay-200 text-center max-w-3xl px-2">
+            3rd - 7th November, 2025 • Speke Resort Munyonyo, Uganda
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center animate-fade-in delay-300">
-            <Link href="/register" className="btn-primary px-6 py-2.5 rounded-lg font-semibold text-base shadow-lg hover:scale-105 transition-transform duration-200">
+          <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 justify-center items-center animate-fade-in delay-300 w-full max-w-md sm:max-w-none px-4">
+            <Link href="/register" className="btn-primary w-full xs:w-auto text-center min-h-[44px] flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-200">
               Register Now
             </Link>
-            <Link href="/abstracts" className="border-2 border-white text-white hover:bg-white hover:text-primary-900 px-6 py-2.5 rounded-lg font-semibold text-base shadow-lg transition-all duration-200">
+            <Link href="/abstracts" className="border-2 border-white text-white hover:bg-white hover:text-primary-900 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold text-sm sm:text-base shadow-lg transition-all duration-200 w-full xs:w-auto text-center min-h-[44px] flex items-center justify-center">
               Submit Abstract
             </Link>
           </div>
@@ -112,7 +112,7 @@ export default function HomePage() {
             <div className="flex flex-col items-center bg-primary-950/80 border border-primary-700 rounded-2xl p-6 shadow-md w-full sm:w-1/3">
               <Calendar className="w-8 h-8 text-primary-400 mb-2" />
               <span className="text-lg font-bold text-primary-100">Dates</span>
-              <span className="text-primary-200 mt-1">November 3-7, 2025</span>
+              <span className="text-primary-200 mt-1">3rd - 7th November, 2025</span>
             </div>
             <div className="flex flex-col items-center bg-primary-950/80 border border-primary-700 rounded-2xl p-6 shadow-md w-full sm:w-1/3">
               <MapPin className="w-8 h-8 text-primary-400 mb-2" />

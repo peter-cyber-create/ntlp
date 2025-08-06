@@ -284,10 +284,10 @@ export default function RegisterPage() {
       <section className="bg-gradient-to-r from-primary-600 to-primary-800 text-white section-padding">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-center leading-tight">
               Register for NACNDC & JASH Conference 2025
             </h1>
-            <p className="text-xl text-primary-100 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-primary-100 max-w-3xl mx-auto px-2">
               Be part of Uganda's most important health conference at Speke Resort Munyonyo. 
               Register today for UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES.
             </p>
@@ -299,22 +299,22 @@ export default function RegisterPage() {
       <section className="section-padding bg-gray-50">
         <div className="container">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Registration</h2>
-              <p className="text-xl text-gray-600">Choose the option that works best for you</p>
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Choose Your Registration</h2>
+              <p className="text-lg sm:text-xl text-gray-600 px-2">Choose the option that works best for you</p>
               {!selectedTicket && (
-                <p className="text-red-600 mt-2 font-medium">⚠️ Please select a ticket type below to continue</p>
+                <p className="text-red-600 mt-2 font-medium text-sm sm:text-base">⚠️ Please select a ticket type below to continue</p>
               )}
               {selectedTicket && (
-                <p className="text-green-600 mt-2 font-medium">✅ {ticketTypes.find(t => t.id === selectedTicket)?.name} ticket selected</p>
+                <p className="text-green-600 mt-2 font-medium text-sm sm:text-base">✅ {ticketTypes.find(t => t.id === selectedTicket)?.name} ticket selected</p>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {ticketTypes.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className={`bg-white rounded-2xl shadow-lg p-8 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] focus-within:scale-[1.02] focus-within:ring-2 focus-within:ring-primary-400 ${selectedTicket === ticket.id ? 'ring-4 ring-primary-500 scale-[1.02]' : 'hover:shadow-lg'}`}
+                  className={`bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] focus-within:scale-[1.02] focus-within:ring-2 focus-within:ring-primary-400 touch-target ${selectedTicket === ticket.id ? 'ring-4 ring-primary-500 scale-[1.02]' : 'hover:shadow-lg'}`}
                   onClick={() => handleTicketSelect(ticket.id)}
                   tabIndex={0}
                   role="button"
@@ -372,7 +372,7 @@ export default function RegisterPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                     First Name *
@@ -387,7 +387,7 @@ export default function RegisterPage() {
                     required
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 form-input-mobile touch-target"
                     placeholder="Enter your first name"
                   />
                 </div>
@@ -406,13 +406,13 @@ export default function RegisterPage() {
                     required
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 form-input-mobile touch-target"
                     placeholder="Enter your last name"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address *

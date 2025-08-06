@@ -10,6 +10,8 @@
   body {
     @apply text-gray-900 bg-white;
     color: #111827; /* Ensure dark text on light backgrounds */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   /* Ensure text is visible on all backgrounds */
@@ -20,27 +22,34 @@
   .text-on-light {
     @apply text-gray-900;
   }
+  
+  /* Mobile viewport fix */
+  @media screen and (max-width: 768px) {
+    body {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+  }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-semibold py-2 px-4 sm:py-3 sm:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg text-sm sm:text-base;
+    @apply bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-semibold py-2 px-4 sm:py-3 sm:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg text-sm sm:text-base min-h-[44px] flex items-center justify-center;
   }
   
   .btn-secondary {
-    @apply bg-white hover:bg-primary-50 active:bg-primary-100 text-primary-600 border border-primary-600 hover:border-primary-700 font-semibold py-2 px-4 sm:py-3 sm:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg text-sm sm:text-base;
+    @apply bg-white hover:bg-primary-50 active:bg-primary-100 text-primary-600 border border-primary-600 hover:border-primary-700 font-semibold py-2 px-4 sm:py-3 sm:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg text-sm sm:text-base min-h-[44px] flex items-center justify-center;
   }
   
   .section-padding {
-    @apply py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8;
+    @apply py-8 sm:py-12 md:py-16 lg:py-20 px-3 sm:px-4 md:px-6 lg:px-8;
   }
   
   .container {
-    @apply max-w-7xl mx-auto;
+    @apply max-w-7xl mx-auto px-3 sm:px-4 md:px-6;
   }
   
   .floating-nav {
-    @apply fixed top-4 left-0 right-0 z-40 transition-all duration-300;
+    @apply fixed top-2 sm:top-4 left-0 right-0 z-40 transition-all duration-300;
   }
   
   .nav-scrolled {
@@ -53,7 +62,7 @@
   
   /* Add padding for floating navbar */
   .main-content {
-    @apply pt-20 sm:pt-24 lg:pt-28;
+    @apply pt-16 sm:pt-20 md:pt-24 lg:pt-28;
   }
   
   /* Reduce padding for admin pages */
@@ -61,7 +70,7 @@
     @apply pt-6 sm:pt-8;
   }
   
-  /* Responsive text utilities */
+  /* Mobile-first responsive text utilities */
   .text-responsive-xs {
     @apply text-xs sm:text-sm md:text-base;
   }
@@ -84,5 +93,132 @@
   
   .text-responsive-2xl {
     @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl;
+  }
+  
+  /* Mobile touch targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+  
+  /* Mobile form improvements */
+  .form-input-mobile {
+    @apply text-base; /* Prevents zoom on iOS */
+  }
+  
+  /* Safe area padding for notched devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Mobile card styling */
+  .card-mobile {
+    @apply p-4 sm:p-6 rounded-lg shadow-md;
+  }
+  
+  /* Mobile table responsiveness */
+  .table-mobile {
+    @apply overflow-x-auto -webkit-overflow-scrolling-touch;
+  }
+}
+
+/* Mobile-specific responsive improvements */
+@media (max-width: 640px) {
+  /* Hero sections on mobile */
+  .hero-mobile {
+    min-height: 50vh !important;
+    padding: 1rem !important;
+  }
+  
+  /* Better button spacing on mobile */
+  .btn-group-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+  
+  .btn-group-mobile > * {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Improved card layout on mobile */
+  .cards-mobile {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  /* Mobile form improvements */
+  .form-mobile input,
+  .form-mobile select,
+  .form-mobile textarea {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 0.875rem !important;
+  }
+  
+  /* Mobile navigation improvements */
+  .nav-mobile {
+    padding: 0.5rem 1rem !important;
+    border-radius: 0.75rem !important;
+    top: 0.5rem !important;
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    width: calc(100% - 1rem) !important;
+    max-width: none !important;
+  }
+}
+
+/* Portrait orientation optimizations */
+@media screen and (orientation: portrait) and (max-width: 768px) {
+  .hero-portrait {
+    min-height: 60vh;
+  }
+  
+  .text-hero-mobile {
+    font-size: 1.125rem !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .hero-landscape {
+    min-height: 80vh;
+    padding: 0.5rem;
+  }
+  
+  .nav-landscape {
+    padding: 0.25rem 0.75rem !important;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .hover-effect:hover {
+    transform: none !important;
+  }
+  
+  /* Ensure all interactive elements are touch-friendly */
+  button, 
+  .btn, 
+  [role="button"], 
+  a[href] {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .no-touch-hover:hover {
+    background-color: inherit !important;
+    color: inherit !important;
+    transform: none !important;
   }
 }

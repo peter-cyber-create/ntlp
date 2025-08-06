@@ -37,19 +37,30 @@ export function Navbar() {
       setIsScrolled(window.scrollY > 50)
     }
 
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false)
+      }
+    }
+
     window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    document.addEventListener('keydown', handleEscape)
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [])
 
   return (
     <nav className={
-      `floating-nav bg-white/80 shadow-md backdrop-blur-md border-b border-primary-200 fixed top-[20px] left-1/2 -translate-x-1/2 rounded-2xl max-w-[98vw] lg:max-w-[1600px] w-full mx-auto z-40 transition-all duration-300 py-2 px-6 flex items-center`
+      `floating-nav bg-white/80 shadow-md backdrop-blur-md border-b border-primary-200 fixed top-[10px] sm:top-[20px] left-1/2 -translate-x-1/2 rounded-xl sm:rounded-2xl max-w-[96vw] sm:max-w-[98vw] lg:max-w-[1600px] w-full mx-auto z-40 transition-all duration-300 py-1 sm:py-2 px-3 sm:px-6 flex items-center`
     }>
       <div className="flex justify-between items-center w-full flex-nowrap">
-        <div className="flex justify-between items-center min-h-[4.5rem] py-2 w-full flex-nowrap gap-2">
+        <div className="flex justify-between items-center min-h-[3.5rem] sm:min-h-[4.5rem] py-1 sm:py-2 w-full flex-nowrap gap-1 sm:gap-2">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center">
               <img 
                 src="/images/uganda-coat-of-arms.png" 
                 alt="Uganda Coat of Arms" 
@@ -57,11 +68,11 @@ export function Navbar() {
               />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className={`font-bold text-sm sm:text-base lg:text-lg leading-tight transition-colors ${shouldUseWhiteText ? 'text-white' : 'text-gray-900'}`}>
+              <span className={`font-bold text-xs sm:text-sm lg:text-base xl:text-lg leading-tight transition-colors ${shouldUseWhiteText ? 'text-white' : 'text-gray-900'}`}>
                 <span className="block">NACNDC & JASH</span>
                 <span className="block">Conference <span className="font-extrabold">2025</span></span>
               </span>
-              <span className={`text-xs sm:text-sm font-medium transition-colors ${shouldUseWhiteText ? 'text-primary-200' : 'text-gray-600'}`}>
+              <span className={`text-[10px] sm:text-xs md:text-sm font-medium transition-colors ${shouldUseWhiteText ? 'text-primary-200' : 'text-gray-600'}`}>
                 Ministry of Health Uganda
               </span>
             </div>
@@ -103,57 +114,67 @@ export function Navbar() {
 
           {/* Mobile menu button */}
           <button
-            className={`lg:hidden p-2 rounded-lg transition-colors ${
+            className={`lg:hidden p-3 rounded-lg transition-colors touch-target ${
               shouldUseWhiteText ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'
             }`}
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle navigation menu"
+            aria-expanded={isOpen}
           >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden absolute left-0 right-0 top-full mt-2 mx-4 bg-white/98 backdrop-blur-sm rounded-xl shadow-2xl z-50 border border-gray-200">
-            <div className="p-6 space-y-1 max-h-96 overflow-y-auto">
-              {/* Main Navigation */}
-              <div className="space-y-1 mb-4">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`block px-4 py-3 rounded-lg font-medium transition-colors transform hover:scale-105 ${
-                      pathname === item.href
-                        ? 'bg-primary-50 text-primary-700 border-l-4 border-primary-500'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-primary-600'
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
+          <>
+            {/* Backdrop */}
+            <div 
+              className="lg:hidden fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+              aria-hidden="true"
+            />
+            {/* Mobile menu */}
+            <div className="lg:hidden absolute left-0 right-0 top-full mt-2 mx-3 sm:mx-4 bg-white/98 backdrop-blur-sm rounded-xl shadow-2xl z-50 border border-gray-200">
+              <div className="p-4 sm:p-6 space-y-1">
+                {/* Main Navigation */}
+                <div className="space-y-1 mb-4">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`block px-4 py-3 rounded-lg font-medium transition-colors transform hover:scale-105 touch-target ${
+                        pathname === item.href
+                          ? 'bg-primary-50 text-primary-700 border-l-4 border-primary-500'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-primary-600'
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
 
-              {/* Action Buttons */}
-              <div className="space-y-3 pt-4 border-t border-gray-200">
-                {actionItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`block px-4 py-3 rounded-lg font-medium text-center transition-all duration-200 transform hover:scale-105 ${
-                      item.type === 'primary'
-                        ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg'
-                        : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md'
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
+                {/* Action Buttons */}
+                <div className="space-y-3 pt-4 border-t border-gray-200">
+                  {actionItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`block px-4 py-3 rounded-lg font-medium text-center transition-all duration-200 transform hover:scale-105 touch-target ${
+                        item.type === 'primary'
+                          ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg'
+                          : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md'
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </nav>

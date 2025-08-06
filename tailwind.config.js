@@ -7,6 +7,25 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '475px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+      },
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
+      },
+      fontSize: {
+        'xs-mobile': ['0.75rem', { lineHeight: '1rem' }],
+        'sm-mobile': ['0.875rem', { lineHeight: '1.25rem' }],
+        'base-mobile': ['1rem', { lineHeight: '1.5rem' }],
+      },
       colors: {
         primary: {
           50: '#f8fafc',
