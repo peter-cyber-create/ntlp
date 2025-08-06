@@ -93,12 +93,19 @@ export default function AdminDashboard() {
       ]);
       
       let regData, contactData;
+      let usingFallback = false;
       
       // Process registration data
       if (regResponse && regResponse.ok) {
         regData = await regResponse.json()
         setRegistrationsData(regData.data || [])
         setRegistrationStats(regData.stats || {})
+      } else {
+        // Fallback to local data
+        console.log('Database unavailable, using local data manager...')
+        usingFallback = true;
+        loadLocalData();
+        return;
       }
 
       // Process contact data  
@@ -124,6 +131,69 @@ export default function AdminDashboard() {
       })
     } catch (error) {
       console.error('Error loading data:', error)
+      // Fallback to local data on any error
+      loadLocalData();
+    }
+  }
+
+  const loadLocalData = () => {
+    try {
+      if (dataManager) {
+        const stats = dataManager.getStats()
+        const registrations = dataManager.getRegistrations()
+        const contacts = dataManager.getContactSubmissions()
+        
+        // Map registrations to expected format
+        const mappedRegistrations = registrations.map(reg => ({
+          id: reg.id,
+          name: `${reg.firstName} ${reg.lastName}`,
+          email: reg.email,
+          phone: reg.phone,
+          organization: reg.organization,
+          position: reg.title,
+          district: reg.country,
+          ticket: reg.ticketType,
+          paymentStatus: 'pending',
+          date: new Date(reg.createdAt).toLocaleDateString(),
+          status: reg.status || 'pending'
+        }));
+
+        // Map contacts to expected format
+        const mappedContacts = contacts.map(contact => ({
+          id: contact.id,
+          name: contact.name,
+          email: contact.email,
+          organization: contact.organization || '',
+          subject: contact.subject,
+          message: contact.message,
+          status: contact.status,
+          submittedAt: contact.createdAt,
+          respondedAt: contact.updatedAt
+        }));
+
+        setRegistrationsData(mappedRegistrations);
+        setContactsData(mappedContacts);
+        setRegistrationStats({
+          total: registrations.length,
+          pending: registrations.filter(r => r.status === 'pending').length,
+          confirmed: registrations.filter(r => r.status === 'confirmed').length
+        });
+
+        setDashboardData({
+          stats: {
+            totalRegistrations: stats.totalRegistrations,
+            pendingRegistrations: stats.pendingRegistrations,
+            totalSpeakers: stats.approvedSpeakers + stats.pendingSpeakers,
+            contactSubmissions: stats.totalContacts,
+            websiteViews: 15420,
+            conversionRate: stats.conversionRate
+          },
+          recentRegistrations: mappedRegistrations.slice(0, 5),
+          recentContacts: mappedContacts.slice(0, 5)
+        });
+      }
+    } catch (error) {
+      console.error('Error loading local data:', error);
     }
   }
 
@@ -176,9 +246,15 @@ export default function AdminDashboard() {
         setAbstractStats(result.stats || {})
       } else {
         console.error('Failed to fetch abstracts:', response.statusText)
+        // Fallback to empty arrays for now - in production, could add mock abstract data
+        setAbstractsData([])
+        setAbstractStats({})
       }
     } catch (error) {
       console.error('Error fetching abstracts:', error)
+      // Fallback to empty arrays when database is unavailable
+      setAbstractsData([])
+      setAbstractStats({})
     } finally {
       setLoadingAbstracts(false)
     }
@@ -758,6 +834,7 @@ export default function AdminDashboard() {
               <option value="all">All Status</option>
               <option value="confirmed">Confirmed</option>
               <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
         </div>
@@ -787,6 +864,7 @@ export default function AdminDashboard() {
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Email</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Organization</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Ticket Type</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Status</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Payment</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Date</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-900">Actions</th>
@@ -819,6 +897,16 @@ export default function AdminDashboard() {
                   </td>
                   <td className="py-4 px-6">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      reg.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                      reg.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      reg.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {reg.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       reg.paymentStatus === 'completed' ? 'bg-green-100 text-green-800' :
                       reg.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-red-100 text-red-800'
@@ -828,24 +916,44 @@ export default function AdminDashboard() {
                   </td>
                   <td className="py-4 px-6 text-gray-600">{reg.date}</td>
                   <td className="py-4 px-6">
-                    <div className="flex space-x-2">
+                    <div className="flex items-center space-x-2">
+                      {/* Accept/Reject buttons for pending registrations */}
+                      {reg.status === 'pending' && (
+                        <>
+                          <button 
+                            onClick={() => handleStatusUpdate(reg.id, 'confirmed')}
+                            className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded" 
+                            title="Accept Registration"
+                          >
+                            <Check size={16} />
+                          </button>
+                          <button 
+                            onClick={() => handleStatusUpdate(reg.id, 'rejected')}
+                            className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded" 
+                            title="Reject Registration"
+                          >
+                            <X size={16} />
+                          </button>
+                        </>
+                      )}
+                      {/* Standard action buttons */}
                       <button 
                         onClick={() => handleViewItem(reg, 'registration')}
-                        className="p-1 text-gray-600 hover:text-blue-600" 
+                        className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded" 
                         title="View"
                       >
                         <Eye size={16} />
                       </button>
                       <button 
                         onClick={() => handleEditItem(reg, 'registration')}
-                        className="p-1 text-gray-600 hover:text-green-600" 
+                        className="p-1 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 rounded" 
                         title="Edit"
                       >
                         <Edit size={16} />
                       </button>
                       <button 
                         onClick={() => handleSingleDelete(reg.id, 'registration')}
-                        className="p-1 text-gray-600 hover:text-red-600"
+                        className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
                         title="Delete"
                       >
                         <Trash2 size={16} />

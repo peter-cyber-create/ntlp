@@ -19,7 +19,7 @@ interface Registration {
   accommodationNeeds?: string
   emergencyContact?: string
   emergencyPhone?: string
-  status: 'pending' | 'confirmed' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'cancelled' | 'rejected'
   createdAt: string
   updatedAt: string
 }

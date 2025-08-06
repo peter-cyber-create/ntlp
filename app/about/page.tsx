@@ -2,8 +2,8 @@ import React from 'react'
 import { Target, Globe, Users, Lightbulb } from 'lucide-react'
 
 export const metadata = {
-  title: 'About - The Communicable and Non-Communicable Diseases Conference 2025',
-  description: 'Learn about The Communicable and Non-Communicable Diseases Conference, Uganda premier health conference organized by Ministry of Health Uganda.',
+  title: 'About - NATIONAL ANNUAL COMMUNICABLE AND NON COMMUNICABLE DISEASES (NACNDC) AND 19TH JOINT SCIENTIFIC HEALTH(JASH) CONFERENCE 2025',
+  description: 'Learn about NACNDC AND JASH CONFERENCE 2025, Uganda premier health conference organized by Ministry of Health Uganda. UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES.',
 }
 
 export default function AboutPage() {
@@ -32,10 +32,10 @@ export default function AboutPage() {
             </div>
           </div>
           <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-            The Communicable and Non-Communicable Diseases Conference 2025 is Uganda's premier gathering for healthcare advancement, 
-            organized by the Ministry of Health Uganda, focusing on United Action Against Communicable 
-            and Non-Communicable Diseases, bringing together national healthcare leaders, experts, 
-            and stakeholders to strengthen Uganda's health systems.
+            The NATIONAL ANNUAL COMMUNICABLE AND NON COMMUNICABLE DISEASES (NACNDC) AND 19TH JOINT SCIENTIFIC HEALTH(JASH) CONFERENCE 2025 is Uganda's premier gathering for healthcare advancement, 
+            organized by the Ministry of Health Uganda. Our theme: UNIFIED ACTION AGAINST COMMUNICABLE 
+            AND NON COMMUNICABLE DISEASES, brings together national healthcare leaders, experts, 
+            and stakeholders to strengthen Uganda's health systems at Speke Resort Munyonyo.
           </p>
         </div>
       </section>

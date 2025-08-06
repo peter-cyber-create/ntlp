@@ -16,13 +16,12 @@ export function Footer() {
                 />
               </div>
               <span className="font-bold text-sm sm:text-base lg:text-lg leading-tight block">
-                <span className="block">The Communicable</span>
-                <span className="block">and Non-Communicable Diseases</span>
+                <span className="block">NACNDC & JASH</span>
                 <span className="block">Conference <span className="font-extrabold">2025</span></span>
               </span>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
-              Bringing together Uganda's healthcare professionals and leaders for integrated health systems and technology-driven solutions against communicable and non-communicable diseases.
+              UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES. Bringing together Uganda's healthcare professionals and leaders at Speke Resort Munyonyo for integrated health systems and technology-driven solutions.
             </p>
           </div>
 

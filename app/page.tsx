@@ -4,19 +4,19 @@ import HomeSlideshow from '../components/HomeSlideshow'
 import { Navbar } from '../components/Navbar'
 
 export const metadata = {
-  title: 'The Communicable and Non-Communicable Diseases Conference 2025',
-  description: 'Uganda\'s premier national health conference organized by the Ministry of Health. Join health professionals and leaders addressing critical health challenges.',
-  keywords: 'uganda health conference, ministry of health uganda, national health, communicable diseases, non-communicable diseases, health policy, conference 2025',
+  title: 'NATIONAL ANNUAL COMMUNICABLE AND NON COMMUNICABLE DISEASES (NACNDC) AND 19TH JOINT SCIENTIFIC HEALTH(JASH) CONFERENCE 2025',
+  description: 'Uganda\'s premier national health conference organized by the Ministry of Health. UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES.',
+  keywords: 'uganda health conference, ministry of health uganda, national health, communicable diseases, non-communicable diseases, health policy, conference 2025, NACNDC, JASH',
   openGraph: {
-    title: 'The Communicable and Non-Communicable Diseases Conference 2025',
-    description: 'Uganda\'s premier national health conference organized by the Ministry of Health.',
+    title: 'NATIONAL ANNUAL COMMUNICABLE AND NON COMMUNICABLE DISEASES (NACNDC) AND 19TH JOINT SCIENTIFIC HEALTH(JASH) CONFERENCE 2025',
+    description: 'Uganda\'s premier national health conference organized by the Ministry of Health. UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES.',
     images: ['/images/uganda-coat-of-arms.png'],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'The Communicable and Non-Communicable Diseases Conference 2025',
-    description: 'Uganda\'s premier national health conference organized by the Ministry of Health.',
+    title: 'NATIONAL ANNUAL COMMUNICABLE AND NON COMMUNICABLE DISEASES (NACNDC) AND 19TH JOINT SCIENTIFIC HEALTH(JASH) CONFERENCE 2025',
+    description: 'Uganda\'s premier national health conference organized by the Ministry of Health. UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES.',
   },
 }
 
@@ -31,11 +31,14 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent" />
         </div>
         <div className="relative z-10 flex flex-col items-center justify-center w-full h-full pt-16 pb-8 animate-fade-in">
-          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-2 tracking-tight leading-tight drop-shadow-xl animate-slide-up">
-            The Communicable and Non-Communicable Diseases Conference 2025
+          <h1 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-2 tracking-tight leading-tight drop-shadow-xl animate-slide-up text-center px-4">
+            NATIONAL ANNUAL COMMUNICABLE AND NON COMMUNICABLE DISEASES (NACNDC) AND 19TH JOINT SCIENTIFIC HEALTH(JASH) CONFERENCE 2025
           </h1>
+          <h2 className="text-primary-200 text-lg sm:text-xl md:text-2xl font-bold mb-2 animate-fade-in delay-100 text-center max-w-4xl px-4">
+            UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES
+          </h2>
           <p className="text-primary-200 text-base sm:text-xl font-medium mb-4 animate-fade-in delay-200 text-center max-w-2xl">
-            November 3-7, 2025 • Kampala, Uganda
+            November 3-7, 2025 • Speke Resort Munyonyo, Uganda
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center animate-fade-in delay-300">
             <Link href="/register" className="btn-primary px-6 py-2.5 rounded-lg font-semibold text-base shadow-lg hover:scale-105 transition-transform duration-200">
@@ -114,7 +117,7 @@ export default function HomePage() {
             <div className="flex flex-col items-center bg-primary-950/80 border border-primary-700 rounded-2xl p-6 shadow-md w-full sm:w-1/3">
               <MapPin className="w-8 h-8 text-primary-400 mb-2" />
               <span className="text-lg font-bold text-primary-100">Venue</span>
-              <span className="text-primary-200 mt-1">Kampala Serena Hotel, Uganda</span>
+              <span className="text-primary-200 mt-1">Speke Resort Munyonyo, Uganda</span>
             </div>
             <div className="flex flex-col items-center bg-primary-950/80 border border-primary-700 rounded-2xl p-6 shadow-md w-full sm:w-1/3">
               <Users className="w-8 h-8 text-primary-400 mb-2" />

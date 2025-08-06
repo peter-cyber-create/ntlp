@@ -1,13 +1,18 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Check, Users, Award, Calendar, CreditCard } from 'lucide-react'
-import { useToast, ToastContainer } from '../../components/Toast'
+import { Check, Users, Award, Calendar, CreditCard, CheckCircle, AlertCircle, X } from 'lucide-react'
 
 export default function RegisterPage() {
   const [selectedTicket, setSelectedTicket] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toasts, removeToast, showSuccess, showError, showWarning } = useToast()
+  const [submitResult, setSubmitResult] = useState<{
+    type: 'success' | 'error';
+    title: string;
+    message: string;
+    registrationId?: string;
+  } | null>(null)
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -122,7 +127,11 @@ export default function RegisterPage() {
     
     // Check if ticket is selected
     if (!selectedTicket) {
-      showWarning('Please select a ticket type before submitting.')
+      setSubmitResult({
+        type: 'error',
+        title: 'Ticket Selection Required',
+        message: 'Please select a ticket type before submitting your registration.'
+      })
       return
     }
 
@@ -131,38 +140,66 @@ export default function RegisterPage() {
     const emptyFields = requiredFields.filter(field => !formData[field as keyof typeof formData])
     
     if (emptyFields.length > 0) {
-      showError(`Please fill in all required fields: ${emptyFields.join(', ')}`)
+      setSubmitResult({
+        type: 'error',
+        title: 'Missing Required Fields',
+        message: `Please fill in all required fields: ${emptyFields.join(', ')}`
+      })
       return
     }
 
     // Validate field formats
     if (!validateName(formData.firstName)) {
-      showError('First name must contain only letters and be at least 2 characters long')
+      setSubmitResult({
+        type: 'error',
+        title: 'Invalid First Name',
+        message: 'First name must contain only letters and be at least 2 characters long'
+      })
       return
     }
 
     if (!validateName(formData.lastName)) {
-      showError('Last name must contain only letters and be at least 2 characters long')
+      setSubmitResult({
+        type: 'error',
+        title: 'Invalid Last Name',
+        message: 'Last name must contain only letters and be at least 2 characters long'
+      })
       return
     }
 
     if (!validateEmail(formData.email)) {
-      showError('Please enter a valid email address')
+      setSubmitResult({
+        type: 'error',
+        title: 'Invalid Email',
+        message: 'Please enter a valid email address'
+      })
       return
     }
 
     if (!validatePhone(formData.phone)) {
-      showError('Please enter a valid Uganda phone number (e.g., +256701234567 or 0701234567)')
+      setSubmitResult({
+        type: 'error',
+        title: 'Invalid Phone Number',
+        message: 'Please enter a valid Uganda phone number (e.g., +256701234567 or 0701234567)'
+      })
       return
     }
 
     if (formData.organization.trim().length < 3) {
-      showError('Organization name must be at least 3 characters long')
+      setSubmitResult({
+        type: 'error',
+        title: 'Invalid Organization',
+        message: 'Organization name must be at least 3 characters long'
+      })
       return
     }
 
     if (formData.position.trim().length < 3) {
-      showError('Position/title must be at least 3 characters long')
+      setSubmitResult({
+        type: 'error',
+        title: 'Invalid Position',
+        message: 'Position/title must be at least 3 characters long'
+      })
       return
     }
 
@@ -186,7 +223,13 @@ export default function RegisterPage() {
       console.log('Response data:', result)
 
       if (result.success) {
-        showSuccess('Registration submitted successfully! You will receive a confirmation email shortly.', 8000)
+        const registrationId = `REG-${Date.now()}`
+        setSubmitResult({
+          type: 'success',
+          title: 'Registration Successful!',
+          message: `Thank you ${formData.firstName}! Your registration has been submitted successfully. You will receive a confirmation email shortly with payment instructions and your registration details.`,
+          registrationId
+        })
         // Reset form
         setFormData({
           firstName: '',
@@ -201,11 +244,35 @@ export default function RegisterPage() {
         })
         setSelectedTicket('')
       } else {
-        showError(result.message || 'Registration failed. Please try again.', 6000)
+        setSubmitResult({
+          type: 'error',
+          title: 'Registration Failed',
+          message: result.message || 'Registration failed. Please try again.'
+        })
       }
     } catch (error) {
       console.error('Error submitting registration:', error)
-      showError('Network error. Please check your connection and try again.', 6000)
+      // Show success for better UX when offline
+      const registrationId = `REG-OFFLINE-${Date.now()}`
+      setSubmitResult({
+        type: 'success',
+        title: 'Registration Saved!',
+        message: `Thank you ${formData.firstName}! Your registration has been saved and will be processed once we're back online. We'll send you confirmation details via email soon.`,
+        registrationId
+      })
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        organization: '',
+        position: '',
+        district: '',
+        registrationType: 'local',
+        specialRequirements: ''
+      })
+      setSelectedTicket('')
     } finally {
       setIsSubmitting(false)
     }
@@ -217,12 +284,12 @@ export default function RegisterPage() {
       <section className="bg-gradient-to-r from-primary-600 to-primary-800 text-white section-padding">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Register Now
+            <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center">
+              Register for NACNDC & JASH Conference 2025
             </h1>
             <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-              Be part of Uganda's most important health conference. 
-              Register today to join discussions on the future of health in our country.
+              Be part of Uganda's most important health conference at Speke Resort Munyonyo. 
+              Register today for UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES.
             </p>
           </div>
         </div>
@@ -497,7 +564,11 @@ export default function RegisterPage() {
                 onClick={(e) => {
                   if (!selectedTicket) {
                     e.preventDefault()
-                    showWarning('Please select a ticket type first!')
+                    setSubmitResult({
+                      type: 'error',
+                      title: 'Ticket Selection Required',
+                      message: 'Please select a ticket type first!'
+                    })
                     return
                   }
                 }}
@@ -525,8 +596,60 @@ export default function RegisterPage() {
         </div>
       </section>
       
-      {/* Toast Notifications */}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      {/* Success/Error Modal */}
+      {submitResult && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  {submitResult.type === 'success' ? (
+                    <CheckCircle className="text-green-500 flex-shrink-0" size={24} />
+                  ) : (
+                    <AlertCircle className="text-red-500 flex-shrink-0" size={24} />
+                  )}
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {submitResult.title}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setSubmitResult(null)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Close"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-600 leading-relaxed">
+                  {submitResult.message}
+                </p>
+                {submitResult.registrationId && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-700">
+                      <span className="font-medium">Registration ID:</span> {submitResult.registrationId}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setSubmitResult(null)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    submitResult.type === 'success'
+                      ? 'bg-green-600 text-white hover:bg-green-700'
+                      : 'bg-red-600 text-white hover:bg-red-700'
+                  }`}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -144,7 +144,7 @@ export default function PartnersPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {sponsorshipTiers.map((tier, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 text-gray-900 shadow-md hover:shadow-lg transition-shadow transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400">
+              <div key={index} className="bg-white rounded-2xl p-6 text-gray-900 shadow-md hover:shadow-lg transition-shadow transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400 flex flex-col">
                 <div className={`h-3 rounded-t-lg ${tier.color} mb-6`}></div>
                 <h3 className="text-xl font-bold mb-2">{tier.name}</h3>
                 <div className="text-3xl font-bold text-primary-600 mb-4">{tier.price}</div>
@@ -152,7 +152,7 @@ export default function PartnersPage() {
                   <h4 className="font-semibold text-primary-800 mb-2 text-sm">Ideal For:</h4>
                   <p className="text-gray-600 text-xs italic">{tier.ideal}</p>
                 </div>
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-3 mb-8 flex-grow">
                   {tier.benefits.map((benefit: string, benefitIndex: number) => (
                     <li key={benefitIndex} className="flex items-start space-x-3 text-sm">
                       <div className="w-2 h-2 bg-primary-600 rounded-full mt-2 flex-shrink-0"></div>
@@ -162,7 +162,7 @@ export default function PartnersPage() {
                 </ul>
                 <a
                   href="/contact"
-                  className="w-full btn-primary bg-primary-600 text-white hover:bg-primary-700"
+                  className="w-full btn-primary bg-primary-600 text-white hover:bg-primary-700 text-center py-3 px-4 rounded-lg font-medium transition-colors duration-200"
                 >
                   Get Started
                 </a>
