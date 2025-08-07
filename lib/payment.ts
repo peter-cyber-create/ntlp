@@ -26,8 +26,14 @@ export const BANK_DETAILS = {
   }
 };
 
-// Initialize Flutterwave
-const flw = new Flutterwave(FLW_CLIENT_ID, FLW_CLIENT_SECRET);
+// Initialize Flutterwave with error handling
+let flw: any;
+try {
+  flw = new Flutterwave(FLW_CLIENT_ID, FLW_CLIENT_SECRET);
+} catch (error) {
+  console.error('Flutterwave initialization error:', error);
+  flw = null;
+}
 
 // Payment Types
 export enum PaymentType {
@@ -114,6 +120,21 @@ export function getSponsorshipPrice(packageType: string) {
  */
 export async function createPaymentLink(paymentRequest: PaymentRequest): Promise<PaymentResponse> {
   try {
+    // Check if Flutterwave is properly initialized
+    if (!flw || !flw.PaymentLink) {
+      console.error('Flutterwave not properly initialized');
+      return {
+        status: 'error',
+        message: 'Payment service is currently unavailable. Please try again later or use bank transfer option.',
+        data: {
+          bankDetails: BANK_DETAILS,
+          reference: paymentRequest.referenceId,
+          amount: paymentRequest.amount,
+          currency: paymentRequest.currency
+        }
+      };
+    }
+
     const payload = {
       tx_ref: paymentRequest.referenceId,
       amount: paymentRequest.amount,
@@ -154,9 +175,18 @@ export async function createPaymentLink(paymentRequest: PaymentRequest): Promise
     }
   } catch (error: any) {
     console.error('Payment link creation error:', error);
+    
+    // Provide fallback with bank details
     return {
       status: 'error',
-      message: error.message || 'An error occurred while creating payment link'
+      message: 'Online payment temporarily unavailable. Please use bank transfer option below.',
+      data: {
+        bankDetails: BANK_DETAILS,
+        reference: paymentRequest.referenceId,
+        amount: paymentRequest.amount,
+        currency: paymentRequest.currency,
+        fallbackMessage: 'Please transfer the exact amount and use the reference number for identification.'
+      }
     };
   }
 }
@@ -166,6 +196,18 @@ export async function createPaymentLink(paymentRequest: PaymentRequest): Promise
  */
 export async function verifyPayment(transactionId: string): Promise<PaymentStatus> {
   try {
+    // Check if Flutterwave is properly initialized
+    if (!flw || !flw.Transaction) {
+      console.error('Flutterwave not properly initialized for verification');
+      return {
+        status: 'failed',
+        reference: '',
+        amount: 0,
+        currency: 'UGX',
+        gatewayResponse: { error: 'Payment verification service unavailable' }
+      };
+    }
+
     const response = await flw.Transaction.verify({ id: transactionId });
     
     if (response.status === 'success' && response.data) {

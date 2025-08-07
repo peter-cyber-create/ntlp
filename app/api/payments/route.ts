@@ -117,10 +117,45 @@ export async function POST(request: NextRequest) {
       });
 
     } else {
+      // Payment creation failed, provide bank transfer option
+      const db = DatabaseManager.getInstance();
+      
+      try {
+        const connection = await db.getConnection();
+        await connection.execute(
+          `INSERT INTO payments (
+            reference_id, payment_type, amount, currency, email, name, phone,
+            status, gateway_response, form_data, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+          [
+            paymentResponse.reference || `MANUAL_${Date.now()}`,
+            paymentType,
+            paymentResponse.data?.amount || 0,
+            paymentResponse.data?.currency || 'UGX',
+            userEmail,
+            userName,
+            userPhone || null,
+            'pending_manual',
+            JSON.stringify({ error: paymentResponse.message, fallback: 'bank_transfer' }),
+            JSON.stringify(formData)
+          ]
+        );
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+      }
+
       return NextResponse.json({
-        success: false,
-        error: paymentResponse.message
-      }, { status: 400 });
+        success: true, // Still success but with manual payment option
+        data: {
+          paymentUrl: null,
+          reference: paymentResponse.reference || `MANUAL_${Date.now()}`,
+          amount: paymentResponse.data?.amount,
+          currency: paymentResponse.data?.currency,
+          message: 'Online payment temporarily unavailable. Please use bank transfer.',
+          bankDetails: BANK_DETAILS,
+          fallbackPayment: true
+        }
+      });
     }
 
   } catch (error: any) {
