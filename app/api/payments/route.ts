@@ -112,7 +112,15 @@ export async function POST(request: NextRequest) {
           amount: paymentResponse.data?.amount,
           currency: paymentResponse.data?.currency,
           message: 'Payment link created successfully',
-          bankDetails: BANK_DETAILS
+          bankDetails: BANK_DETAILS,
+          // Add inline payment data for frontend
+          inlinePayment: {
+            publicKey: process.env.NEXT_PUBLIC_FLW_PUBLIC_KEY,
+            email: userEmail,
+            name: userName,
+            phone: userPhone || '',
+            description: paymentType === 'registration' ? `Conference Registration` : `Conference Sponsorship`
+          }
         }
       });
 

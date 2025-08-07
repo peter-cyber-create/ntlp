@@ -80,7 +80,6 @@ export default function SponsorshipPage() {
       price: '$10,000',
       description: 'Premium positioning with speaking opportunities',
       icon: <Trophy className="h-8 w-8" />,
-      highlighted: true,
       features: [
         'All Silver benefits',
         'Speaking opportunity (5 minutes)',

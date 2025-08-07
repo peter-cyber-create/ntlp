@@ -1,14 +1,20 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Check, Users, Award, Calendar, CreditCard, CheckCircle, AlertCircle, X } from 'lucide-react'
+import { Check, CreditCard, ArrowRight, CheckCircle, AlertCircle, X, Users, Building } from 'lucide-react'
+import InlinePayment from '../../components/InlinePayment'
 
-export default function RegisterPage() {
-  const [selectedTicket, setSelectedTicket] = useState('')
+export default function RegistrationPage() {
+  const [selectedTicket, setSelectedTicket] = useState('local')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
+  const [paymentData, setPaymentData] = useState<any>(null)
   const [submitResult, setSubmitResult] = useState<{
     type: 'success' | 'error';
     title: string;
+    message: string;
+    registrationId?: string;
+  } | null>(null)
     message: string;
     registrationId?: string;
   } | null>(null)

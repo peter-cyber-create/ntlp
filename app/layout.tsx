@@ -57,6 +57,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* DNS prefetch for performance */}
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        
+        {/* Flutterwave Inline Payment Script */}
+        <script src="https://checkout.flutterwave.com/v3.js"></script>
       </head>
       <body className={inter.className}>
         {/* Uganda Flag Stripe */}
