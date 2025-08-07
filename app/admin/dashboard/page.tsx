@@ -630,31 +630,31 @@ export default function AdminDashboard() {
   const filteredRegistrations = getFilteredRegistrations()
 
   const renderOverview = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Registrations</p>
-              <p className="text-3xl font-bold text-gray-900">{dashboardData?.stats?.totalRegistrations || 0}</p>
-              <p className="text-sm text-green-600">+12% from last week</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total Registrations</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{dashboardData?.stats?.totalRegistrations || 0}</p>
+              <p className="text-xs sm:text-sm text-green-600">+12% from last week</p>
             </div>
-            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-              <Users className="text-primary-600" size={24} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+              <Users className="text-primary-600" size={20} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending Reviews</p>
-              <p className="text-3xl font-bold text-gray-900">{dashboardData?.stats?.pendingRegistrations || 0}</p>
-              <p className="text-sm text-orange-600">Requires attention</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Pending Reviews</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{dashboardData?.stats?.pendingRegistrations || 0}</p>
+              <p className="text-xs sm:text-sm text-orange-600">Requires attention</p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <FileText className="text-orange-600" size={24} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <FileText className="text-orange-600" size={20} />
             </div>
           </div>
         </div>
@@ -2022,28 +2022,30 @@ ABSTRACT STATUS:
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:ml-0 min-h-screen">
+        <main className="flex-1 p-2 sm:p-4 lg:p-6 lg:ml-0 min-h-screen">
           {/* Professional Header */}
-          <div className="mb-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <div className="mb-4 sm:mb-6 bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6">
+            <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Communicable and Non-Communicable Diseases Conference 2025 - Admin Dashboard</h1>
-                <p className="text-gray-600 mt-1">
-                  Manage registrations, abstracts, and conference communications
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight">
+                  Conference 2025 - Admin Dashboard
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600 mt-1">
+                  Manage registrations, abstracts, and communications
                 </p>
               </div>
-              <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-4 text-sm">
-                <div className="bg-blue-50 px-3 py-2 rounded-lg">
+              <div className="flex flex-row sm:flex-col lg:flex-row gap-2 sm:gap-3 text-xs sm:text-sm">
+                <div className="bg-blue-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg flex-1 sm:flex-none text-center">
                   <span className="text-blue-600 font-medium">
                     {registrationsData.length} Registrations
                   </span>
                 </div>
-                <div className="bg-green-50 px-3 py-2 rounded-lg">
+                <div className="bg-green-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg flex-1 sm:flex-none text-center">
                   <span className="text-green-600 font-medium">
                     {abstractsData.length} Abstracts
                   </span>
                 </div>
-                <div className="bg-purple-50 px-3 py-2 rounded-lg">
+                <div className="bg-purple-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg flex-1 sm:flex-none text-center">
                   <span className="text-purple-600 font-medium">
                     {contactsData.length} Contacts
                   </span>
