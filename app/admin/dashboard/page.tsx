@@ -301,7 +301,7 @@ export default function AdminDashboard() {
       
       return matchesSearch && matchesStatus
     }).map(reg => ({
-      id: reg._id,
+      id: reg._id || reg.id,
       name: `${reg.first_name || reg.firstName} ${reg.last_name || reg.lastName}`,
       email: reg.email,
       phone: reg.phone,
@@ -338,7 +338,7 @@ export default function AdminDashboard() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ids: [id],
+          id: id,
           status: newStatus
         })
       });
@@ -346,13 +346,15 @@ export default function AdminDashboard() {
       if (response.ok) {
         // Refresh data
         loadRealData();
+        showNotification('Registration status updated successfully', 'success');
       } else {
-        console.error('Failed to update registration status');
-        alert('Failed to update status. Please try again.');
+        const errorData = await response.json().catch(() => null);
+        console.error('Failed to update registration status:', errorData);
+        showNotification(`Failed to update status. ${errorData?.message || 'Please try again.'}`, 'error');
       }
     } catch (error) {
       console.error('Error updating registration status:', error);
-      alert('Error updating status. Please try again.');
+      showNotification('Error updating status. Please check your connection and try again.', 'error');
     }
   }
 
@@ -364,7 +366,9 @@ export default function AdminDashboard() {
         const endpoint = type === 'contact' ? '/api/contacts/' : 
                         type === 'registration' ? '/api/registrations/' : '/api/abstracts/';
         
-        const response = await fetch(`${endpoint}?ids=${id}`, {
+        // Use the correct parameter name for each API
+        const paramName = type === 'registration' ? 'id' : 'ids';
+        const response = await fetch(`${endpoint}?${paramName}=${id}`, {
           method: 'DELETE',
         });
 
@@ -1605,17 +1609,44 @@ export default function AdminDashboard() {
       try {
         // Show loading notification
         showNotification(`Deleting ${selectedIds.length} ${type}...`, 'info');
+        setIsProcessing(true);
         
-        const endpoint = type === 'contacts' ? '/api/contacts' : 
-                        type === 'registrations' ? '/api/registrations' : '/api/abstracts';
+        const endpoint = type === 'contacts' ? '/api/contacts/' : 
+                        type === 'registrations' ? '/api/registrations/' : '/api/abstracts/';
         
-        const response = await fetch(`${endpoint}?ids=${selectedIds.join(',')}`, {
-          method: 'DELETE',
-        });
+        let deletedCount = 0;
+        
+        if (type === 'registrations') {
+          // Handle registrations one by one since the API doesn't support batch delete
+          for (const id of selectedIds) {
+            try {
+              const response = await fetch(`${endpoint}?id=${id}`, {
+                method: 'DELETE',
+              });
+              if (response.ok) {
+                deletedCount++;
+              } else {
+                console.error(`Failed to delete registration ${id}`);
+              }
+            } catch (error) {
+              console.error(`Error deleting registration ${id}:`, error);
+            }
+          }
+        } else {
+          // Contacts and abstracts support batch delete
+          const response = await fetch(`${endpoint}?ids=${selectedIds.join(',')}`, {
+            method: 'DELETE',
+          });
 
-        if (response.ok) {
-          const result = await response.json();
-          const deletedCount = result.deletedCount || selectedIds.length;
+          if (response.ok) {
+            const result = await response.json();
+            deletedCount = result.deletedCount || selectedIds.length;
+          } else {
+            throw new Error(`Failed to delete ${type}`);
+          }
+        }
+
+        if (deletedCount > 0) {
           showNotification(`Successfully deleted ${deletedCount} ${type}`, 'success');
           
           // Clear selections
@@ -1630,12 +1661,13 @@ export default function AdminDashboard() {
             loadRealData();
           }
         } else {
-          const errorData = await response.json().catch(() => null);
-          showNotification(`Failed to delete ${type}. ${errorData?.error || 'Please try again.'}`, 'error');
+          showNotification(`Failed to delete any ${type}. Please try again.`, 'error');
         }
       } catch (error) {
         console.error(`Error deleting ${type}:`, error);
         showNotification(`Error deleting ${type}. Please check your connection and try again.`, 'error');
+      } finally {
+        setIsProcessing(false);
       }
     }
   }
