@@ -96,8 +96,8 @@ export default function PartnersPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {allPartners.map((partner, index) => (
               <div key={index} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center">
-                <div className="h-20 w-20 flex items-center justify-center mb-4">
-                  <img src={partner.logo} alt={partner.name + ' logo'} className="h-16 w-auto object-contain" />
+                <div className="h-32 w-full flex items-center justify-center mb-6">
+                  <img src={partner.logo} alt={partner.name + ' logo'} className="max-h-28 max-w-full w-auto object-contain" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">{partner.name}</h3>
                 <p className="text-gray-600 text-center mb-4">{partner.description}</p>
