@@ -359,7 +359,9 @@ export default function AdminDashboard() {
   }
 
   const handleSingleDelete = async (id: string, type: 'contact' | 'registration' | 'abstract') => {
-    const confirmMessage = `Are you sure you want to permanently delete this ${type}? This action cannot be undone.`;
+    const typeLabel = type === 'contact' ? 'inquiry' : type;
+    const confirmMessage = `⚠️ DELETE CONFIRMATION\n\nYou are about to permanently delete this ${typeLabel}.\n\n• This action cannot be undone\n• All associated data will be lost\n• This may affect reporting and analytics\n\nDo you want to proceed with the deletion?`;
+    
     if (window.confirm(confirmMessage)) {
       setIsProcessing(true);
       try {
@@ -419,21 +421,35 @@ export default function AdminDashboard() {
   const handleEditItem = async (item: any, type: 'contact' | 'registration' | 'abstract') => {
     switch (type) {
       case 'contact':
-        const newContactStatus = prompt(`Edit Contact Status for ${item.name}:`, item.status);
+        const availableContactStatuses = 'new, in-progress, resolved, pending';
+        const newContactStatus = prompt(
+          `📝 UPDATE CONTACT STATUS\n\nContact: ${item.name}\nCurrent Status: ${item.status}\n\nAvailable options: ${availableContactStatuses}\n\nEnter new status:`, 
+          item.status
+        );
         if (newContactStatus && newContactStatus !== item.status) {
           await updateItemStatus(item.id || item._id, newContactStatus, 'contact');
         }
         break;
       case 'registration':
-        const newRegStatus = prompt(`Edit Registration Status for ${item.name}:`, item.status);
+        const availableRegStatuses = 'pending, confirmed, rejected, cancelled';
+        const newRegStatus = prompt(
+          `📝 UPDATE REGISTRATION STATUS\n\nParticipant: ${item.name}\nCurrent Status: ${item.status}\n\nAvailable options: ${availableRegStatuses}\n\nEnter new status:`, 
+          item.status
+        );
         if (newRegStatus && newRegStatus !== item.status) {
           await handleStatusUpdate(item.id || item._id, newRegStatus);
         }
         break;
       case 'abstract':
-        const newAbstractStatus = prompt(`Edit Abstract Status for "${item.title}":`, item.status);
+        const availableAbstractStatuses = 'pending, under-review, accepted, rejected';
+        const newAbstractStatus = prompt(
+          `📝 UPDATE ABSTRACT STATUS\n\nTitle: "${item.title}"\nAuthor: ${item.authors}\nCurrent Status: ${item.status}\n\nAvailable options: ${availableAbstractStatuses}\n\nEnter new status:`, 
+          item.status
+        );
         if (newAbstractStatus && newAbstractStatus !== item.status && (newAbstractStatus === 'accepted' || newAbstractStatus === 'rejected' || newAbstractStatus === 'pending' || newAbstractStatus === 'under-review')) {
           await handleAbstractStatusUpdate(item.id || item._id, newAbstractStatus as 'accepted' | 'rejected' | 'pending' | 'under-review');
+        } else if (newAbstractStatus && !['accepted', 'rejected', 'pending', 'under-review'].includes(newAbstractStatus)) {
+          showNotification(`Invalid status "${newAbstractStatus}". Valid options: pending, under-review, accepted, rejected`, 'error');
         }
         break;
     }
@@ -793,18 +809,18 @@ export default function AdminDashboard() {
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  selectedRegistrations.forEach(id => handleStatusUpdate(id, 'confirmed'))
-                  setSelectedRegistrations([])
+                  const confirmMessage = `✅ BATCH CONFIRM CONFIRMATION\n\nYou are about to confirm ${selectedRegistrations.length} registration(s).\n\n• This will update the status to "confirmed"\n• Participants may receive confirmation emails\n• This action can be reversed later if needed\n\nProceed with confirming ${selectedRegistrations.length} registration(s)?`;
+                  if (window.confirm(confirmMessage)) {
+                    selectedRegistrations.forEach(id => handleStatusUpdate(id, 'confirmed'))
+                    setSelectedRegistrations([])
+                  }
                 }}
                 className="btn-primary text-sm"
               >
                 Confirm ({selectedRegistrations.length})
               </button>
               <button
-                onClick={() => {
-                  selectedRegistrations.forEach(id => handleSingleDelete(id, 'registration'))
-                  setSelectedRegistrations([])
-                }}
+                onClick={() => handleBatchDelete('registrations')}
                 className="btn-danger text-sm"
               >
                 Delete ({selectedRegistrations.length})
@@ -1196,8 +1212,11 @@ export default function AdminDashboard() {
               <div className="flex gap-2">
                 <button 
                   onClick={() => {
-                    selectedAbstracts.forEach(id => handleAbstractStatusUpdate(id, 'accepted'))
-                    setSelectedAbstracts([])
+                    const confirmMessage = `✅ BATCH ACCEPT CONFIRMATION\n\nYou are about to accept ${selectedAbstracts.length} abstract(s).\n\n• This will update the status to "accepted"\n• Authors may be notified of the decision\n• This action can be reversed later if needed\n\nProceed with accepting ${selectedAbstracts.length} abstract(s)?`;
+                    if (window.confirm(confirmMessage)) {
+                      selectedAbstracts.forEach(id => handleAbstractStatusUpdate(id, 'accepted'))
+                      setSelectedAbstracts([])
+                    }
                   }}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
                 >
@@ -1206,8 +1225,11 @@ export default function AdminDashboard() {
                 </button>
                 <button 
                   onClick={() => {
-                    selectedAbstracts.forEach(id => handleAbstractStatusUpdate(id, 'rejected'))
-                    setSelectedAbstracts([])
+                    const confirmMessage = `❌ BATCH REJECT CONFIRMATION\n\nYou are about to reject ${selectedAbstracts.length} abstract(s).\n\n• This will update the status to "rejected"\n• Authors may be notified of the decision\n• This action can be reversed later if needed\n\nProceed with rejecting ${selectedAbstracts.length} abstract(s)?`;
+                    if (window.confirm(confirmMessage)) {
+                      selectedAbstracts.forEach(id => handleAbstractStatusUpdate(id, 'rejected'))
+                      setSelectedAbstracts([])
+                    }
                   }}
                   className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
                 >
@@ -1484,10 +1506,7 @@ export default function AdminDashboard() {
               </span>
               <div className="flex gap-2">
                 <button
-                  onClick={() => {
-                    selectedContacts.forEach(id => handleSingleDelete(id, 'contact'))
-                    setSelectedContacts([])
-                  }}
+                  onClick={() => handleBatchDelete('contacts')}
                   className="btn-danger text-sm"
                 >
                   Delete ({selectedContacts.length})
@@ -1604,11 +1623,14 @@ export default function AdminDashboard() {
       return;
     }
     
-    const confirmMessage = `Are you sure you want to delete ${selectedIds.length} selected ${type}? This action cannot be undone.`;
+    const typeLabel = type === 'contacts' ? 'inquiries' : type;
+    const itemWord = selectedIds.length === 1 ? 'item' : 'items';
+    const confirmMessage = `🗑️ BATCH DELETE CONFIRMATION\n\nYou are about to permanently delete ${selectedIds.length} ${typeLabel}.\n\n• This action cannot be undone\n• All associated data will be permanently lost\n• This may affect reporting and analytics\n• Multiple ${itemWord} will be processed\n\nDo you want to proceed with deleting all ${selectedIds.length} selected ${itemWord}?`;
+    
     if (window.confirm(confirmMessage)) {
       try {
         // Show loading notification
-        showNotification(`Deleting ${selectedIds.length} ${type}...`, 'info');
+        showNotification(`Processing deletion of ${selectedIds.length} ${typeLabel}...`, 'info');
         setIsProcessing(true);
         
         const endpoint = type === 'contacts' ? '/api/contacts/' : 
