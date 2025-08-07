@@ -2,8 +2,8 @@ import React from 'react'
 import { Award, Users, Target, Heart } from 'lucide-react'
 
 export const metadata = {
-  title: 'Partners - The Communicable and Non-Communicable Diseases Conference 2025',
-  description: 'Meet our valued partners supporting The Communicable and Non-Communicable Diseases Conference. Join our partnership program.',
+  title: 'Partners - NACNDC & JASHConference 2025',
+  description: 'Our partners supporting NACNDC & JASHConference 2025',
 }
 
 export default function PartnersPage() {

@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
             />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Portal</h1>
-          <p className="text-primary-600 font-medium">The Communicable and Non-Communicable Diseases Conference 2025</p>
+          <p className="text-primary-600 font-medium">NACNDC & JASHConference 2025</p>
           <p className="text-gray-500 text-sm mt-2">Conference Management System</p>
         </div>
 

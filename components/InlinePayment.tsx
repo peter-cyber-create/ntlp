@@ -50,10 +50,10 @@ export const InlinePayment: React.FC<InlinePaymentProps> = ({
         name: name,
       },
       customizations: {
-        title: "NTLP Conference 2025",
+          logo: "",
+        },
+        title: "NACNDC & JASHConference 2025",
         description: description,
-        logo: `${window.location.origin}/images/idi-logo.png`,
-      },
       callback: function (data: any) {
         console.log('Payment completed:', data);
         if (data.status === 'successful') {

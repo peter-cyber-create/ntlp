@@ -1,4 +1,4 @@
-// Payment configuration and utilities for NTLP Conference
+// Payment configuration and utilities for NACNDC & JASHConference 2025
 import Flutterwave from 'flutterwave-node-v3';
 import { v4 as uuidv4 } from 'uuid';
 import CryptoJS from 'crypto-js';
@@ -146,7 +146,7 @@ export async function createPaymentLink(paymentRequest: PaymentRequest): Promise
         phonenumber: paymentRequest.phone || ''
       },
       customizations: {
-        title: 'NTLP Conference 2025',
+        title: 'NACNDC & JASHConference 2025',
         description: paymentRequest.description,
         logo: `${process.env.NEXT_PUBLIC_BASE_URL}/images/idi-logo.png`
       },

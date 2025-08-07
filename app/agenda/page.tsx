@@ -2,8 +2,8 @@ import React from 'react'
 import { Clock, MapPin, Users } from 'lucide-react'
 
 export const metadata = {
-  title: 'Agenda - The Communicable and Non-Communicable Diseases Conference 2025',
-  description: 'View the complete agenda for The Communicable and Non-Communicable Diseases Conference 2025 with keynotes, panels, and workshops.',
+  title: 'Agenda - NACNDC & JASHConference 2025',
+  description: 'View the complete agenda for NACNDC & JASHConference 2025 with keynotes, panels, and workshops.',
 }
 
 const agendaData = {
@@ -183,8 +183,8 @@ export default function AgendaPage() {
         {/* Centered content over slideshow/hero */}
         <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center z-10 pointer-events-none">
           <div className="max-w-3xl w-full mx-auto text-center flex flex-col items-center justify-center gap-4">
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-primary-100 drop-shadow-lg text-center bg-primary-900/80 rounded-xl px-6 py-4 shadow-xl">
-              The Communicable and Non-Communicable Diseases Conference 2025
+                        <h1 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-white drop-shadow-lg text-center">
+              NACNDC & JASHConference 2025
             </h1>
             {/* Centered, organized writeup (if any) can be added here as needed */}
           </div>

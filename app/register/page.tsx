@@ -1,20 +1,17 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react'
-import { Check, CreditCard, ArrowRight, CheckCircle, AlertCircle, X, Users, Building } from 'lucide-react'
-import InlinePayment from '../../components/InlinePayment'
+import { useState } from 'react';
+import { ChevronDown, User, Mail, Phone, Globe, MapPin, Calendar, ChevronRight, X, Check, CreditCard, CheckCircle, AlertCircle } from 'lucide-react';
+import InlinePayment from '../../components/InlinePayment';
 
-export default function RegistrationPage() {
-  const [selectedTicket, setSelectedTicket] = useState('local')
+export default function RegisterPage() {
+  const [selectedTicket, setSelectedTicket] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
   const [paymentData, setPaymentData] = useState<any>(null)
   const [submitResult, setSubmitResult] = useState<{
     type: 'success' | 'error';
     title: string;
-    message: string;
-    registrationId?: string;
-  } | null>(null)
     message: string;
     registrationId?: string;
   } | null>(null)
@@ -240,8 +237,17 @@ export default function RegistrationPage() {
           paymentReference: paymentResult.data.reference
         }));
         
-        // Redirect to payment page immediately
-        window.location.href = paymentResult.data.paymentUrl;
+        // Store payment data and show inline payment instead of redirecting
+        setPaymentData({
+          amount: paymentResult.data.amount,
+          currency: paymentResult.data.currency,
+          email: formData.email,
+          name: `${formData.firstName} ${formData.lastName}`,
+          phone: formData.phone,
+          description: `Conference Registration - ${selectedTicket}`,
+          reference: paymentResult.data.reference
+        });
+        setShowPayment(true);
       } else {
         setSubmitResult({
           type: 'error',
@@ -260,6 +266,36 @@ export default function RegistrationPage() {
       setIsSubmitting(false)
     }
   }
+
+  const handlePaymentSuccess = (response: any) => {
+    console.log('Payment successful:', response);
+    setSubmitResult({
+      type: 'success',
+      title: 'Registration Successful!',
+      message: `Your registration has been completed successfully. Payment reference: ${response.tx_ref}`,
+      registrationId: response.tx_ref
+    });
+    setShowPayment(false);
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPayment(false);
+    setSubmitResult({
+      type: 'error',
+      title: 'Payment Cancelled',
+      message: 'Your payment was cancelled. You can try again or contact support for assistance.'
+    });
+  };
+
+  const handlePaymentError = (error: any) => {
+    console.error('Payment error:', error);
+    setShowPayment(false);
+    setSubmitResult({
+      type: 'error',
+      title: 'Payment Failed',
+      message: `Payment could not be processed: ${error.message || 'Unknown error'}. Please try again or contact support.`
+    });
+  };
 
   return (
     <div>
@@ -606,6 +642,49 @@ export default function RegistrationPage() {
           </div>
         </div>
       </section>
+      
+      {/* Payment Modal */}
+      {showPayment && paymentData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Complete Payment</h3>
+                <button
+                  onClick={() => setShowPayment(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Close"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-600 mb-2">Registration for: <strong>{paymentData.name}</strong></p>
+                <p className="text-gray-600 mb-4">Amount: <strong>{paymentData.currency} {paymentData.amount}</strong></p>
+                <p className="text-sm text-gray-500 mb-4">Click below to complete your payment using your card or mobile money.</p>
+              </div>
+              
+              <InlinePayment
+                amount={paymentData.amount}
+                currency={paymentData.currency}
+                email={paymentData.email}
+                name={paymentData.name}
+                phone={paymentData.phone}
+                description={paymentData.description}
+                reference={paymentData.reference}
+                onSuccess={handlePaymentSuccess}
+                onCancel={handlePaymentCancel}
+                onError={handlePaymentError}
+              />
+              
+              <div className="mt-4 text-xs text-gray-500">
+                <p>Secure payment powered by Flutterwave</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Success/Error Modal */}
       {submitResult && (

@@ -1971,7 +1971,7 @@ export default function AdminDashboard() {
               const timestamp = new Date().toISOString().split('T')[0];
               
               // Create summary report
-              const summary = `Communicable and Non-Communicable Diseases Conference 2025 - Data Export Summary
+              const summary = `NACNDC & JASHConference 2025 - Data Export Summary
 Generated: ${new Date().toLocaleString()}
 
 STATISTICS:
@@ -2306,7 +2306,7 @@ ABSTRACT STATUS:
             </div>
             <div className="hidden sm:block">
               <h1 className="text-lg sm:text-xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-xs sm:text-sm text-gray-600">The Communicable and Non-Communicable Diseases Conference 2025</p>
+              <p className="text-xs sm:text-sm text-gray-600">NACNDC & JASHConference 2025</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 sm:space-x-4">
@@ -2379,7 +2379,7 @@ ABSTRACT STATUS:
             <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
               <div>
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight">
-                  Conference 2025 - Admin Dashboard
+                  NACNDC & JASHConference 2025 - Admin Dashboard
                 </h1>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">
                   Manage registrations, abstracts, and communications

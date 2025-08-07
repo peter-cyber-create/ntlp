@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { Check, Building, Users, Award, Trophy, Star, CreditCard, ArrowRight, CheckCircle, AlertCircle, X } from 'lucide-react'
+import InlinePayment from '../../components/InlinePayment'
 
 interface SponsorshipPackage {
   id: string;
@@ -43,6 +44,86 @@ export default function SponsorshipPage() {
     industry: '',
     specialRequirements: ''
   })
+
+  // Payment state for inline payment modal
+  const [showPayment, setShowPayment] = useState(false)
+  const [paymentData, setPaymentData] = useState<{
+    amount: number;
+    currency: string;
+    email: string;
+    name: string;
+    phone: string;
+    description: string;
+    reference: string;
+  } | null>(null)
+
+  // Payment handlers
+  const handlePaymentSuccess = async (response: any) => {
+    console.log('Payment successful:', response);
+    
+    try {
+      // Get stored form data
+      const storedData = localStorage.getItem('sponsorshipFormData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        
+        // Submit sponsorship application after successful payment
+        const applicationResponse = await fetch('/api/sponsors', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...parsedData,
+            paymentReference: response.tx_ref,
+            paymentStatus: 'completed',
+            transactionId: response.transaction_id
+          }),
+        });
+
+        if (applicationResponse.ok) {
+          localStorage.removeItem('sponsorshipFormData');
+          setShowPayment(false);
+          setSubmitResult({
+            type: 'success',
+            title: 'Sponsorship Application Successful!',
+            message: `Thank you for your sponsorship! Your application has been submitted and payment processed. Reference: ${response.tx_ref}`,
+            sponsorshipId: response.tx_ref
+          });
+        } else {
+          throw new Error('Failed to submit sponsorship application');
+        }
+      }
+    } catch (error) {
+      console.error('Error processing payment success:', error);
+      setShowPayment(false);
+      setSubmitResult({
+        type: 'error',
+        title: 'Application Submission Failed',
+        message: 'Payment was successful, but we encountered an error submitting your application. Please contact support with your payment reference.'
+      });
+    }
+  };
+
+  const handlePaymentCancel = () => {
+    console.log('Payment cancelled');
+    setShowPayment(false);
+    setSubmitResult({
+      type: 'error',
+      title: 'Payment Cancelled',
+      message: 'Payment was cancelled. You can try again when ready.'
+    });
+  };
+
+  const handlePaymentError = (error: any) => {
+    console.error('Payment error:', error);
+    setShowPayment(false);
+    setSubmitResult({
+      type: 'error',
+      title: 'Payment Failed',
+      message: 'There was an error processing your payment. Please try again or contact support.'
+    });
+  };
 
   const sponsorshipPackages: SponsorshipPackage[] = [
     {
@@ -191,57 +272,45 @@ export default function SponsorshipPage() {
     setIsSubmitting(true)
     
     try {
-      // Create payment BEFORE saving sponsorship application
-      const paymentResponse = await fetch('/api/payments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          paymentType: 'sponsorship',
-          packageType: selectedPackage,
-          userEmail: formData.email,
-          userName: formData.companyName,
-          userPhone: formData.phone,
-          companyName: formData.companyName,
-          formData: {
-            companyName: formData.companyName,
-            contactPerson: formData.contactPerson,
-            email: formData.email,
-            phone: formData.phone,
-            packageType: selectedPackage,
-            website: formData.website,
-            industry: formData.industry,
-            specialRequirements: formData.specialRequirements
-          }
-        }),
+      // Create payment reference and set up inline payment
+      const selectedPkg = sponsorshipPackages.find(pkg => pkg.id === selectedPackage);
+      if (!selectedPkg) {
+        throw new Error('Selected package not found');
+      }
+
+      // Generate unique payment reference
+      const reference = `sponsor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      
+      // Extract amount from price string (remove $ and commas)
+      const amount = parseFloat(selectedPkg.price.replace(/[$,]/g, ''));
+      
+      // Store form data for after payment
+      localStorage.setItem('sponsorshipFormData', JSON.stringify({
+        ...formData,
+        packageType: selectedPackage,
+        paymentReference: reference
+      }));
+
+      // Set up payment data for inline payment
+      setPaymentData({
+        amount: amount,
+        currency: 'USD',
+        email: formData.email,
+        name: formData.companyName,
+        phone: formData.phone || '',
+        description: `${selectedPkg.name} - ${formData.companyName}`,
+        reference: reference
       });
 
-      const paymentResult = await paymentResponse.json();
-
-      if (paymentResult.success) {
-        // Store form data temporarily in localStorage for after payment
-        localStorage.setItem('pending_sponsorship', JSON.stringify({
-          ...formData,
-          packageType: selectedPackage,
-          paymentReference: paymentResult.data.reference
-        }));
-        
-        // Redirect to payment page immediately
-        window.location.href = paymentResult.data.paymentUrl;
-      } else {
-        setSubmitResult({
-          type: 'error',
-          title: 'Payment Creation Failed',
-          message: `Unable to create payment link. Please try again or contact support. Error: ${paymentResult.error || 'Unknown error'}`
-        })
-      }
+      // Show inline payment modal
+      setShowPayment(true);
+      
     } catch (error) {
-      console.error('Error creating payment:', error)
+      console.error('Error setting up payment:', error)
       setSubmitResult({
         type: 'error',
-        title: 'Connection Error',
-        message: 'Unable to connect to payment service. Please check your internet connection and try again.'
+        title: 'Setup Error',
+        message: 'Unable to set up payment. Please try again or contact support.'
       })
     } finally {
       setIsSubmitting(false)
@@ -290,8 +359,8 @@ export default function SponsorshipPage() {
       <section className="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-16 lg:py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-              Sponsor NTLP Conference 2025
+                        <h1 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-white drop-shadow-lg text-center">
+              Sponsor NACNDC & JASHConference 2025
             </h1>
             <p className="text-lg md:text-xl text-primary-100 max-w-3xl mx-auto leading-relaxed">
               Partner with Uganda's premier health conference and showcase your commitment to 
@@ -516,7 +585,7 @@ export default function SponsorshipPage() {
                       Selected Package: {sponsorshipPackages.find(p => p.id === selectedPackage)?.name}
                     </h3>
                     <p className="text-primary-700 text-sm">
-                      After submitting this application, you will be redirected to complete the payment process.
+                      After submitting this application, you will complete the payment process right here.
                     </p>
                   </div>
                 )}
@@ -580,7 +649,7 @@ export default function SponsorshipPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Why Sponsor NTLP Conference 2025?
+                Why Sponsor NACNDC & JASHConference 2025?
               </h2>
             </div>
 
@@ -624,6 +693,49 @@ export default function SponsorshipPage() {
           </div>
         </div>
       </section>
+      
+      {/* Payment Modal */}
+      {showPayment && paymentData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Complete Payment</h3>
+                <button
+                  onClick={() => setShowPayment(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Close"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-600 mb-2">Sponsorship for: <strong>{paymentData.name}</strong></p>
+                <p className="text-gray-600 mb-4">Amount: <strong>{paymentData.currency} {paymentData.amount}</strong></p>
+                <p className="text-sm text-gray-500 mb-4">Click below to complete your sponsorship payment using your card or mobile money.</p>
+              </div>
+              
+              <InlinePayment
+                amount={paymentData.amount}
+                currency={paymentData.currency}
+                email={paymentData.email}
+                name={paymentData.name}
+                phone={paymentData.phone}
+                description={paymentData.description}
+                reference={paymentData.reference}
+                onSuccess={handlePaymentSuccess}
+                onCancel={handlePaymentCancel}
+                onError={handlePaymentError}
+              />
+              
+              <div className="mt-4 text-xs text-gray-500">
+                <p>Secure payment powered by Flutterwave</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

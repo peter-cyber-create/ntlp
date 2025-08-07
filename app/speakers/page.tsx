@@ -2,8 +2,8 @@ import React from 'react'
 import { Award, Users, Globe } from 'lucide-react'
 
 export const metadata = {
-  title: 'Speakers - The Communicable and Non-Communicable Diseases Conference 2025',
-  description: 'Meet our distinguished speakers at The Communicable and Non-Communicable Diseases Conference 2025',
+  title: 'Speakers - NACNDC & JASHConference 2025',
+  description: 'Meet our distinguished speakers at NACNDC & JASHConference 2025',
 }
 
 export default function SpeakersPage() {
@@ -97,7 +97,7 @@ export default function SpeakersPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {speakers.map((speaker) => (
-              <div key={speaker.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400">
+              <div key={speaker.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400">
                 {/* Speaker Image Placeholder */}
                 <div className="h-64 flex items-center justify-center bg-gray-100">
                   <img

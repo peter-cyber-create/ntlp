@@ -1,5 +1,5 @@
 /**
- * API Client for NTLP Conference Frontend
+ * API Client for NACNDC & JASHConference 2025 Frontend
  * Connects to Express Backend at http://localhost:5000
  */
 

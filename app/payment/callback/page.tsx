@@ -196,7 +196,7 @@ function PaymentCallbackContent() {
           {/* Header */}
           <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-8 py-6">
             <h1 className="text-2xl font-bold text-white">Payment Status</h1>
-            <p className="text-primary-100 mt-2">NTLP Conference 2025</p>
+            <p className="text-primary-100 mt-2">NACNDC & JASHConference 2025</p>
           </div>
 
           {/* Status Section */}
