@@ -205,70 +205,51 @@ export default function RegisterPage() {
     setIsSubmitting(true)
     
     try {
-      const response = await fetch('/api/registrations', {
+      // Create payment BEFORE saving registration
+      const paymentResponse = await fetch('/api/payments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          registrationType: selectedTicket
+          paymentType: 'registration',
+          registrationType: selectedTicket,
+          userEmail: formData.email,
+          userName: `${formData.firstName} ${formData.lastName}`,
+          userPhone: formData.phone,
+          formData: {
+            ...formData,
+            registrationType: selectedTicket
+          }
         }),
-      })
+      });
 
-      const result = await response.json()
+      const paymentResult = await paymentResponse.json();
 
-      if (result.success) {
-        const registrationId = `REG-${Date.now()}`
-        setSubmitResult({
-          type: 'success',
-          title: 'Registration Successful!',
-          message: `Thank you ${formData.firstName}! Your registration has been submitted successfully. You will receive a confirmation email shortly with payment instructions and your registration details.`,
-          registrationId
-        })
-        // Reset form
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          organization: '',
-          position: '',
-          district: '',
-          registrationType: 'local',
-          specialRequirements: ''
-        })
-        setSelectedTicket('')
+      if (paymentResult.success) {
+        // Store form data temporarily in localStorage for after payment
+        localStorage.setItem('pending_registration', JSON.stringify({
+          ...formData,
+          registrationType: selectedTicket,
+          paymentReference: paymentResult.data.reference
+        }));
+        
+        // Redirect to payment page immediately
+        window.location.href = paymentResult.data.paymentUrl;
       } else {
         setSubmitResult({
           type: 'error',
-          title: 'Registration Failed',
-          message: result.message || 'Registration failed. Please try again.'
+          title: 'Payment Creation Failed',
+          message: `Unable to create payment link. Please try again or contact support. Error: ${paymentResult.error || 'Unknown error'}`
         })
       }
     } catch (error) {
-      console.error('Error submitting registration:', error)
-      // Show success for better UX when offline
-      const registrationId = `REG-OFFLINE-${Date.now()}`
+      console.error('Error creating payment:', error)
       setSubmitResult({
-        type: 'success',
-        title: 'Registration Saved!',
-        message: `Thank you ${formData.firstName}! Your registration has been saved and will be processed once we're back online. We'll send you confirmation details via email soon.`,
-        registrationId
+        type: 'error',
+        title: 'Connection Error',
+        message: 'Unable to connect to payment service. Please check your internet connection and try again.'
       })
-      // Reset form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        organization: '',
-        position: '',
-        district: '',
-        registrationType: 'local',
-        specialRequirements: ''
-      })
-      setSelectedTicket('')
     } finally {
       setIsSubmitting(false)
     }
@@ -580,25 +561,41 @@ export default function RegisterPage() {
                     return
                   }
                 }}
-                className="w-full btn-primary flex items-center justify-center space-x-2 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] transition-transform duration-200"
+                className="relative w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl text-lg min-h-[56px] border border-primary-600 hover:border-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Processing Registration...</span>
+                    <span className="relative z-10">Processing Registration...</span>
                   </>
                 ) : (
                   <>
-                    <CreditCard size={20} />
-                    <span>Complete Registration</span>
+                    <CreditCard size={20} className="relative z-10" />
+                    <span className="relative z-10">Complete Registration & Pay</span>
                   </>
                 )}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
               </button>
 
               <p className="text-xs text-gray-500 text-center mt-4">
                 By registering, you agree to our Terms of Service and Privacy Policy. 
                 Payment will be processed securely through our payment partner.
               </p>
+              
+              <div className="flex items-center justify-center mt-3 space-x-4 text-xs text-gray-600">
+                <div className="flex items-center gap-1">
+                  <CreditCard size={14} />
+                  <span>Visa</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <CreditCard size={14} />
+                  <span>Mastercard</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <CreditCard size={14} />
+                  <span>Mobile Money</span>
+                </div>
+              </div>
             </form>
           </div>
         </div>

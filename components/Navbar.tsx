@@ -23,12 +23,14 @@ export function Navbar() {
     { name: 'Agenda', href: '/agenda' },
     { name: 'Abstracts', href: '/abstracts' },
     { name: 'Partners', href: '/partners' },
+    { name: 'Sponsors', href: '/sponsors' },
     { name: 'Contact', href: '/contact' },
   ]
 
   const actionItems = [
-    { name: 'Submit Abstract', href: '/abstracts', type: 'secondary' },
-    { name: 'Register Now', href: '/register', type: 'primary' },
+    { name: 'Submit Abstract', href: '/abstracts', type: 'accent', icon: '📄' },
+    { name: 'Become a Sponsor', href: '/sponsors', type: 'sponsor', icon: '🤝' },
+    { name: 'Register Now', href: '/register', type: 'payment', icon: '🎫' },
   ]
 
   // Handle scroll for floating navbar
@@ -100,13 +102,17 @@ export function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-400 text-center ${
-                    item.type === 'primary'
-                      ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg'
-                      : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md'
+                  className={`relative inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-1 text-xs sm:text-sm shadow-md hover:shadow-lg ${
+                    item.type === 'payment'
+                      ? 'bg-primary-600 hover:bg-primary-700 text-white border border-primary-600 hover:border-primary-700 focus:ring-primary-500'
+                      : item.type === 'sponsor'
+                      ? 'bg-uganda-yellow hover:bg-yellow-500 text-uganda-black border border-uganda-yellow hover:border-yellow-500 focus:ring-yellow-400'
+                      : 'bg-primary-500 hover:bg-primary-600 text-white border border-primary-500 hover:border-primary-600 focus:ring-primary-400'
                   }`}
                 >
-                  {item.name}
+                  <span className="text-sm">{item.icon}</span>
+                  <span className="relative z-10 hidden sm:inline">{item.name}</span>
+                  <span className="relative z-10 sm:hidden">{item.name.split(' ')[0]}</span>
                 </Link>
               ))}
             </div>
@@ -167,14 +173,19 @@ export function Navbar() {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`block px-3 py-2.5 rounded-lg font-semibold text-center transition-all duration-200 text-sm shadow-md ${
-                        item.type === 'primary'
-                          ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg border-2 border-primary-600 hover:border-primary-700'
-                          : 'bg-orange-500 text-white hover:bg-orange-600 border-2 border-orange-500 hover:border-orange-600'
+                      className={`relative block px-3 py-2.5 rounded-lg font-semibold text-center transition-all duration-300 text-sm shadow-md border ${
+                        item.type === 'payment'
+                          ? 'bg-primary-600 hover:bg-primary-700 text-white border-primary-600 hover:border-primary-700'
+                          : item.type === 'sponsor'
+                          ? 'bg-uganda-yellow hover:bg-yellow-500 text-uganda-black border-uganda-yellow hover:border-yellow-500'
+                          : 'bg-primary-500 hover:bg-primary-600 text-white border-primary-500 hover:border-primary-600'
                       }`}
                       onClick={() => setIsOpen(false)}
                     >
-                      {item.name}
+                      <div className="flex items-center justify-center gap-2">
+                        <span>{item.icon}</span>
+                        <span className="relative z-10">{item.name}</span>
+                      </div>
                     </Link>
                   ))}
                 </div>

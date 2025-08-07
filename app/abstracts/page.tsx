@@ -420,8 +420,14 @@ export default function AbstractsPage() {
                 className="w-40 h-40 object-cover rounded-xl shadow-xl mb-3 animate-zoom"
               />
               <div className="flex gap-4">
-                <a href="/images/abstract.jpg" target="_blank" rel="noopener noreferrer" className="btn-primary px-4 py-2 rounded-lg font-semibold transform hover:scale-105 transition-transform duration-200">View</a>
-                <a href="/images/abstract.jpg" download className="btn-secondary px-4 py-2 rounded-lg font-semibold transform hover:scale-105 transition-transform duration-200">Download</a>
+                <a href="/images/abstract.jpg" target="_blank" rel="noopener noreferrer" className="relative inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm border border-primary-500 hover:border-primary-600">
+                  <span className="relative z-10">View Template</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                </a>
+                <a href="/images/abstract.jpg" download className="relative inline-flex items-center justify-center gap-2 px-6 py-3 bg-uganda-yellow hover:bg-yellow-500 text-uganda-black font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm border border-uganda-yellow hover:border-yellow-500">
+                  <span className="relative z-10">Download</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                </a>
               </div>
             </div>
             <p className="text-lg text-primary-100 max-w-2xl mx-auto">
@@ -940,9 +946,11 @@ export default function AbstractsPage() {
                 <LoadingButton
                   type="submit"
                   isLoading={isSubmitting}
-                  className="bg-gradient-to-r from-primary-500 to-primary-700 text-white px-8 py-4 rounded-xl font-bold text-base shadow-lg hover:from-primary-600 hover:to-primary-800 transform hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:scale-105 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+                  className="relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl text-base min-h-[56px] border border-primary-500 hover:border-primary-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
-                  {isSubmitting ? 'Submitting Abstract...' : 'Submit Abstract'}
+                  <span className="text-lg">📄</span>
+                  <span className="relative z-10">{isSubmitting ? 'Submitting Abstract...' : 'Submit Abstract'}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                 </LoadingButton>
                 <p className="text-sm text-gray-600 mt-4">
                   By submitting this form, you agree to the conference terms and conditions.

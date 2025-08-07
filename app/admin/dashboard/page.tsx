@@ -29,7 +29,9 @@ import {
   Upload,
   Menu,
   X,
-  ExternalLink
+  ExternalLink,
+  CreditCard,
+  Building
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -39,6 +41,8 @@ export default function AdminDashboard() {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
   const [selectedRegistrations, setSelectedRegistrations] = useState<string[]>([])
   const [selectedAbstracts, setSelectedAbstracts] = useState<string[]>([])
+  const [selectedPayments, setSelectedPayments] = useState<string[]>([])
+  const [selectedSponsorships, setSelectedSponsorships] = useState<string[]>([])
   const [showBatchActions, setShowBatchActions] = useState(false)
   const [dashboardData, setDashboardData] = useState<any>(null)
   const [dataManager, setDataManager] = useState<DataManager | null>(null)
@@ -50,6 +54,10 @@ export default function AdminDashboard() {
   const [registrationStats, setRegistrationStats] = useState<any>({})
   const [contactsData, setContactsData] = useState<any[]>([])
   const [contactStats, setContactStats] = useState<any>({})
+  const [paymentsData, setPaymentsData] = useState<any[]>([])
+  const [paymentStats, setPaymentStats] = useState<any>({})
+  const [sponsorshipsData, setSponsorshipsData] = useState<any[]>([])
+  const [sponsorshipStats, setSponsorshipStats] = useState<any>({})
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null)
@@ -87,12 +95,14 @@ export default function AdminDashboard() {
   const loadRealData = async () => {
     try {
       // Load data in parallel for better performance
-      const [regResponse, contactResponse] = await Promise.all([
+      const [regResponse, contactResponse, paymentResponse, sponsorshipResponse] = await Promise.all([
         fetch('/api/registrations/').catch(() => null),
-        fetch('/api/contacts/').catch(() => null)
+        fetch('/api/contacts/').catch(() => null),
+        fetch('/api/payments/').catch(() => null),
+        fetch('/api/sponsorships/').catch(() => null)
       ]);
       
-      let regData, contactData;
+      let regData, contactData, paymentData, sponsorshipData;
       let usingFallback = false;
       
       // Process registration data
@@ -115,6 +125,20 @@ export default function AdminDashboard() {
         setContactStats(contactData.stats || {})
       }
 
+      // Process payment data
+      if (paymentResponse && paymentResponse.ok) {
+        paymentData = await paymentResponse.json()
+        setPaymentsData(paymentData.data || [])
+        setPaymentStats(paymentData.stats || {})
+      }
+
+      // Process sponsorship data
+      if (sponsorshipResponse && sponsorshipResponse.ok) {
+        sponsorshipData = await sponsorshipResponse.json()
+        setSponsorshipsData(sponsorshipData.data || [])
+        setSponsorshipStats(sponsorshipData.stats || {})
+      }
+
       // Load abstracts asynchronously (doesn't block dashboard loading)
       loadAbstractsData()
 
@@ -125,6 +149,11 @@ export default function AdminDashboard() {
           pendingRegistrations: regData?.stats?.pending || 0,
           totalSpeakers: 0, // Will be updated when we have speaker data
           contactSubmissions: contactData?.stats?.total || 0,
+          totalPayments: paymentData?.stats?.total || 0,
+          completedPayments: paymentData?.stats?.completed || 0,
+          totalSponsorships: sponsorshipData?.stats?.total || 0,
+          confirmedSponsorships: sponsorshipData?.stats?.confirmed || 0,
+          totalRevenue: (paymentData?.stats?.totalRevenue || 0) + (sponsorshipData?.stats?.totalRevenue || 0),
           websiteViews: 15420, // Mock data for now
           conversionRate: 75 // Mock data for now
         }
@@ -1975,10 +2004,278 @@ ABSTRACT STATUS:
     </div>
   )
 
+  const renderPayments = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-2xl font-bold text-gray-900">Payment Management</h2>
+        <div className="flex gap-3">
+          <button className="btn-secondary text-sm">
+            <Download size={16} className="mr-2" />
+            Export Payments
+          </button>
+        </div>
+      </div>
+
+      {/* Payment Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Payments</p>
+              <p className="text-3xl font-bold text-gray-900">{paymentStats.total || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <CreditCard className="text-blue-600" size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Completed</p>
+              <p className="text-3xl font-bold text-gray-900">{paymentStats.completed || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <CheckCircle className="text-green-600" size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-3xl font-bold text-gray-900">{paymentStats.pending || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <AlertCircle className="text-yellow-600" size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+              <p className="text-3xl font-bold text-gray-900">${paymentStats.totalRevenue || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="text-purple-600" size={24} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Payments Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Reference</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Type</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Amount</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Email</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Status</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Date</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {paymentsData.slice(0, 20).map((payment: any) => (
+                <tr key={payment.id} className="hover:bg-gray-50">
+                  <td className="py-4 px-6 font-mono text-sm">{payment.reference_id}</td>
+                  <td className="py-4 px-6">
+                    <span className="capitalize px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                      {payment.payment_type}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 font-semibold">
+                    {payment.currency} {payment.amount?.toLocaleString()}
+                  </td>
+                  <td className="py-4 px-6 text-gray-600">{payment.email}</td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      payment.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {payment.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 text-gray-600">
+                    {new Date(payment.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center space-x-2">
+                      <button className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded" title="View">
+                        <Eye size={16} />
+                      </button>
+                      {payment.status === 'pending' && (
+                        <button className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded" title="Verify">
+                          <CheckCircle size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderSponsorships = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-2xl font-bold text-gray-900">Sponsorship Management</h2>
+        <div className="flex gap-3">
+          <button className="btn-secondary text-sm">
+            <Download size={16} className="mr-2" />
+            Export Sponsorships
+          </button>
+        </div>
+      </div>
+
+      {/* Sponsorship Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Applications</p>
+              <p className="text-3xl font-bold text-gray-900">{sponsorshipStats.total || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Building className="text-blue-600" size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Confirmed</p>
+              <p className="text-3xl font-bold text-gray-900">{sponsorshipStats.confirmed || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <CheckCircle className="text-green-600" size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-3xl font-bold text-gray-900">{sponsorshipStats.pending || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <AlertCircle className="text-yellow-600" size={24} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Revenue</p>
+              <p className="text-3xl font-bold text-gray-900">${sponsorshipStats.totalRevenue || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="text-purple-600" size={24} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sponsorships Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Company</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Contact</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Package</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Amount</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Status</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Payment</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Date</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-900">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {sponsorshipsData.slice(0, 20).map((sponsorship: any) => (
+                <tr key={sponsorship.id} className="hover:bg-gray-50">
+                  <td className="py-4 px-6 font-medium text-gray-900">{sponsorship.company_name}</td>
+                  <td className="py-4 px-6">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{sponsorship.contact_person}</div>
+                      <div className="text-sm text-gray-500">{sponsorship.email}</div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className="capitalize px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                      {sponsorship.package_type}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 font-semibold">
+                    {sponsorship.currency} {sponsorship.amount?.toLocaleString()}
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      sponsorship.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                      sponsorship.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {sponsorship.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      sponsorship.payment_status === 'completed' ? 'bg-green-100 text-green-800' :
+                      sponsorship.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {sponsorship.payment_status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 text-gray-600">
+                    {new Date(sponsorship.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center space-x-2">
+                      <button className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded" title="View">
+                        <Eye size={16} />
+                      </button>
+                      <button className="p-1 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 rounded" title="Edit">
+                        <Edit size={16} />
+                      </button>
+                      {sponsorship.status === 'pending' && (
+                        <button className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded" title="Approve">
+                          <CheckCircle size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+
   const navigation = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'registrations', label: 'Registrations', icon: Users },
     { id: 'abstracts', label: 'Abstracts', icon: FileText },
+    { id: 'payments', label: 'Payments', icon: CreditCard },
+    { id: 'sponsorships', label: 'Sponsorships', icon: Building },
     { id: 'contacts', label: 'Inquiries', icon: Mail },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
     { id: 'export', label: 'Data Export', icon: Download },
@@ -2111,6 +2408,8 @@ ABSTRACT STATUS:
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'registrations' && renderRegistrations()}
           {activeTab === 'abstracts' && renderAbstracts()}
+          {activeTab === 'payments' && renderPayments()}
+          {activeTab === 'sponsorships' && renderSponsorships()}
           {activeTab === 'analytics' && renderAnalytics()}
           {activeTab === 'contacts' && renderContacts()}
           {activeTab === 'export' && renderExport()}

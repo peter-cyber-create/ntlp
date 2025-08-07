@@ -40,12 +40,16 @@ export default function HomePage() {
           <p className="text-primary-200 text-sm sm:text-base md:text-lg lg:text-xl font-medium mb-4 sm:mb-6 animate-fade-in delay-200 text-center max-w-3xl px-2">
             3rd - 7th November, 2025 • Speke Resort Munyonyo, Uganda
           </p>
-          <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 justify-center items-center animate-fade-in delay-300 w-full max-w-md sm:max-w-none px-4">
-            <Link href="/register" className="btn-primary w-full xs:w-auto text-center min-h-[44px] flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-200">
-              Register Now
+          <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 justify-center items-center animate-fade-in delay-300 w-full max-w-lg sm:max-w-none px-4">
+            <Link href="/register" className="relative inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl text-sm sm:text-base min-h-[52px] border border-primary-600 hover:border-primary-700 w-full xs:w-auto text-center min-w-[160px]">
+              <span className="text-lg">🎫</span>
+              <span className="relative z-10">Register Now</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
             </Link>
-            <Link href="/abstracts" className="border-2 border-white text-white hover:bg-white hover:text-primary-900 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold text-sm sm:text-base shadow-lg transition-all duration-200 w-full xs:w-auto text-center min-h-[44px] flex items-center justify-center">
-              Submit Abstract
+            <Link href="/abstracts" className="relative inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 bg-transparent hover:bg-white/10 text-white border-2 border-white hover:border-white/90 font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl text-sm sm:text-base min-h-[52px] backdrop-blur-sm w-full xs:w-auto text-center min-w-[160px]">
+              <span className="text-lg">📄</span>
+              <span className="relative z-10">Submit Abstract</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
             </Link>
           </div>
         </div>
