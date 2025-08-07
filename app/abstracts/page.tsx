@@ -447,11 +447,11 @@ export default function AbstractsPage() {
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-center">
                       <Calendar size={16} className="mr-2 text-primary-600" />
-                      Abstract Submission Deadline: <strong>July 15, 2025</strong>
+                      Abstract Submission Deadline: <strong>August 30, 2025</strong>
                     </li>
                     <li className="flex items-center">
                       <Calendar size={16} className="mr-2 text-primary-600" />
-                      Notification of Acceptance: <strong>July 25, 2025</strong>
+                      Notification of Acceptance: <strong>September 10, 2025</strong>
                     </li>
                   </ul>
                 </div>
