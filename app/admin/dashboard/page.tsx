@@ -556,7 +556,7 @@ export default function AdminDashboard() {
     try {
       // Get the selected abstract data
       const selectedAbstractData = abstractsData.filter(abstract => 
-        selectedAbstracts.includes(abstract._id)
+        selectedAbstracts.includes(abstract.id)
       );
 
       if (selectedAbstractData.length === 0) {
@@ -595,7 +595,7 @@ export default function AdminDashboard() {
     }
 
     const selectedAbstractData = abstractsData.filter(abstract => 
-      selectedAbstracts.includes(abstract._id)
+      selectedAbstracts.includes(abstract.id)
     );
 
     const csvData = selectedAbstractData.map(abstract => {
@@ -1302,7 +1302,7 @@ export default function AdminDashboard() {
                         checked={selectedAbstracts.length === filteredAbstracts.length && filteredAbstracts.length > 0}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedAbstracts(filteredAbstracts.map(a => a._id))
+                            setSelectedAbstracts(filteredAbstracts.map(a => a.id))
                           } else {
                             setSelectedAbstracts([])
                           }
@@ -1320,16 +1320,16 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredAbstracts.map((abstract: any) => (
-                    <tr key={abstract._id} className="hover:bg-gray-50">
+                    <tr key={abstract.id} className="hover:bg-gray-50">
                       <td className="py-4 px-6">
                         <input
                           type="checkbox"
-                          checked={selectedAbstracts.includes(abstract._id)}
+                          checked={selectedAbstracts.includes(abstract.id)}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setSelectedAbstracts([...selectedAbstracts, abstract._id])
+                              setSelectedAbstracts([...selectedAbstracts, abstract.id])
                             } else {
-                              setSelectedAbstracts(selectedAbstracts.filter(id => id !== abstract._id))
+                              setSelectedAbstracts(selectedAbstracts.filter(id => id !== abstract.id))
                             }
                           }}
                           className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
