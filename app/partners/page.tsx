@@ -10,8 +10,8 @@ export default function PartnersPage() {
   const allPartners = [
     {
       name: 'Makerere University College of Health Sciences (MakCHS)',
-      logo: '/images/uganda-coat-of-arms.png',
-      description: 'Uganda’s premier health sciences college, leading research, training, and innovation in health.',
+      logo: '/images/makCHS-logo-1.png',
+      description: 'Uganda\'s premier health sciences college, leading research, training, and innovation in health.',
       website: 'https://chs.mak.ac.ug/'
     },
   ];
@@ -100,59 +100,14 @@ export default function PartnersPage() {
                   <img src={partner.logo} alt={partner.name + ' logo'} className="h-16 w-auto object-contain" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">{partner.name}</h3>
-                <p className="text-gray-600 text-sm mb-4 leading-relaxed text-center">{partner.description}</p>
-                {partner.website && (
-                  <a 
-                    href={partner.website} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary-600 hover:text-primary-700 font-medium text-sm inline-flex items-center"
-                  >
-                    Learn More →
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Sponsorship Opportunities */}
-      <section className="section-padding bg-primary-600 text-white">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Sponsorship Opportunities
-            </h2>
-            <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-              Join us as a sponsor and connect with health professionals, researchers, and leaders 
-              who are shaping the future of healthcare in Uganda and across Africa.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-            {sponsorshipTiers.map((tier, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 text-gray-900 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400 flex flex-col">
-                <div className={`h-3 rounded-t-lg ${tier.color} mb-6`}></div>
-                <h3 className="text-xl font-bold mb-2">{tier.name}</h3>
-                <div className="text-3xl font-bold text-primary-600 mb-4">{tier.price}</div>
-                <div className="mb-6">
-                  <h4 className="font-semibold text-primary-800 mb-2 text-sm">Ideal For:</h4>
-                  <p className="text-gray-600 text-xs italic">{tier.ideal}</p>
-                </div>
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {tier.benefits.map((benefit: string, benefitIndex: number) => (
-                    <li key={benefitIndex} className="flex items-start space-x-3 text-sm">
-                      <div className="w-2 h-2 bg-primary-600 rounded-full mt-2 flex-shrink-0"></div>
-                      <span>{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="/contact"
-                  className="w-full btn-primary bg-primary-600 text-white hover:bg-primary-700 text-center py-3 px-4 rounded-lg font-medium transition-colors duration-200"
+                <p className="text-gray-600 text-center mb-4">{partner.description}</p>
+                <a 
+                  href={partner.website} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary-600 hover:text-primary-700 font-medium"
                 >
-                  Get Started
+                  Visit Website →
                 </a>
               </div>
             ))}
@@ -160,25 +115,103 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      {/* Partnership CTA */}
-      <section className="section-padding">
+      {/* Partnership Opportunities */}
+      <section className="section-padding bg-white">
         <div className="container">
-          <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 md:p-12 text-center">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Become a Partner
+              Partnership Opportunities
             </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join our mission to advance African healthcare through technology. 
-              Let's create impact together.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/contact" className="btn-primary">
-                Contact Partnership Team
-              </a>
-              <a href="/register" className="btn-secondary">
-                Attend as Delegate
-              </a>
+            <p className="text-xl text-gray-600">Join us in advancing health innovation and research in Uganda</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {sponsorshipTiers.map((tier, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+                <div className={`${tier.color} p-6 text-white`}>
+                  <h3 className="text-xl font-bold mb-2">{tier.name}</h3>
+                  <div className="text-3xl font-bold">{tier.price}</div>
+                </div>
+                <div className="p-6">
+                  <p className="text-sm text-gray-600 mb-4 italic">Ideal for: {tier.ideal}</p>
+                  <ul className="space-y-2">
+                    {tier.benefits.map((benefit, benefitIndex) => (
+                      <li key={benefitIndex} className="flex items-start">
+                        <div className="w-2 h-2 bg-primary-600 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <span className="text-gray-700">{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="px-6 pb-6">
+                  <button className="w-full bg-primary-600 text-white py-3 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                    Choose This Package
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Partner With Us */}
+      <section className="section-padding bg-gray-50">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Partner With Us?
+            </h2>
+            <p className="text-xl text-gray-600">Unlock unique opportunities to make a lasting impact</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="text-primary-600" size={32} />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Network Access</h3>
+              <p className="text-gray-600">Connect with 500+ health professionals, researchers, and policymakers</p>
             </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Target className="text-primary-600" size={32} />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Targeted Audience</h3>
+              <p className="text-gray-600">Reach decision-makers in healthcare, government, and academia</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="text-primary-600" size={32} />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Brand Recognition</h3>
+              <p className="text-gray-600">Enhance your brand visibility among key stakeholders</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="text-primary-600" size={32} />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Social Impact</h3>
+              <p className="text-gray-600">Support initiatives that improve health outcomes in Uganda</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="section-padding bg-primary-600 text-white">
+        <div className="container text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Partner With Us?</h2>
+          <p className="text-xl mb-8 text-primary-100">Join our mission to advance health innovation and research in Uganda</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/contact" className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+              Contact Us
+            </a>
+            <a href="/register" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition-colors">
+              Register as Sponsor
+            </a>
           </div>
         </div>
       </section>
