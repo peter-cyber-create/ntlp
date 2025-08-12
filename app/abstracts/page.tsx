@@ -1,4 +1,13 @@
-'use client'
+
+"use client";
+  const crossCuttingThemes = [
+    'Health equity and inclusion in marginalized and urbanizing populations',
+    'Urban health, infrastructure, and health service delivery adaptations',
+    'Gender and youth empowerment in policy and practice',
+    'Evidence and translation from research to policy implementation',
+    'South-South collaboration and regional leadership in innovation',
+    "Health professionals' education including transformative teaching methods and competency-based training"
+  ];
 
 import React, { useState } from 'react'
 import { Calendar, Clock, Users, Award, AlertCircle, CheckCircle, Upload, X, FileText } from 'lucide-react'
@@ -17,6 +26,7 @@ export default function AbstractsPage() {
     title: '',
     presentationType: 'oral' as 'oral' | 'poster',
     category: '',
+    crossCuttingTheme: '',
     primaryAuthor: {
       firstName: '',
       lastName: '',
@@ -29,10 +39,10 @@ export default function AbstractsPage() {
     coAuthors: '',
     abstract: '',
     keywords: '',
-    objectives: '',
-    methodology: '',
-    results: '',
-    conclusions: '',
+    background: '',
+    methods: '',
+    findings: '',
+    conclusion: '',
     implications: '',
     conflictOfInterest: false,
     ethicalApproval: false,
@@ -40,18 +50,13 @@ export default function AbstractsPage() {
   })
 
   const categories = [
-    'Communicable Diseases',
-    'Non-Communicable Diseases',
-    'Health Systems Strengthening',
-    'Digital Health & Technology',
-    'Public Health Policy',
-    'Community Health',
-    'Maternal & Child Health',
-    'Mental Health',
-    'Health Economics',
-    'Health Research & Innovation',
-    'Environmental Health',
-    'Health Emergency Preparedness'
+    'Integrated Diagnostics, AMR, and Epidemic Readiness',
+    'Digital Health, Data, and Innovation',
+    'Community Engagement for Disease Prevention and Elimination',
+    'Health System Resilience and Emergency Preparedness and Response',
+    'One Health',
+    'Care, Treatment & Rehabilitation',
+    'Cross-cutting Themes (Applicable to all tracks)'
   ]
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -120,7 +125,7 @@ export default function AbstractsPage() {
   const validateForm = () => {
     const required = [
       'title', 'category', 'abstract', 'keywords', 
-      'objectives', 'methodology', 'results', 'conclusions'
+      'background', 'methods', 'findings', 'conclusion'
     ]
     
     const authorRequired = [
@@ -205,7 +210,13 @@ export default function AbstractsPage() {
       submitData.append('title', formData.title)
       submitData.append('abstract', formData.abstract)
       submitData.append('keywords', formData.keywords)
-      submitData.append('category', mapCategoryToAPI(formData.category))
+      submitData.append('category', formData.category)
+      submitData.append('preferredTrack', formData.category)
+      submitData.append('presentationType', formData.presentationType)
+      submitData.append('background', formData.background)
+      submitData.append('methods', formData.methods)
+      submitData.append('findings', formData.findings)
+      submitData.append('conclusion', formData.conclusion)
       submitData.append('authors', `${formData.primaryAuthor.firstName} ${formData.primaryAuthor.lastName}${formData.coAuthors ? ', ' + formData.coAuthors : ''}`)
       submitData.append('email', formData.primaryAuthor.email)
       submitData.append('institution', formData.primaryAuthor.affiliation)
@@ -233,29 +244,30 @@ export default function AbstractsPage() {
           })
           // Reset form
           setFormData({
-            title: '',
-            presentationType: 'oral',
-            category: '',
-            primaryAuthor: {
-              firstName: '',
-              lastName: '',
-              email: '',
-              phone: '',
-              affiliation: '',
-              position: '',
-              district: ''
-            },
-            coAuthors: '',
-            abstract: '',
-            keywords: '',
-            objectives: '',
-            methodology: '',
-            results: '',
-            conclusions: '',
-            implications: '',
-            conflictOfInterest: false,
-            ethicalApproval: false,
-            consentToPublish: false
+          title: '',
+          presentationType: 'oral',
+          category: '',
+          crossCuttingTheme: '',
+          primaryAuthor: {
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            affiliation: '',
+            position: '',
+            district: ''
+          },
+          coAuthors: '',
+          abstract: '',
+          keywords: '',
+          background: '',
+          methods: '',
+          findings: '',
+          conclusion: '',
+          implications: '',
+          conflictOfInterest: false,
+          ethicalApproval: false,
+          consentToPublish: false
           })
           setSelectedFile(null)
           const fileInput = document.getElementById('abstractFile') as HTMLInputElement
@@ -281,6 +293,7 @@ export default function AbstractsPage() {
           title: '',
           presentationType: 'oral',
           category: '',
+          crossCuttingTheme: '',
           primaryAuthor: {
             firstName: '',
             lastName: '',
@@ -293,10 +306,10 @@ export default function AbstractsPage() {
           coAuthors: '',
           abstract: '',
           keywords: '',
-          objectives: '',
-          methodology: '',
-          results: '',
-          conclusions: '',
+          background: '',
+          methods: '',
+          findings: '',
+          conclusion: '',
           implications: '',
           conflictOfInterest: false,
           ethicalApproval: false,
@@ -321,6 +334,7 @@ export default function AbstractsPage() {
         title: '',
         presentationType: 'oral',
         category: '',
+        crossCuttingTheme: '',
         primaryAuthor: {
           firstName: '',
           lastName: '',
@@ -333,10 +347,10 @@ export default function AbstractsPage() {
         coAuthors: '',
         abstract: '',
         keywords: '',
-        objectives: '',
-        methodology: '',
-        results: '',
-        conclusions: '',
+        background: '',
+        methods: '',
+        findings: '',
+        conclusion: '',
         implications: '',
         conflictOfInterest: false,
         ethicalApproval: false,
@@ -453,11 +467,11 @@ export default function AbstractsPage() {
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-center">
                       <Calendar size={16} className="mr-2 text-primary-600" />
-                      Abstract Submission Deadline: <strong>August 30, 2025</strong>
+                      Abstract Submission Deadline: <strong>September 15, 2025</strong>
                     </li>
                     <li className="flex items-center">
                       <Calendar size={16} className="mr-2 text-primary-600" />
-                      Notification of Acceptance: <strong>September 10, 2025</strong>
+                      Notification of Acceptance: <strong>September 25, 2025</strong>
                     </li>
                   </ul>
                 </div>
@@ -467,7 +481,7 @@ export default function AbstractsPage() {
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-center">
                       <CheckCircle size={16} className="mr-2 text-green-600" />
-                      Maximum 500 words (excluding references)
+                      Maximum 300 words (background, methods, findings, conclusion; excluding references)
                     </li>
                     <li className="flex items-center">
                       <CheckCircle size={16} className="mr-2 text-green-600" />
@@ -717,6 +731,29 @@ export default function AbstractsPage() {
               </div>
 
               {/* Abstract Content */}
+              {formData.category === 'Cross-cutting Themes (Applicable to all tracks)' && (
+                <div className="mb-8">
+                  <label htmlFor="crossCuttingTheme" className="block text-sm font-medium text-gray-700 mb-2">
+                    Cross-cutting Theme Option *
+                    <span className="text-xs text-gray-500 block font-normal">
+                      Select the most relevant cross-cutting theme for your abstract
+                    </span>
+                  </label>
+                  <select
+                    id="crossCuttingTheme"
+                    name="crossCuttingTheme"
+                    required
+                    value={formData.crossCuttingTheme || ''}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">Select a cross-cutting theme</option>
+                    {crossCuttingThemes.map((theme) => (
+                      <option key={theme} value={theme}>{theme}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Abstract Content</h3>
                 
@@ -760,37 +797,37 @@ export default function AbstractsPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="objectives" className="block text-sm font-medium text-gray-700 mb-2">
-                      Objectives *
+                    <label htmlFor="background" className="block text-sm font-medium text-gray-700 mb-2">
+                      Background *
                       <span className="text-xs text-gray-500 block font-normal">
-                        Clear statement of research objectives or aims
+                        Brief background and context for your research
                       </span>
                     </label>
                     <textarea
-                      id="objectives"
-                      name="objectives"
+                      id="background"
+                      name="background"
                       rows={3}
                       required
-                      value={formData.objectives}
+                      value={formData.background}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      placeholder="State the main objectives of your research"
+                      placeholder="Provide background and context for your research"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="methodology" className="block text-sm font-medium text-gray-700 mb-2">
-                      Methodology *
+                    <label htmlFor="methods" className="block text-sm font-medium text-gray-700 mb-2">
+                      Methods *
                       <span className="text-xs text-gray-500 block font-normal">
                         Brief description of methods used
                       </span>
                     </label>
                     <textarea
-                      id="methodology"
-                      name="methodology"
+                      id="methods"
+                      name="methods"
                       rows={4}
                       required
-                      value={formData.methodology}
+                      value={formData.methods}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="Describe your research methodology, study design, data collection methods, etc."
@@ -798,18 +835,18 @@ export default function AbstractsPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="results" className="block text-sm font-medium text-gray-700 mb-2">
-                      Results *
+                    <label htmlFor="findings" className="block text-sm font-medium text-gray-700 mb-2">
+                      Findings *
                       <span className="text-xs text-gray-500 block font-normal">
                         Key findings of your research
                       </span>
                     </label>
                     <textarea
-                      id="results"
-                      name="results"
+                      id="findings"
+                      name="findings"
                       rows={4}
                       required
-                      value={formData.results}
+                      value={formData.findings}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="Present your main findings and results"
@@ -817,18 +854,18 @@ export default function AbstractsPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="conclusions" className="block text-sm font-medium text-gray-700 mb-2">
-                      Conclusions *
+                    <label htmlFor="conclusion" className="block text-sm font-medium text-gray-700 mb-2">
+                      Conclusion *
                       <span className="text-xs text-gray-500 block font-normal">
                         Conclusions drawn from your research
                       </span>
                     </label>
                     <textarea
-                      id="conclusions"
-                      name="conclusions"
+                      id="conclusion"
+                      name="conclusion"
                       rows={3}
                       required
-                      value={formData.conclusions}
+                      value={formData.conclusion}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="State your main conclusions"
