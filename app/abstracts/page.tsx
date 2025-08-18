@@ -26,6 +26,7 @@ export default function AbstractsPage() {
     title: '',
     presentationType: 'oral' as 'oral' | 'poster',
     category: '',
+    subcategory: '',
     crossCuttingTheme: '',
     primaryAuthor: {
       firstName: '',
@@ -49,19 +50,92 @@ export default function AbstractsPage() {
     consentToPublish: false
   })
 
+  // Conference tracks and topics
+  const trackTopics: Record<string, string[]> = {
+    'Integrated Diagnostics, AMR, and Epidemic Readiness': [
+      'Optimizing Laboratory Diagnostics in Integrated Health Systems',
+      'Quality management systems in Multi-Disease Diagnostics',
+      'Leveraging Point-of-Care Testing to Enhance Integrated Service Delivery',
+      'Combatting Antimicrobial Resistance (AMR) Through Diagnostics',
+      'Strengthening surveillance systems for drug resistance across TB, malaria, HIV, and bacterial infections',
+      'Linking diagnostics to resistance monitoring: From lab to real-time policy response',
+      'Role of Diagnostics in Early Warning Systems: lessons from recent outbreaks',
+      'Expanding access to radiological services: Affordable imaging in low-resource settings',
+    ],
+    'Digital Health, Data, and Innovation': [
+      'AI-powered diagnostics: Innovations and governance for TB, HIV, and cervical cancer',
+      'Digital platforms for surveillance, early detection, and outbreak prediction',
+      'Data interoperability and health information exchange: service delivery Integration and data/information systems, Gaps, ethics, and governance',
+      'Community-led digital health: Mobile tools, and digital village health teams (VHTs)',
+      'Localized health information systems: Capturing/collection, use of data at grass root and higher levels for fast action.',
+      'Leveraging digital equity in urban and peri-urban health responses',
+    ],
+    'Community Engagement for Disease Prevention and Elimination': [
+      'Catalyzing youth, community health extension workers (CHEWs), and grassroots champions for health innovation',
+      'Integrating preventive services for communicable and non-communicable diseases, and mental health at household level',
+      'Scaling community-led elimination efforts: Malaria, TB, neglected tropical diseases (NTDs), and leprosy and improving vaccine uptake',
+      'Participatory planning, implementation, monitoring for behavior change, and social accountability',
+    ],
+    'Health System Resilience and Emergency Preparedness and Response': [
+      'Sepsis and emergency triage protocols in fragile health systems',
+      'Strengthening infection prevention and control (IPC) in primary care; including ready to use isolation facilities.',
+      'Local vaccine and therapeutics; access, and emergency stockpiling',
+      'Health workforce preparedness; Training multidisciplinary rapid response teams',
+      'Continuity of care: Protecting essential health services during crises',
+    ],
+    'Policy, Financing and Cross-Sector Integration': [
+      'Integrated financing models for chronic and infectious disease burdens',
+      'Social determinant-sensitive policymaking: Urban health, empowering young people for improved health through education and intersectoral action',
+      'National accountability frameworks for health performance',
+      'Scaling UHC through service integration at the primary level',
+      'Policy instruments for embedding health equity in national planning',
+      'Implementation science and translation of results into policy',
+    ],
+    'One Health': [
+      'Early warning systems and multi-sector coordination for zoonotic outbreaks',
+      'Localizing One Health strategies: Successes and challenges at district level',
+      'Public–private partnerships; Insurance, vouchers, and demand-side financing to reduce out-of-pocket expenditure',
+      'Data harmonization between human and animal health sectors',
+      'Nutrition and lifestyle for health',
+      'Wildlife trade, food systems, and emerging health risks',
+      'Preparing for climate-sensitive disease patterns and spillover threats',
+      'Strengthening Biosafety and Biosecurity Systems to Prevent Zoonotic Spillovers',
+      'Confronting Insecticide Resistance in Vectors: A One Health approach to sustaining vector control gains',
+    ],
+    'Care, Treatment & Rehabilitation': [
+      'Innovations in equitable health services for acute and chronic diseases care delivery across primary levels',
+      'Interface of communicable and non-communicable diseases (NCDs): Integrated models',
+      'Role of traditional medicine in continuum of care',
+      'Enhancing community trust and treatment adherence through culturally embedded care',
+      'Digital decision-support tools for frontline clinicians in NCD and infectious disease management',
+    ],
+  }
+
   const categories = [
     'Integrated Diagnostics, AMR, and Epidemic Readiness',
     'Digital Health, Data, and Innovation',
     'Community Engagement for Disease Prevention and Elimination',
     'Health System Resilience and Emergency Preparedness and Response',
+    'Policy, Financing and Cross-Sector Integration',
     'One Health',
     'Care, Treatment & Rehabilitation',
-    'Cross-cutting Themes (Applicable to all tracks)'
+    'Cross-Cutting Themes (Applicable to All Tracks)'
   ]
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
-    
+    if (name === 'category') {
+      setFormData(prev => ({
+        ...prev,
+        category: value,
+        subcategory: '', // Reset subcategory when category changes
+      }))
+      return
+    }
+    if (name === 'subcategory') {
+      setFormData(prev => ({ ...prev, subcategory: value }))
+      return
+    }
     if (name.startsWith('primaryAuthor.')) {
       const field = name.split('.')[1]
       setFormData(prev => ({
@@ -127,12 +201,13 @@ export default function AbstractsPage() {
       'title', 'category', 'abstract', 'keywords', 
       'background', 'methods', 'findings', 'conclusion'
     ]
-    
+    if (formData.category && trackTopics[formData.category]) {
+      required.push('subcategory')
+    }
     const authorRequired = [
       'firstName', 'lastName', 'email', 'phone', 
       'affiliation', 'position', 'district'
     ]
-    
     for (const field of required) {
       if (!formData[field as keyof typeof formData]) {
         setSubmitResult({
@@ -143,7 +218,6 @@ export default function AbstractsPage() {
         return false
       }
     }
-    
     for (const field of authorRequired) {
       if (!formData.primaryAuthor[field as keyof typeof formData.primaryAuthor]) {
         setSubmitResult({
@@ -154,7 +228,18 @@ export default function AbstractsPage() {
         return false
       }
     }
-    
+    // Word count validation (background + methods + findings + conclusion)
+    const wordCount = [formData.background, formData.methods, formData.findings, formData.conclusion]
+      .map(s => s.trim().split(/\s+/).filter(Boolean).length)
+      .reduce((a, b) => a + b, 0)
+    if (wordCount > 300) {
+      setSubmitResult({
+        type: 'error',
+        title: 'Word Limit Exceeded',
+        message: `Abstract content (background, methods, findings, conclusion) must not exceed 300 words. Current: ${wordCount}`
+      })
+      return false
+    }
     if (!formData.consentToPublish) {
       setSubmitResult({
         type: 'error',
@@ -163,7 +248,6 @@ export default function AbstractsPage() {
       })
       return false
     }
-    
     if (!selectedFile) {
       setSubmitResult({
         type: 'error',
@@ -172,7 +256,6 @@ export default function AbstractsPage() {
       })
       return false
     }
-    
     return true
   }
 
@@ -212,6 +295,7 @@ export default function AbstractsPage() {
       submitData.append('keywords', formData.keywords)
       submitData.append('category', formData.category)
       submitData.append('preferredTrack', formData.category)
+      if (formData.subcategory) submitData.append('subcategory', formData.subcategory)
       submitData.append('presentationType', formData.presentationType)
       submitData.append('background', formData.background)
       submitData.append('methods', formData.methods)
@@ -244,30 +328,31 @@ export default function AbstractsPage() {
           })
           // Reset form
           setFormData({
-          title: '',
-          presentationType: 'oral',
-          category: '',
-          crossCuttingTheme: '',
-          primaryAuthor: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            affiliation: '',
-            position: '',
-            district: ''
-          },
-          coAuthors: '',
-          abstract: '',
-          keywords: '',
-          background: '',
-          methods: '',
-          findings: '',
-          conclusion: '',
-          implications: '',
-          conflictOfInterest: false,
-          ethicalApproval: false,
-          consentToPublish: false
+            title: '',
+            presentationType: 'oral',
+            category: '',
+            subcategory: '',
+            crossCuttingTheme: '',
+            primaryAuthor: {
+              firstName: '',
+              lastName: '',
+              email: '',
+              phone: '',
+              affiliation: '',
+              position: '',
+              district: ''
+            },
+            coAuthors: '',
+            abstract: '',
+            keywords: '',
+            background: '',
+            methods: '',
+            findings: '',
+            conclusion: '',
+            implications: '',
+            conflictOfInterest: false,
+            ethicalApproval: false,
+            consentToPublish: false
           })
           setSelectedFile(null)
           const fileInput = document.getElementById('abstractFile') as HTMLInputElement
@@ -293,6 +378,7 @@ export default function AbstractsPage() {
           title: '',
           presentationType: 'oral',
           category: '',
+          subcategory: '',
           crossCuttingTheme: '',
           primaryAuthor: {
             firstName: '',
@@ -334,6 +420,7 @@ export default function AbstractsPage() {
         title: '',
         presentationType: 'oral',
         category: '',
+        subcategory: '',
         crossCuttingTheme: '',
         primaryAuthor: {
           firstName: '',
@@ -564,9 +651,9 @@ export default function AbstractsPage() {
 
                     <div>
                       <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                        Research Category *
+                        Conference Track *
                         <span className="text-xs text-gray-500 block font-normal">
-                          Choose the most relevant category
+                          Choose the most relevant track
                         </span>
                       </label>
                       <select
@@ -577,13 +664,37 @@ export default function AbstractsPage() {
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       >
-                        <option value="">Select a category</option>
+                        <option value="">Select a track</option>
                         {categories.map((cat) => (
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
                       </select>
                     </div>
                   </div>
+                  {/* Subcategory (Topic) selection */}
+                  {formData.category && trackTopics[formData.category] && (
+                    <div className="mt-6">
+                      <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">
+                        Topic (Subcategory) *
+                        <span className="text-xs text-gray-500 block font-normal">
+                          Select the most relevant topic for your abstract
+                        </span>
+                      </label>
+                      <select
+                        id="subcategory"
+                        name="subcategory"
+                        required
+                        value={formData.subcategory}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      >
+                        <option value="">Select a topic</option>
+                        {trackTopics[formData.category].map((topic) => (
+                          <option key={topic} value={topic}>{topic}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
 

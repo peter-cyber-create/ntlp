@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
     abstract = formData.get('abstract') as string;
     keywords = formData.get('keywords') as string;
     category = formData.get('category') as string;
+    const subcategory = formData.get('subcategory') as string | null;
     authors = formData.get('authors') as string;
     email = formData.get('email') as string;
     institution = formData.get('institution') as string;
     phone = formData.get('phone') as string;
-    
     file = formData.get('file') as File;
 
     // Validate required fields
@@ -81,16 +81,46 @@ export async function POST(request: NextRequest) {
       email,
       institution
     };
-
+    // If category is a main track, subcategory is required
+    const mainTracks = [
+      'Integrated Diagnostics, AMR, and Epidemic Readiness',
+      'Digital Health, Data, and Innovation',
+      'Community Engagement for Disease Prevention and Elimination',
+      'Health System Resilience and Emergency Preparedness and Response',
+      'Policy, Financing and Cross-Sector Integration',
+      'One Health',
+      'Care, Treatment & Rehabilitation'
+    ];
+    if (mainTracks.includes(category) && (!subcategory || subcategory.trim() === '')) {
+      return NextResponse.json({
+        success: false,
+        error: 'Missing required field: subcategory',
+        missingFields: ['subcategory']
+      }, { status: 400 });
+    }
     const missingFields = Object.entries(requiredFields)
       .filter(([key, value]) => !value || (typeof value === 'string' && value.trim() === ''))
       .map(([key]) => key);
-
     if (missingFields.length > 0) {
       return NextResponse.json({ 
         success: false,
         error: 'Missing required fields',
         missingFields 
+      }, { status: 400 });
+    }
+
+    // Enforce 300-word limit for abstract content (background, methods, findings, conclusion)
+    const background = formData.get('background') as string || '';
+    const methods = formData.get('methods') as string || '';
+    const findings = formData.get('findings') as string || '';
+    const conclusion = formData.get('conclusion') as string || '';
+    const wordCount = [background, methods, findings, conclusion]
+      .map(s => s.trim().split(/\s+/).filter(Boolean).length)
+      .reduce((a, b) => a + b, 0);
+    if (wordCount > 300) {
+      return NextResponse.json({
+        success: false,
+        error: `Abstract content (background, methods, findings, conclusion) must not exceed 300 words. Current: ${wordCount}`
       }, { status: 400 });
     }
 
@@ -165,11 +195,11 @@ export async function POST(request: NextRequest) {
       // Insert the abstract
       const result = await db.execute(`
         INSERT INTO abstracts (
-          title, abstract, keywords, category, authors, email, institution, phone,
+          title, abstract, keywords, category, subcategory, authors, email, institution, phone,
           fileName, filePath, fileSize, status, createdAt, updatedAt
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())
       `, [
-        title, abstract, keywords, category, authors, email, institution, phone,
+        title, abstract, keywords, category, subcategory || null, authors, email, institution, phone,
         fileName || 'no-file', filePath || null, fileSize || 0
       ]) as any;
 
@@ -181,6 +211,7 @@ export async function POST(request: NextRequest) {
           title,
           email,
           category,
+          subcategory,
           authors,
           status: 'pending',
           submitted_at: new Date().toISOString()
