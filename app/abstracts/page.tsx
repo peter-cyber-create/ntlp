@@ -509,36 +509,10 @@ export default function AbstractsPage() {
         </div>
       )}
 
-      {/* Abstract Download/View Section */}
-      <section className="bg-gradient-to-r from-primary-600 to-primary-800 text-white section-padding">
-        <div className="container">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">NACNDC & JASH Conference 2025 - Call for Abstracts</h2>
-            <div className="flex flex-col items-center justify-center mb-6">
-              <img
-                src="/images/abstract.jpg"
-                alt="NACNDC & JASH Conference Abstract"
-                className="w-40 h-40 object-cover rounded-xl shadow-xl mb-3 animate-zoom"
-              />
-              <div className="flex gap-4">
-                <a href="/images/abstract.jpg" target="_blank" rel="noopener noreferrer" className="relative inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm border border-primary-500 hover:border-primary-600">
-                  <span className="relative z-10">View Template</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                </a>
-                <a href="/images/abstract.jpg" download className="relative inline-flex items-center justify-center gap-2 px-6 py-3 bg-uganda-yellow hover:bg-yellow-500 text-uganda-black font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm border border-uganda-yellow hover:border-yellow-500">
-                  <span className="relative z-10">Download</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                </a>
-              </div>
-            </div>
-            <p className="text-lg text-primary-100 max-w-2xl mx-auto">
-              Submit your abstract for UNIFIED ACTION AGAINST COMMUNICABLE AND NON COMMUNICABLE DISEASES at Speke Resort Munyonyo.
-            </p>
-          </div>
-        </div>
-      </section>
+
 
       {/* Guidelines Section */}
+
       <section className="section-padding bg-gray-50">
         <div className="container">
           <div className="max-w-4xl mx-auto">

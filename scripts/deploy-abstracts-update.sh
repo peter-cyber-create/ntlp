@@ -16,7 +16,7 @@ git pull
 # 2. Run DB migration
 echo "[2/4] Running database migration for subcategory..."
 if [ -f "$MIGRATION" ]; then
-  mysql -u root -p ntlp_conference < "$MIGRATION"
+  sudo mysql -u root conf < "$MIGRATION"
 else
   echo "Migration file not found: $MIGRATION"
   exit 1

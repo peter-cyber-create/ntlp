@@ -51,6 +51,11 @@ export default function HomePage() {
               <span className="relative z-10">Submit Abstract</span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
             </Link>
+            <Link href="/payment-instructions" className="relative inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl text-sm sm:text-base min-h-[52px] border border-yellow-400 hover:border-yellow-500 w-full xs:w-auto text-center min-w-[160px]">
+              <span className="text-lg">💳</span>
+              <span className="relative z-10">Payment Instructions</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+            </Link>
           </div>
         </div>
       </section>
