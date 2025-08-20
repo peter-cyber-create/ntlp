@@ -8,6 +8,7 @@ export default function PaymentInstructionsPage() {
     <div className="section-padding bg-yellow-50 min-h-screen flex items-center justify-center">
       <div className="container">
         <div className="max-w-3xl mx-auto">
+          {/* Home Button removed as requested */}
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-yellow-300">
             <h2 className="text-2xl font-bold text-yellow-800 mb-4 flex items-center">
               <span className="mr-2">💳</span> Manual Payment Instructions

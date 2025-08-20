@@ -1,6 +1,5 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import UgandaStripe from '../components/UgandaStripe'
 import { ConditionalLayout } from '../components/ConditionalLayout'
 import React from 'react'
 import type { ReactNode } from 'react'
@@ -58,12 +57,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         
-        {/* Flutterwave Inline Payment Script */}
-        <script src="https://checkout.flutterwave.com/v3.js"></script>
       </head>
       <body className={inter.className}>
-        {/* Uganda Flag Stripe */}
-        <UgandaStripe />
         <ConditionalLayout>
           {children}
         </ConditionalLayout>

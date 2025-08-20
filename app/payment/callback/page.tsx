@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { CheckCircle, XCircle, Clock, ArrowRight, CreditCard, Building } from 'lucide-react'
+import { CheckCircle, XCircle, Clock, ArrowRight, Building } from 'lucide-react'
 
 interface PaymentDetails {
   reference: string;
@@ -15,7 +15,6 @@ interface PaymentDetails {
 
 // Bank details for alternative payment methods
 const BANK_DETAILS = {
-  bankName: 'Stanbic Bank Uganda',
   accountName: 'Makerere University School of Public Health',
   accountNumber: '9030005611449',
   branchCode: 'SBICUGKXXXX'
@@ -258,10 +257,7 @@ function PaymentCallbackContent() {
                       <strong>Account Number:</strong><br />
                       {BANK_DETAILS.accountNumber}
                     </div>
-                    <div>
-                      <strong>Bank:</strong><br />
-                      {BANK_DETAILS.bankName}
-                    </div>
+                    {/* Bank name removed for privacy */}
                     <div>
                       <strong>Swift Code:</strong><br />
                       {BANK_DETAILS.branchCode}
@@ -269,7 +265,7 @@ function PaymentCallbackContent() {
                   </div>
                   <div className="mt-3 pt-3 border-t">
                     <p className="text-xs text-gray-500">
-                      For USD payments: Use intermediary bank Citibank New York (CITIUS33)
+
                     </p>
                   </div>
                 </div>
@@ -300,7 +296,7 @@ function PaymentCallbackContent() {
                     onClick={() => window.location.reload()}
                     className="inline-flex items-center bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
                   >
-                    <CreditCard className="mr-2 h-4 w-4" />
+                    {/* Removed CreditCard icon as payment integration is disabled */}
                     Check Payment Status
                   </button>
                   <a 

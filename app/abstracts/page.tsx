@@ -453,20 +453,20 @@ export default function AbstractsPage() {
 
 
   return (
-    <div>
+    <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50 min-h-screen pb-12">
       {/* Success/Error Modal */}
       {submitResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border-t-8 border-primary-600">
+            <div className="p-8">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   {submitResult.type === 'success' ? (
-                    <CheckCircle className="text-green-500 flex-shrink-0" size={24} />
+                    <CheckCircle className="text-green-500 flex-shrink-0" size={28} />
                   ) : (
-                    <AlertCircle className="text-red-500 flex-shrink-0" size={24} />
+                    <AlertCircle className="text-red-500 flex-shrink-0" size={28} />
                   )}
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-xl font-bold text-gray-900">
                     {submitResult.title}
                   </h3>
                 </div>
@@ -475,27 +475,25 @@ export default function AbstractsPage() {
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                   aria-label="Close"
                 >
-                  <X size={20} />
+                  <X size={22} />
                 </button>
               </div>
-              
               <div className="mb-6">
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed">
                   {submitResult.message}
                 </p>
                 {submitResult.submissionId && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-sm text-gray-700">
                       <span className="font-medium">Submission ID:</span> {submitResult.submissionId}
                     </p>
                   </div>
                 )}
               </div>
-              
               <div className="flex justify-end">
                 <button
                   onClick={() => setSubmitResult(null)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  className={`px-5 py-2 rounded-lg font-semibold transition-colors shadow ${
                     submitResult.type === 'success'
                       ? 'bg-green-600 text-white hover:bg-green-700'
                       : 'bg-red-600 text-white hover:bg-red-700'
@@ -509,63 +507,54 @@ export default function AbstractsPage() {
         </div>
       )}
 
-
-
       {/* Guidelines Section */}
-
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding bg-gradient-to-r from-primary-50 to-blue-50 border-b border-primary-100">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 transition-all duration-200 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:ring-2 focus-within:ring-primary-400">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <FileText className="mr-3 text-primary-600" />
+            <div className="bg-white rounded-2xl shadow-xl p-10 mb-10 border-t-4 border-primary-600">
+              <h2 className="text-3xl font-extrabold text-primary-800 mb-8 flex items-center gap-3">
+                <FileText className="text-primary-600" size={32} />
                 Submission Guidelines
               </h2>
-              
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-8">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Important Dates</h3>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-center">
-                      <Calendar size={16} className="mr-2 text-primary-600" />
+                      <Calendar size={18} className="mr-2 text-primary-600" />
                       Abstract Submission Deadline: <strong>September 15, 2025</strong>
                     </li>
                     <li className="flex items-center">
-                      <Calendar size={16} className="mr-2 text-primary-600" />
+                      <Calendar size={18} className="mr-2 text-primary-600" />
                       Notification of Acceptance: <strong>September 25, 2025</strong>
                     </li>
                   </ul>
                 </div>
-                
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Requirements</h3>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-center">
-                      <CheckCircle size={16} className="mr-2 text-green-600" />
+                      <CheckCircle size={18} className="mr-2 text-green-600" />
                       Maximum 300 words (background, methods, findings, conclusion; excluding references)
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle size={16} className="mr-2 text-green-600" />
+                      <CheckCircle size={18} className="mr-2 text-green-600" />
                       File formats: PDF, DOC, DOCX only
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle size={16} className="mr-2 text-green-600" />
+                      <CheckCircle size={18} className="mr-2 text-green-600" />
                       Maximum file size: 2MB
                     </li>
                   </ul>
                 </div>
               </div>
-              
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-start">
-                  <AlertCircle className="mr-3 text-blue-600 mt-0.5" size={20} />
-                  <div>
-                    <h4 className="font-medium text-blue-900">Review Process</h4>
-                    <p className="text-blue-700 text-sm mt-1">
-                      All abstracts will be reviewed by the scientific committee. 
-                      Authors will be notified of acceptance and presentation format by email.
-                    </p>
-                  </div>
+              <div className="mt-8 p-5 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-4">
+                <AlertCircle className="text-blue-600 mt-1" size={24} />
+                <div>
+                  <h4 className="font-semibold text-blue-900">Review Process</h4>
+                  <p className="text-blue-700 text-sm mt-1">
+                    All abstracts will be reviewed by the scientific committee. Authors will be notified of acceptance and presentation format by email.
+                  </p>
                 </div>
               </div>
             </div>
@@ -577,14 +566,15 @@ export default function AbstractsPage() {
       <section className="section-padding">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8">
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl p-10 border-t-4 border-primary-600">
               {/* Basic Information */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Abstract Information</h3>
-                
-                <div className="grid gap-6">
+              <div className="mb-10">
+                <h3 className="text-2xl font-bold text-primary-800 mb-8 flex items-center gap-2">
+                  <FileText className="text-primary-600" size={24} /> Abstract Information
+                </h3>
+                <div className="grid gap-8">
                   <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="title" className="block text-base font-semibold text-gray-700 mb-2">
                       Abstract Title *
                       <span className="text-xs text-gray-500 block font-normal">
                         Provide a clear, descriptive title for your research
@@ -601,10 +591,9 @@ export default function AbstractsPage() {
                       placeholder="Enter your abstract title"
                     />
                   </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-8">
                     <div>
-                      <label htmlFor="presentationType" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="presentationType" className="block text-base font-semibold text-gray-700 mb-2">
                         Presentation Type *
                         <span className="text-xs text-gray-500 block font-normal">
                           Select your preferred presentation format
@@ -622,9 +611,8 @@ export default function AbstractsPage() {
                         <option value="poster">Poster Presentation</option>
                       </select>
                     </div>
-
                     <div>
-                      <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="category" className="block text-base font-semibold text-gray-700 mb-2">
                         Conference Track *
                         <span className="text-xs text-gray-500 block font-normal">
                           Choose the most relevant track
@@ -648,7 +636,7 @@ export default function AbstractsPage() {
                   {/* Subcategory (Topic) selection */}
                   {formData.category && trackTopics[formData.category] && (
                     <div className="mt-6">
-                      <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="subcategory" className="block text-base font-semibold text-gray-700 mb-2">
                         Topic (Subcategory) *
                         <span className="text-xs text-gray-500 block font-normal">
                           Select the most relevant topic for your abstract
@@ -671,14 +659,14 @@ export default function AbstractsPage() {
                   )}
                 </div>
               </div>
-
               {/* Primary Author Information */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Primary Author Information</h3>
-                
-                <div className="grid md:grid-cols-2 gap-6">
+              <div className="mb-10">
+                <h3 className="text-2xl font-bold text-primary-800 mb-8 flex items-center gap-2">
+                  <Users className="text-primary-600" size={24} /> Primary Author Information
+                </h3>
+                <div className="grid md:grid-cols-2 gap-8">
                   <div>
-                    <label htmlFor="primaryAuthor.firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="primaryAuthor.firstName" className="block text-base font-semibold text-gray-700 mb-2">
                       First Name *
                     </label>
                     <input
@@ -691,9 +679,8 @@ export default function AbstractsPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="primaryAuthor.lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="primaryAuthor.lastName" className="block text-base font-semibold text-gray-700 mb-2">
                       Last Name *
                     </label>
                     <input
@@ -706,9 +693,8 @@ export default function AbstractsPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="primaryAuthor.email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="primaryAuthor.email" className="block text-base font-semibold text-gray-700 mb-2">
                       Email Address *
                       <span className="text-xs text-gray-500 block font-normal">
                         Official correspondence will be sent to this email
@@ -724,9 +710,8 @@ export default function AbstractsPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="primaryAuthor.phone" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="primaryAuthor.phone" className="block text-base font-semibold text-gray-700 mb-2">
                       Phone Number *
                       <span className="text-xs text-gray-500 block font-normal">
                         Include country code (e.g., +256)
@@ -742,9 +727,8 @@ export default function AbstractsPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="primaryAuthor.affiliation" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="primaryAuthor.affiliation" className="block text-base font-semibold text-gray-700 mb-2">
                       Institution/Organization *
                       <span className="text-xs text-gray-500 block font-normal">
                         Full name of your institution
@@ -760,9 +744,8 @@ export default function AbstractsPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="primaryAuthor.position" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="primaryAuthor.position" className="block text-base font-semibold text-gray-700 mb-2">
                       Position/Title *
                     </label>
                     <input
@@ -775,9 +758,8 @@ export default function AbstractsPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>
-
                   <div className="md:col-span-2">
-                    <label htmlFor="primaryAuthor.district" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="primaryAuthor.district" className="block text-base font-semibold text-gray-700 mb-2">
                       District/Region *
                       <span className="text-xs text-gray-500 block font-normal">
                         District where you are based in Uganda
@@ -795,10 +777,9 @@ export default function AbstractsPage() {
                   </div>
                 </div>
               </div>
-
               {/* Co-Authors */}
-              <div className="mb-8">
-                <label htmlFor="coAuthors" className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="mb-10">
+                <label htmlFor="coAuthors" className="block text-base font-semibold text-gray-700 mb-2">
                   Co-Authors (Optional)
                   <span className="text-xs text-gray-500 block font-normal">
                     List all co-authors with their affiliations (one per line)
@@ -814,11 +795,10 @@ export default function AbstractsPage() {
                   placeholder="John Doe, Makerere University&#10;Jane Smith, Ministry of Health"
                 />
               </div>
-
               {/* Abstract Content */}
               {formData.category === 'Cross-cutting Themes (Applicable to all tracks)' && (
-                <div className="mb-8">
-                  <label htmlFor="crossCuttingTheme" className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-10">
+                  <label htmlFor="crossCuttingTheme" className="block text-base font-semibold text-gray-700 mb-2">
                     Cross-cutting Theme Option *
                     <span className="text-xs text-gray-500 block font-normal">
                       Select the most relevant cross-cutting theme for your abstract
@@ -839,12 +819,13 @@ export default function AbstractsPage() {
                   </select>
                 </div>
               )}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Abstract Content</h3>
-                
-                <div className="space-y-6">
+              <div className="mb-10">
+                <h3 className="text-2xl font-bold text-primary-800 mb-8 flex items-center gap-2">
+                  <FileText className="text-primary-600" size={24} /> Abstract Content
+                </h3>
+                <div className="space-y-8">
                   <div>
-                    <label htmlFor="abstract" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="abstract" className="block text-base font-semibold text-gray-700 mb-2">
                       Abstract Summary *
                       <span className="text-xs text-gray-500 block font-normal">
                         Provide a concise summary of your research (100-150 words)
@@ -861,9 +842,8 @@ export default function AbstractsPage() {
                       placeholder="Provide a brief summary of your research including background, methods, key findings, and conclusions"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="keywords" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="keywords" className="block text-base font-semibold text-gray-700 mb-2">
                       Keywords *
                       <span className="text-xs text-gray-500 block font-normal">
                         3-6 keywords separated by commas
@@ -880,9 +860,8 @@ export default function AbstractsPage() {
                       placeholder="public health, disease prevention, Uganda, health systems"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="background" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="background" className="block text-base font-semibold text-gray-700 mb-2">
                       Background *
                       <span className="text-xs text-gray-500 block font-normal">
                         Brief background and context for your research
@@ -899,9 +878,8 @@ export default function AbstractsPage() {
                       placeholder="Provide background and context for your research"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="methods" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="methods" className="block text-base font-semibold text-gray-700 mb-2">
                       Methods *
                       <span className="text-xs text-gray-500 block font-normal">
                         Brief description of methods used
@@ -918,9 +896,8 @@ export default function AbstractsPage() {
                       placeholder="Describe your research methodology, study design, data collection methods, etc."
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="findings" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="findings" className="block text-base font-semibold text-gray-700 mb-2">
                       Findings *
                       <span className="text-xs text-gray-500 block font-normal">
                         Key findings of your research
@@ -937,9 +914,8 @@ export default function AbstractsPage() {
                       placeholder="Present your main findings and results"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="conclusion" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="conclusion" className="block text-base font-semibold text-gray-700 mb-2">
                       Conclusion *
                       <span className="text-xs text-gray-500 block font-normal">
                         Conclusions drawn from your research
@@ -956,9 +932,8 @@ export default function AbstractsPage() {
                       placeholder="State your main conclusions"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="implications" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="implications" className="block text-base font-semibold text-gray-700 mb-2">
                       Policy/Practice Implications (Optional)
                       <span className="text-xs text-gray-500 block font-normal">
                         How your research can inform policy or practice
@@ -976,16 +951,15 @@ export default function AbstractsPage() {
                   </div>
                 </div>
               </div>
-
               {/* File Upload */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Document Upload</h3>
-                
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+              <div className="mb-10">
+                <h3 className="text-2xl font-bold text-primary-800 mb-8 flex items-center gap-2">
+                  <Upload className="text-primary-600" size={24} /> Document Upload
+                </h3>
+                <div className="border-2 border-dashed border-primary-200 rounded-lg p-8 bg-primary-50/30">
                   <div className="text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                     <label htmlFor="abstractFile" className="cursor-pointer">
-                      <span className="text-lg font-medium text-gray-900">Upload Abstract Document</span>
+                      <span className="text-lg font-semibold text-gray-900">Upload Abstract Document</span>
                       <p className="text-sm text-gray-600 mt-2">
                         PDF, DOC, or DOCX files only. Maximum size: 2MB
                       </p>
@@ -1012,12 +986,12 @@ export default function AbstractsPage() {
                   </div>
                 </div>
               </div>
-
               {/* Declarations */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Declarations</h3>
-                
-                <div className="space-y-4">
+              <div className="mb-10">
+                <h3 className="text-2xl font-bold text-primary-800 mb-8 flex items-center gap-2">
+                  <AlertCircle className="text-primary-600" size={24} /> Declarations
+                </h3>
+                <div className="space-y-6">
                   <div className="flex items-start">
                     <input
                       type="checkbox"
@@ -1027,11 +1001,10 @@ export default function AbstractsPage() {
                       onChange={handleInputChange}
                       className="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                     />
-                    <label htmlFor="conflictOfInterest" className="ml-3 text-sm text-gray-700">
-                      <span className="font-medium">Conflict of Interest:</span> I declare that there are no conflicts of interest related to this research.
+                    <label htmlFor="conflictOfInterest" className="ml-3 text-base text-gray-700">
+                      <span className="font-semibold">Conflict of Interest:</span> I declare that there are no conflicts of interest related to this research.
                     </label>
                   </div>
-
                   <div className="flex items-start">
                     <input
                       type="checkbox"
@@ -1041,11 +1014,10 @@ export default function AbstractsPage() {
                       onChange={handleInputChange}
                       className="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                     />
-                    <label htmlFor="ethicalApproval" className="ml-3 text-sm text-gray-700">
-                      <span className="font-medium">Ethical Approval:</span> This research has obtained necessary ethical approvals (where applicable).
+                    <label htmlFor="ethicalApproval" className="ml-3 text-base text-gray-700">
+                      <span className="font-semibold">Ethical Approval:</span> This research has obtained necessary ethical approvals (where applicable).
                     </label>
                   </div>
-
                   <div className="flex items-start">
                     <input
                       type="checkbox"
@@ -1056,19 +1028,18 @@ export default function AbstractsPage() {
                       onChange={handleInputChange}
                       className="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                     />
-                    <label htmlFor="consentToPublish" className="ml-3 text-sm text-gray-700">
-                      <span className="font-medium">Consent to Publish:</span> I consent to the publication of this abstract in conference proceedings and related materials. *
+                    <label htmlFor="consentToPublish" className="ml-3 text-base text-gray-700">
+                      <span className="font-semibold">Consent to Publish:</span> I consent to the publication of this abstract in conference proceedings and related materials. *
                     </label>
                   </div>
                 </div>
               </div>
-
               {/* Submit Button */}
-              <div className="text-center">
+              <div className="text-center mt-8">
                 <LoadingButton
                   type="submit"
                   isLoading={isSubmitting}
-                  className="relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl text-base min-h-[56px] border border-primary-500 hover:border-primary-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                  className="relative inline-flex items-center justify-center gap-3 px-10 py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl text-lg min-h-[56px] border border-primary-600 hover:border-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
                   <span className="text-lg">📄</span>
                   <span className="relative z-10">{isSubmitting ? 'Submitting Abstract...' : 'Submit Abstract'}</span>
