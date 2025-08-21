@@ -99,6 +99,7 @@ export default function SponsorsPage() {
       industry: formData.industry,
       specialRequirements: formData.specialRequirements,
       selectedPackage: formData.selectedPackage,
+      packageType: formData.selectedPackage, // for legacy/compatibility
       message: formData.message
     };
     try {
