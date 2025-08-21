@@ -369,25 +369,6 @@ export default function SponsorsPage() {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
-                <div>
-                  <label htmlFor="selectedPackage" className="block text-base font-semibold text-gray-700 mb-2">
-                    Package Type *
-                  </label>
-                  <select
-                    id="selectedPackage"
-                    name="selectedPackage"
-                    required
-                    value={formData.selectedPackage}
-                    onChange={e => setFormData({ ...formData, selectedPackage: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  >
-                    <option value="">Select a package</option>
-                    <option value="Platinum Sponsor">Platinum Sponsor</option>
-                    <option value="Gold Sponsor">Gold Sponsor</option>
-                    <option value="Silver Sponsor">Silver Sponsor</option>
-                    <option value="Bronze Sponsor">Bronze Sponsor</option>
-                  </select>
-                </div>
                 <div className="md:col-span-2">
                   <label htmlFor="message" className="block text-base font-semibold text-gray-700 mb-2">
                     Message (Optional)
