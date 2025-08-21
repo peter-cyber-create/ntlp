@@ -4,12 +4,14 @@ import { useState } from "react";
 import { User, Mail, Phone, X, Check, CheckCircle, AlertCircle } from "lucide-react";
 
 interface FormData {
-  name: string;
+  companyName: string;
+  contactPerson: string;
   email: string;
   phone: string;
-  organization: string;
-  position: string;
-  sponsorshipLevel: string;
+  website: string;
+  industry: string;
+  specialRequirements: string;
+  selectedPackage: string;
   message: string;
 }
 
@@ -66,12 +68,14 @@ export default function SponsorsPage() {
     message: string;
   } | null>(null);
   const [formData, setFormData] = useState<FormData>({
-    name: "",
+    companyName: "",
+    contactPerson: "",
     email: "",
     phone: "",
-    organization: "",
-    position: "",
-    sponsorshipLevel: "",
+    website: "",
+    industry: "",
+    specialRequirements: "",
+    selectedPackage: "",
     message: "",
   });
 
@@ -83,17 +87,18 @@ export default function SponsorsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLevel) return;
+    if (!formData.selectedPackage) return;
     setIsSubmitting(true);
     setSubmitResult(null);
-    // Prepare payload in snake_case
     const payload = {
-      name: formData.name,
+      companyName: formData.companyName,
+      contactPerson: formData.contactPerson,
       email: formData.email,
       phone: formData.phone,
-      organization: formData.organization,
-      position: formData.position,
-      sponsorship_level: formData.sponsorshipLevel,
+      website: formData.website,
+      industry: formData.industry,
+      specialRequirements: formData.specialRequirements,
+      selectedPackage: formData.selectedPackage,
       message: formData.message
     };
     try {
@@ -110,15 +115,16 @@ export default function SponsorsPage() {
             "Thank you for your interest in sponsoring. Our team will contact you soon.",
         });
         setFormData({
-          name: "",
+          companyName: "",
+          contactPerson: "",
           email: "",
           phone: "",
-          organization: "",
-          position: "",
-          sponsorshipLevel: "",
+          website: "",
+          industry: "",
+          specialRequirements: "",
+          selectedPackage: "",
           message: "",
         });
-        setSelectedLevel("");
       } else {
         const result = await response.json().catch(() => ({}));
         setSubmitResult({
@@ -213,7 +219,7 @@ export default function SponsorsPage() {
                   }`}
                   onClick={() => {
                     setSelectedLevel(level.id);
-                    setFormData({ ...formData, sponsorshipLevel: level.name });
+                    setFormData({ ...formData, selectedPackage: level.name });
                   }}
                   tabIndex={0}
                   role="button"
@@ -268,15 +274,29 @@ export default function SponsorsPage() {
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
-                  <label htmlFor="name" className="block text-base font-semibold text-gray-700 mb-2">
-                    Contact Name *
+                  <label htmlFor="companyName" className="block text-base font-semibold text-gray-700 mb-2">
+                    Company Name *
                   </label>
                   <input
                     type="text"
-                    id="name"
-                    name="name"
+                    id="companyName"
+                    name="companyName"
                     required
-                    value={formData.name}
+                    value={formData.companyName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="contactPerson" className="block text-base font-semibold text-gray-700 mb-2">
+                    Contact Person *
+                  </label>
+                  <input
+                    type="text"
+                    id="contactPerson"
+                    name="contactPerson"
+                    required
+                    value={formData.contactPerson}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
@@ -310,46 +330,62 @@ export default function SponsorsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="organization" className="block text-base font-semibold text-gray-700 mb-2">
-                    Organization *
+                  <label htmlFor="website" className="block text-base font-semibold text-gray-700 mb-2">
+                    Company Website
                   </label>
                   <input
-                    type="text"
-                    id="organization"
-                    name="organization"
-                    required
-                    value={formData.organization}
+                    type="url"
+                    id="website"
+                    name="website"
+                    value={formData.website}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
                 <div>
-                  <label htmlFor="position" className="block text-base font-semibold text-gray-700 mb-2">
-                    Position/Title *
+                  <label htmlFor="industry" className="block text-base font-semibold text-gray-700 mb-2">
+                    Industry
                   </label>
                   <input
                     type="text"
-                    id="position"
-                    name="position"
-                    required
-                    value={formData.position}
+                    id="industry"
+                    name="industry"
+                    value={formData.industry}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
                 <div>
-                  <label htmlFor="sponsorshipLevel" className="block text-base font-semibold text-gray-700 mb-2">
-                    Sponsorship Level *
+                  <label htmlFor="specialRequirements" className="block text-base font-semibold text-gray-700 mb-2">
+                    Special Requirements
                   </label>
                   <input
                     type="text"
-                    id="sponsorshipLevel"
-                    name="sponsorshipLevel"
-                    required
-                    value={formData.sponsorshipLevel}
-                    readOnly
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
+                    id="specialRequirements"
+                    name="specialRequirements"
+                    value={formData.specialRequirements}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
+                </div>
+                <div>
+                  <label htmlFor="selectedPackage" className="block text-base font-semibold text-gray-700 mb-2">
+                    Package Type *
+                  </label>
+                  <select
+                    id="selectedPackage"
+                    name="selectedPackage"
+                    required
+                    value={formData.selectedPackage}
+                    onChange={e => setFormData({ ...formData, selectedPackage: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">Select a package</option>
+                    <option value="Platinum Sponsor">Platinum Sponsor</option>
+                    <option value="Gold Sponsor">Gold Sponsor</option>
+                    <option value="Silver Sponsor">Silver Sponsor</option>
+                    <option value="Bronze Sponsor">Bronze Sponsor</option>
+                  </select>
                 </div>
                 <div className="md:col-span-2">
                   <label htmlFor="message" className="block text-base font-semibold text-gray-700 mb-2">
