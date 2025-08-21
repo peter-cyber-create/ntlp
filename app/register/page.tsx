@@ -112,20 +112,65 @@ export default function RegisterPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedTicket) return;
     setIsSubmitting(true);
-    // Simulate submit
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitResult({
-        type: "success",
-        title: "Registration Successful!",
-        message:
-          "Thank you for registering. Please check your email for confirmation and payment instructions.",
-        registrationId: Math.random().toString(36).substring(2, 10).toUpperCase(),
+    setSubmitResult(null);
+    // Prepare payload in snake_case
+    const payload = {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      organization: formData.organization,
+      position: formData.position,
+      district: formData.district,
+      special_requirements: formData.specialRequirements,
+      registration_type: selectedTicket // required by backend
+    };
+    try {
+      const response = await fetch('/api/registrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
-    }, 1200);
+      if (response.ok) {
+        setSubmitResult({
+          type: "success",
+          title: "Registration Successful!",
+          message:
+            "Thank you for registering. Please check your email for confirmation and payment instructions.",
+          registrationId: Math.random().toString(36).substring(2, 10).toUpperCase(),
+        });
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          organization: "",
+          position: "",
+          district: "",
+          specialRequirements: "",
+        });
+        setSelectedTicket("");
+      } else {
+        const result = await response.json().catch(() => ({}));
+        setSubmitResult({
+          type: "error",
+          title: "Registration Failed",
+          message: result?.error || "Registration could not be completed. Please try again.",
+        });
+      }
+    } catch (err) {
+      setSubmitResult({
+        type: "error",
+        title: "Network Error",
+        message: "Could not connect to the server. Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

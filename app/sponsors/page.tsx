@@ -81,19 +81,61 @@ export default function SponsorsPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedLevel) return;
     setIsSubmitting(true);
-    // Simulate submit
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitResult({
-        type: "success",
-        title: "Sponsorship Request Sent!",
-        message:
-          "Thank you for your interest in sponsoring. Our team will contact you soon.",
+    setSubmitResult(null);
+    // Prepare payload in snake_case
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      organization: formData.organization,
+      position: formData.position,
+      sponsorship_level: formData.sponsorshipLevel,
+      message: formData.message
+    };
+    try {
+      const response = await fetch('/api/sponsorships', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
-    }, 1200);
+      if (response.ok) {
+        setSubmitResult({
+          type: "success",
+          title: "Sponsorship Request Sent!",
+          message:
+            "Thank you for your interest in sponsoring. Our team will contact you soon.",
+        });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          organization: "",
+          position: "",
+          sponsorshipLevel: "",
+          message: "",
+        });
+        setSelectedLevel("");
+      } else {
+        const result = await response.json().catch(() => ({}));
+        setSubmitResult({
+          type: "error",
+          title: "Submission Failed",
+          message: result?.error || "Sponsorship request could not be completed. Please try again.",
+        });
+      }
+    } catch (err) {
+      setSubmitResult({
+        type: "error",
+        title: "Network Error",
+        message: "Could not connect to the server. Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
