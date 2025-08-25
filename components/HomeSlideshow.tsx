@@ -12,11 +12,25 @@ const slides = [
     name: 'Dr. Charles Ouma',
   },
   {
-    src: '/images/home2.jpg',
+    src: '/images/home2.jpeg',
     alt: 'Conference day 2',
     caption: 'Panel: Dr. Diana Nambatya',
     title: 'Panelist',
     name: 'Dr. Diana Nambatya',
+  },
+  {
+    src: '/images/home3.jpeg',
+    alt: 'Conference day 3',
+    caption: 'Workshop: Dr. John Doe',
+    title: 'Workshop Leader',
+    name: 'Dr. John Doe',
+  },
+  {
+    src: '/images/home4.jpeg',
+    alt: 'Conference day 4',
+    caption: 'Closing: Dr. Jane Smith',
+    title: 'Closing Speaker',
+    name: 'Dr. Jane Smith',
   },
 ];
 
