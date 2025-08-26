@@ -117,19 +117,18 @@ export default function RegisterPage() {
     if (!selectedTicket) return;
     setIsSubmitting(true);
     setSubmitResult(null);
-    // Prepare payload in snake_case and match backend expectations
+    // Prepare payload in camelCase to match backend and DB
     const payload = {
-      first_name: formData.firstName,
-      last_name: formData.lastName,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: formData.email,
-      institution: formData.organization || "", // use organization as institution
       phone: formData.phone,
+      organization: formData.organization,
       position: formData.position,
-      country: formData.district || "", // use district as country for now
-      session_track: "", // not collected in form
-      registration_type: selectedTicket,
-      dietary_requirements: "", // not collected in form
-      special_needs: formData.specialRequirements || ""
+      district: formData.district,
+      registrationType: selectedTicket,
+      specialRequirements: formData.specialRequirements,
+      dietary_requirements: ""
     };
     try {
       const response = await fetch('/api/registrations', {
