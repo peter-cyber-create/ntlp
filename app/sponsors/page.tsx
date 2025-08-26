@@ -91,15 +91,14 @@ export default function SponsorsPage() {
     setIsSubmitting(true);
     setSubmitResult(null);
     const payload = {
-      companyName: formData.companyName,
-      contactPerson: formData.contactPerson,
+      company_name: formData.companyName,
+      contact_person: formData.contactPerson,
       email: formData.email,
       phone: formData.phone,
       website: formData.website,
       industry: formData.industry,
-      specialRequirements: formData.specialRequirements,
-      selectedPackage: formData.selectedPackage,
-      packageType: formData.selectedPackage, // for legacy/compatibility
+      special_requirements: formData.specialRequirements,
+      selected_package: formData.selectedPackage,
       message: formData.message
     };
     try {

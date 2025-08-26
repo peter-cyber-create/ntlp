@@ -441,9 +441,7 @@ export default function RegisterPage() {
                 <p className="text-sm text-gray-600 mt-4">
                   By submitting this form, you agree to the conference terms and conditions.
                 </p>
-                <p className="text-sm text-blue-700 mt-2">
-                  Need payment details? <a href="/payment-instructions" className="text-primary-600 underline hover:text-primary-800">See payment instructions</a>.
-                </p>
+                {/* Payment instructions removed. */}
               </div>
             </form>
           </div>
