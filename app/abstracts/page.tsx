@@ -293,7 +293,8 @@ export default function AbstractsPage() {
       submitData.append('title', formData.title)
       submitData.append('abstract', formData.abstract)
       submitData.append('keywords', formData.keywords)
-      submitData.append('category', formData.category)
+      // Map UI track selection to API-supported categories
+      submitData.append('category', mapCategoryToAPI(formData.category))
       submitData.append('preferredTrack', formData.category)
       if (formData.subcategory) submitData.append('subcategory', formData.subcategory)
       submitData.append('presentationType', formData.presentationType)

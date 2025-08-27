@@ -137,12 +137,14 @@ export default function RegisterPage() {
         body: JSON.stringify(payload)
       });
       if (response.ok) {
+        const result = await response.json().catch(() => ({} as any));
+        const apiRegistrationId = (result && (result.data?.id || result.id)) || null;
         setSubmitResult({
           type: "success",
           title: "Registration Successful!",
           message:
             "Thank you for registering. Please check your email for confirmation and payment instructions.",
-          registrationId: Math.random().toString(36).substring(2, 10).toUpperCase(),
+          registrationId: apiRegistrationId ? String(apiRegistrationId).toUpperCase() : undefined,
         });
         setFormData({
           firstName: "",
