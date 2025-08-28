@@ -27,7 +27,7 @@ export default function AbstractsPage() {
     presentationType: 'oral' as 'oral' | 'poster',
     category: '',
     subcategory: '',
-    crossCuttingTheme: '',
+    crossCuttingThemes: '',
     primaryAuthor: {
       firstName: '',
       lastName: '',
@@ -306,7 +306,7 @@ export default function AbstractsPage() {
         submission_type: 'abstract',
         track: formData.category,
         subcategory: formData.subcategory,
-        cross_cutting_themes: formData.crossCuttingTheme ? [formData.crossCuttingTheme] : [],
+        cross_cutting_themes: formData.crossCuttingThemes ? [formData.crossCuttingThemes] : [],
         format: formData.presentationType,
         submitted_by: formData.primaryAuthor.email
       };
@@ -332,7 +332,7 @@ export default function AbstractsPage() {
           presentationType: 'oral',
           category: '',
           subcategory: '',
-          crossCuttingTheme: '',
+          crossCuttingThemes: '',
           primaryAuthor: {
             firstName: '',
             lastName: '',
@@ -737,17 +737,17 @@ export default function AbstractsPage() {
               {/* Abstract Content */}
               {formData.category === 'Cross-cutting Themes (Applicable to all tracks)' && (
                 <div className="mb-10">
-                  <label htmlFor="crossCuttingTheme" className="block text-base font-semibold text-gray-700 mb-2">
+                  <label htmlFor="crossCuttingThemes" className="block text-base font-semibold text-gray-700 mb-2">
                     Cross-cutting Theme Option *
                     <span className="text-xs text-gray-500 block font-normal">
                       Select the most relevant cross-cutting theme for your abstract
                     </span>
                   </label>
                   <select
-                    id="crossCuttingTheme"
-                    name="crossCuttingTheme"
+                    id="crossCuttingThemes"
+                    name="crossCuttingThemes"
                     required
-                    value={formData.crossCuttingTheme || ''}
+                    value={formData.crossCuttingThemes || ''}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
