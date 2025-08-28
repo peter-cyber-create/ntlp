@@ -62,6 +62,8 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [formSubmissions, setFormSubmissions] = useState<any[]>([]);
+  const [submissionStats, setSubmissionStats] = useState<any>({});
 
   // Notification helper function
   const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -1781,6 +1783,93 @@ export default function AdminDashboard() {
       window.URL.revokeObjectURL(url)
     }
   }
+
+  // Form review functions
+  const loadFormSubmissions = async () => {
+    try {
+      const response = await fetch('/api/admin/submissions');
+      if (response.ok) {
+        const data = await response.json();
+        setFormSubmissions(data.submissions || []);
+        
+        // Calculate stats
+        const stats = {
+          pending: data.submissions?.filter((s: any) => s.status === 'submitted').length || 0,
+          underReview: data.submissions?.filter((s: any) => s.status === 'under_review').length || 0,
+          approved: data.submissions?.filter((s: any) => s.status === 'approved').length || 0,
+          rejected: data.submissions?.filter((s: any) => s.status === 'rejected').length || 0
+        };
+        setSubmissionStats(stats);
+      }
+    } catch (error) {
+      console.error('Error loading form submissions:', error);
+      showNotification('Failed to load form submissions', 'error');
+    }
+  };
+
+  const handleQuickApprove = async (submissionId: number) => {
+    try {
+      const submission = formSubmissions.find(s => s.id === submissionId);
+      if (!submission) return;
+
+      const response = await fetch(`/api/${getEntityType(submission.form_type)}/${submission.entity_id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'approved',
+          admin_notes: 'Quick approved by admin',
+          review_comments: 'Approved'
+        })
+      });
+
+      if (response.ok) {
+        showNotification('Submission approved successfully', 'success');
+        loadFormSubmissions();
+      } else {
+        showNotification('Failed to approve submission', 'error');
+      }
+    } catch (error) {
+      console.error('Error approving submission:', error);
+      showNotification('Error approving submission', 'error');
+    }
+  };
+
+  const handleQuickReject = async (submissionId: number) => {
+    try {
+      const submission = formSubmissions.find(s => s.id === submissionId);
+      if (!submission) return;
+
+      const response = await fetch(`/api/${getEntityType(submission.form_type)}/${submission.entity_id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'rejected',
+          admin_notes: 'Quick rejected by admin',
+          review_comments: 'Rejected'
+        })
+      });
+
+      if (response.ok) {
+        showNotification('Submission rejected successfully', 'success');
+        loadFormSubmissions();
+      } else {
+        showNotification('Failed to reject submission', 'error');
+      }
+    } catch (error) {
+      console.error('Error rejecting submission:', error);
+      showNotification('Error rejecting submission', 'error');
+    }
+  };
+
+  const getEntityType = (formType: string) => {
+    switch (formType) {
+      case 'registration': return 'registrations';
+      case 'abstract': return 'abstracts';
+      case 'contact': return 'contacts';
+      case 'sponsorship': return 'sponsorships';
+      default: return 'registrations';
+    }
+  };
 
   const renderExport = () => (
     <div className="space-y-6">

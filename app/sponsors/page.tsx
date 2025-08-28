@@ -91,15 +91,11 @@ export default function SponsorsPage() {
     setIsSubmitting(true);
     setSubmitResult(null);
     const payload = {
-      company_name: formData.companyName,
-      contact_person: formData.contactPerson,
+      companyName: formData.companyName,
+      contactPerson: formData.contactPerson,
       email: formData.email,
       phone: formData.phone,
-      website: formData.website,
-      industry: formData.industry,
-      special_requirements: formData.specialRequirements,
-      selected_package: formData.selectedPackage,
-      message: formData.message
+      selectedPackage: formData.selectedPackage
     };
     try {
       const response = await fetch('/api/sponsorships', {
@@ -110,9 +106,9 @@ export default function SponsorsPage() {
       if (response.ok) {
         setSubmitResult({
           type: "success",
-          title: "Sponsorship Request Sent!",
+          title: "Sponsorship Request Submitted!",
           message:
-            "Thank you for your interest in sponsoring. Our team will contact you soon.",
+            "Thank you for your interest in sponsoring. Your application has been submitted and is under review. Our team will contact you soon.",
         });
         setFormData({
           companyName: "",
@@ -125,6 +121,7 @@ export default function SponsorsPage() {
           selectedPackage: "",
           message: "",
         });
+        setSelectedLevel("");
       } else {
         const result = await response.json().catch(() => ({}));
         setSubmitResult({

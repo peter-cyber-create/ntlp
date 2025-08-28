@@ -278,102 +278,54 @@ export default function AbstractsPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitResult(null);
 
-    setIsSubmitting(true)
-    
     try {
-      const submitData = new FormData()
-      
-      // Map frontend fields to API expected fields
-      submitData.append('title', formData.title)
-      submitData.append('abstract', formData.abstract)
-      submitData.append('keywords', formData.keywords)
-      // Map UI track selection to API-supported categories
-      submitData.append('category', mapCategoryToAPI(formData.category))
-      submitData.append('preferredTrack', formData.category)
-      if (formData.subcategory) submitData.append('subcategory', formData.subcategory)
-      submitData.append('presentationType', formData.presentationType)
-      submitData.append('background', formData.background)
-      submitData.append('methods', formData.methods)
-      submitData.append('findings', formData.findings)
-      submitData.append('conclusion', formData.conclusion)
-      submitData.append('authors', `${formData.primaryAuthor.firstName} ${formData.primaryAuthor.lastName}${formData.coAuthors ? ', ' + formData.coAuthors : ''}`)
-      submitData.append('email', formData.primaryAuthor.email)
-      submitData.append('institution', formData.primaryAuthor.affiliation)
-      submitData.append('phone', formData.primaryAuthor.phone)
-      
-      if (selectedFile) {
-        submitData.append('file', selectedFile)
-      }
-      
-      // Submit the form
-      const response = await fetch('/api/abstracts/', {
-        method: 'POST',
-        body: submitData
-      }).catch(() => null)
+      // Prepare the submission data
+      const submissionData = {
+        title: formData.title,
+        abstract: `${formData.background}\n\nMethods:\n${formData.methods}\n\nFindings:\n${formData.findings}\n\nConclusion:\n${formData.conclusion}`,
+        keywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k),
+        authors: [
+          {
+            name: `${formData.primaryAuthor.firstName} ${formData.primaryAuthor.lastName}`,
+            email: formData.primaryAuthor.email,
+            affiliation: formData.primaryAuthor.affiliation,
+            position: formData.primaryAuthor.position
+          },
+          ...formData.coAuthors.split(',').map(author => author.trim()).filter(author => author).map(author => ({
+            name: author,
+            email: '',
+            affiliation: '',
+            position: ''
+          }))
+        ],
+        corresponding_author_email: formData.primaryAuthor.email,
+        submission_type: 'abstract',
+        track: formData.category,
+        subcategory: formData.subcategory,
+        cross_cutting_themes: formData.crossCuttingTheme ? [formData.crossCuttingTheme] : [],
+        format: formData.presentationType,
+        submitted_by: formData.primaryAuthor.email
+      };
 
-      if (response && response.ok) {
-        const result = await response.json()
-        if (result.success) {
-          const submissionId = `ABS-${Date.now()}`
-          setSubmitResult({
-            type: 'success',
-            title: 'Abstract Submitted Successfully!',
-            message: `Thank you ${formData.primaryAuthor.firstName}! Your abstract "${formData.title}" has been submitted successfully. You will receive a confirmation email shortly with review timeline and submission details.`,
-            submissionId
-          })
-          // Reset form
-          setFormData({
-            title: '',
-            presentationType: 'oral',
-            category: '',
-            subcategory: '',
-            crossCuttingTheme: '',
-            primaryAuthor: {
-              firstName: '',
-              lastName: '',
-              email: '',
-              phone: '',
-              affiliation: '',
-              position: '',
-              district: ''
-            },
-            coAuthors: '',
-            abstract: '',
-            keywords: '',
-            background: '',
-            methods: '',
-            findings: '',
-            conclusion: '',
-            implications: '',
-            conflictOfInterest: false,
-            ethicalApproval: false,
-            consentToPublish: false
-          })
-          setSelectedFile(null)
-          const fileInput = document.getElementById('abstractFile') as HTMLInputElement
-          if (fileInput) fileInput.value = ''
-        } else {
-          setSubmitResult({
-            type: 'error',
-            title: 'Submission Failed',
-            message: result.message || 'Abstract submission failed. Please try again.'
-          })
-        }
-      } else {
-        // Show success when API is unavailable for better UX
-        const submissionId = `ABS-LOCAL-${Date.now()}`
+      const response = await fetch('/api/abstracts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submissionData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
         setSubmitResult({
           type: 'success',
-          title: 'Abstract Received!',
-          message: `Thank you ${formData.primaryAuthor.firstName}! Your abstract "${formData.title}" has been saved locally and will be processed as soon as our systems are back online. We will contact you via email with review updates.`,
-          submissionId
-        })
+          title: 'Abstract Submitted Successfully!',
+          message: 'Your abstract has been submitted and is now under review by our scientific committee.',
+          submissionId: result.abstract?.id || result.id
+        });
+        
         // Reset form
         setFormData({
           title: '',
@@ -401,56 +353,27 @@ export default function AbstractsPage() {
           conflictOfInterest: false,
           ethicalApproval: false,
           consentToPublish: false
-        })
-        setSelectedFile(null)
-        const fileInput = document.getElementById('abstractFile') as HTMLInputElement
-        if (fileInput) fileInput.value = ''
+        });
+        setSelectedFile(null);
+      } else {
+        const errorData = await response.json();
+        setSubmitResult({
+          type: 'error',
+          title: 'Submission Failed',
+          message: errorData.error || 'Failed to submit abstract. Please try again.'
+        });
       }
     } catch (error) {
-      console.error('Error submitting abstract:', error)
-      // Show success for better UX when offline
-      const submissionId = `ABS-OFFLINE-${Date.now()}`
+      console.error('Submission error:', error);
       setSubmitResult({
-        type: 'success',
-        title: 'Abstract Saved!',
-        message: `Thank you ${formData.primaryAuthor.firstName}! Your abstract "${formData.title}" has been saved and will be processed once we're back online. We'll send you review updates via email soon.`,
-        submissionId
-      })
-      // Reset form
-      setFormData({
-        title: '',
-        presentationType: 'oral',
-        category: '',
-        subcategory: '',
-        crossCuttingTheme: '',
-        primaryAuthor: {
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          affiliation: '',
-          position: '',
-          district: ''
-        },
-        coAuthors: '',
-        abstract: '',
-        keywords: '',
-        background: '',
-        methods: '',
-        findings: '',
-        conclusion: '',
-        implications: '',
-        conflictOfInterest: false,
-        ethicalApproval: false,
-        consentToPublish: false
-      })
-      setSelectedFile(null)
-      const fileInput = document.getElementById('abstractFile') as HTMLInputElement
-      if (fileInput) fileInput.value = ''
+        type: 'error',
+        title: 'Network Error',
+        message: 'Could not connect to the server. Please try again later.'
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
 
   return (
@@ -458,7 +381,7 @@ export default function AbstractsPage() {
       {/* Success/Error Modal */}
       {submitResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border-t-8 border-primary-600">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-8">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -474,23 +397,38 @@ export default function AbstractsPage() {
                 <button
                   onClick={() => setSubmitResult(null)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label="Close"
                 >
-                  <X size={22} />
+                  <X size={24} />
                 </button>
               </div>
+              
               <div className="mb-6">
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-600 leading-relaxed">
                   {submitResult.message}
                 </p>
+                
                 {submitResult.submissionId && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-700">
-                      <span className="font-medium">Submission ID:</span> {submitResult.submissionId}
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">Submission ID:</p>
+                    <p className="font-mono font-semibold text-gray-800">
+                      {submitResult.submissionId}
                     </p>
                   </div>
                 )}
+                
+                {submitResult.type === 'success' && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-2">What happens next?</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Your abstract is now under review</li>
+                      <li>• Scientific committee will evaluate your submission</li>
+                      <li>• You'll receive feedback and decision via email</li>
+                      <li>• Accepted abstracts will be scheduled for presentation</li>
+                    </ul>
+                  </div>
+                )}
               </div>
+
               <div className="flex justify-end">
                 <button
                   onClick={() => setSubmitResult(null)}

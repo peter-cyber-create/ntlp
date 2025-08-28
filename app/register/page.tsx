@@ -20,6 +20,7 @@ interface FormData {
   position: string;
   district: string;
   specialRequirements: string;
+  paymentProof?: File;
 }
 
 const ticketTypes: TicketType[] = [
@@ -115,22 +116,55 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTicket) return;
+    
+    // Check if payment proof is uploaded
+    if (!formData.paymentProof) {
+      setSubmitResult({
+        type: "error",
+        title: "Payment Proof Required",
+        message: "Please upload proof of payment before submitting your registration.",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitResult(null);
-    // Prepare payload in camelCase to match backend and DB
-    const payload = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone: formData.phone,
-      organization: formData.organization,
-      position: formData.position,
-      district: formData.district,
-      registrationType: selectedTicket,
-      specialRequirements: formData.specialRequirements,
-      dietary_requirements: ""
-    };
+    
     try {
+      // First, upload the payment proof file
+      const formDataUpload = new FormData();
+      formDataUpload.append('paymentProof', formData.paymentProof);
+      formDataUpload.append('entityType', 'registration');
+      formDataUpload.append('entityId', '0'); // Will be updated after registration
+      formDataUpload.append('uploadedBy', formData.email);
+      
+      const uploadResponse = await fetch('/api/uploads/payment-proof', {
+        method: 'POST',
+        body: formDataUpload
+      });
+      
+      if (!uploadResponse.ok) {
+        const uploadError = await uploadResponse.json().catch(() => ({}));
+        throw new Error(uploadError.error || 'Failed to upload payment proof');
+      }
+      
+      const uploadResult = await uploadResponse.json();
+      
+      // Prepare registration payload
+      const payload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        organization: formData.organization,
+        position: formData.position,
+        district: formData.district,
+        registrationType: selectedTicket,
+        specialRequirements: formData.specialRequirements,
+        dietary_requirements: "",
+        paymentProofUrl: uploadResult.file.filePath
+      };
+      
       const response = await fetch('/api/registrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,9 +175,9 @@ export default function RegisterPage() {
         const apiRegistrationId = (result && (result.data?.id || result.id)) || null;
         setSubmitResult({
           type: "success",
-          title: "Registration Successful!",
+          title: "Registration Submitted Successfully!",
           message:
-            "Thank you for registering. Please check your email for confirmation and payment instructions.",
+            "Your registration has been submitted and is now under review by our admin team. You will receive an email confirmation once your registration is approved.",
           registrationId: apiRegistrationId ? String(apiRegistrationId).toUpperCase() : undefined,
         });
         setFormData({
@@ -155,6 +189,7 @@ export default function RegisterPage() {
           position: "",
           district: "",
           specialRequirements: "",
+          paymentProof: undefined,
         });
         setSelectedTicket("");
       } else {
@@ -199,18 +234,33 @@ export default function RegisterPage() {
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                   aria-label="Close"
                 >
-                  <X size={22} />
+                  <X size={24} />
                 </button>
               </div>
+              
               <div className="mb-6">
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-600 leading-relaxed">
                   {submitResult.message}
                 </p>
+                
                 {submitResult.registrationId && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-700">
-                      <span className="font-medium">Registration ID:</span> {submitResult.registrationId}
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">Registration ID:</p>
+                    <p className="font-mono font-semibold text-gray-800">
+                      {submitResult.registrationId}
                     </p>
+                  </div>
+                )}
+                
+                {submitResult.type === "success" && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-2">What happens next?</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Your registration is now under review</li>
+                      <li>• Admin team will verify your payment proof</li>
+                      <li>• You'll receive approval confirmation via email</li>
+                      <li>• Payment verification typically takes 24-48 hours</li>
+                    </ul>
                   </div>
                 )}
               </div>
@@ -430,15 +480,98 @@ export default function RegisterPage() {
                   />
                 </div>
               </div>
+              
+              {/* Payment Proof Upload Section */}
+              <div className="md:col-span-2 mb-8">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:border-primary-400 transition-colors">
+                  <div className="text-center">
+                    <div className="mx-auto w-12 h-12 mb-4 flex items-center justify-center bg-primary-100 rounded-full">
+                      <span className="text-2xl">💳</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Proof Required</h3>
+                    <p className="text-gray-600 mb-4">
+                      Please upload proof of payment before submitting your registration. 
+                      Accepted formats: JPEG, PNG, GIF, PDF (max 5MB)
+                    </p>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="file"
+                          id="paymentProof"
+                          name="paymentProof"
+                          accept=".jpg,.jpeg,.png,.gif,.pdf"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.size > 5 * 1024 * 1024) {
+                                alert('File size must be less than 5MB');
+                                e.target.value = '';
+                                return;
+                              }
+                              setFormData({ ...formData, paymentProof: file });
+                            }
+                          }}
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="paymentProof"
+                          className="cursor-pointer inline-flex items-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors shadow-md hover:shadow-lg"
+                        >
+                          <span className="mr-2">📁</span>
+                          Choose Payment Proof File
+                        </label>
+                      </div>
+                      
+                      {formData.paymentProof && (
+                        <div className="bg-white rounded-lg p-4 border border-green-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <span className="text-green-600">✅</span>
+                              <div>
+                                <p className="font-medium text-gray-900">{formData.paymentProof.name}</p>
+                                <p className="text-sm text-gray-500">
+                                  {(formData.paymentProof.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, paymentProof: undefined })}
+                              className="text-red-500 hover:text-red-700 transition-colors"
+                            >
+                              <X size={20} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="mt-4 text-sm text-gray-500">
+                      <p className="font-medium mb-2">Payment Instructions:</p>
+                      <ul className="text-left space-y-1">
+                        <li>• <strong>Bank Transfer:</strong> Send payment to the provided account</li>
+                        <li>• <strong>Mobile Money:</strong> Use the provided number</li>
+                        <li>• <strong>Cash Payment:</strong> Visit our office during business hours</li>
+                        <li>• Upload the receipt, screenshot, or confirmation as proof</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               {/* Submit Button - moved below form fields */}
               <div className="md:col-span-2 flex flex-col items-center mt-10">
                 <button
                   type="submit"
                   className="inline-flex items-center justify-center gap-3 px-10 py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl text-lg min-h-[56px] border border-primary-600 hover:border-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                  disabled={isSubmitting || !selectedTicket}
+                  disabled={isSubmitting || !selectedTicket || !formData.paymentProof}
                 >
                   <span className="text-lg">📝</span>
-                  <span className="relative z-10">{isSubmitting ? 'Submitting Registration...' : 'Submit Registration'}</span>
+                  <span className="relative z-10">
+                    {isSubmitting ? 'Submitting Registration...' : 
+                     !formData.paymentProof ? 'Upload Payment Proof First' : 'Submit Registration'}
+                  </span>
                 </button>
                 <p className="text-sm text-gray-600 mt-4">
                   By submitting this form, you agree to the conference terms and conditions.
