@@ -138,7 +138,7 @@ export default function RegisterPage() {
       formDataUpload.append('entityId', '0'); // Will be updated after registration
       formDataUpload.append('uploadedBy', formData.email);
       
-      const uploadResponse = await fetch('/api/uploads/payment-proof', {
+      const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/uploads/payment-proof`, {
         method: 'POST',
         body: formDataUpload
       });
@@ -165,7 +165,7 @@ export default function RegisterPage() {
         paymentProofUrl: uploadResult.file.filePath
       };
       
-      const response = await fetch('/api/registrations', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

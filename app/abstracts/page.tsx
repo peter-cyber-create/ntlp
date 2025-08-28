@@ -311,7 +311,7 @@ export default function AbstractsPage() {
         submitted_by: formData.primaryAuthor.email
       };
 
-      const response = await fetch('/api/abstracts', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submissionData)

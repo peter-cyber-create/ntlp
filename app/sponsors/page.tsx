@@ -98,7 +98,7 @@ export default function SponsorsPage() {
       selectedPackage: formData.selectedPackage
     };
     try {
-      const response = await fetch('/api/sponsorships', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sponsorships`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
