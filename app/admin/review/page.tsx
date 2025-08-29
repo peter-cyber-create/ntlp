@@ -77,7 +77,7 @@ export default function AdminReviewPage() {
         fetch('https://conference.health.go.ug/api/sponsorships').catch(() => null)
       ]);
       
-      const allSubmissions = [];
+      const allSubmissions: any[] = [];
       
       // Process registrations
       if (regResponse?.ok) {
