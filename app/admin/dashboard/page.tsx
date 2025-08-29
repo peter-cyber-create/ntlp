@@ -3209,12 +3209,12 @@ ABSTRACT STATUS:
       {/* Notification System */}
       {notification && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
-          notification.type === 'success' ? 'bg-green-100 border-green-500 text-green-800' :
-          notification.type === 'error' ? 'bg-red-100 border-red-500 text-red-800' :
+          notification?.type === 'success' ? 'bg-green-100 border-green-500 text-green-800' :
+          notification?.type === 'error' ? 'bg-red-100 border-green-500 text-red-800' :
           'bg-blue-100 border-blue-500 text-blue-800'
         } border-l-4`}>
           <div className="flex items-center justify-between">
-            <span className="font-medium">{notification.message}</span>
+            <span className="font-medium">{notification?.message}</span>
             <button
               onClick={() => setNotification(null)}
               className="ml-4 text-gray-400 hover:text-gray-600"
@@ -3238,4 +3238,4 @@ ABSTRACT STATUS:
       )}
     </div>
   )
-  }
+}
