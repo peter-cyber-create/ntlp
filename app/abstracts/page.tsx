@@ -286,7 +286,7 @@ export default function AbstractsPage() {
       // Prepare the submission data
       const submissionData = {
         title: formData.title,
-        abstract: `${formData.background}\n\nMethods:\n${formData.methods}\n\nFindings:\n${formData.findings}\n\nConclusion:\n${formData.conclusion}`,
+        abstract: `Background:\n${formData.background}\n\nMethods:\n${formData.methods}\n\nFindings:\n${formData.findings}\n\nConclusion:\n${formData.conclusion}`,
         keywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k),
         authors: [
           {
@@ -294,21 +294,15 @@ export default function AbstractsPage() {
             email: formData.primaryAuthor.email,
             affiliation: formData.primaryAuthor.affiliation,
             position: formData.primaryAuthor.position
-          },
-          ...formData.coAuthors.split(',').map(author => author.trim()).filter(author => author).map(author => ({
-            name: author,
-            email: '',
-            affiliation: '',
-            position: ''
-          }))
+          }
         ],
+        co_authors: formData.coAuthors.split(',').map(author => author.trim()).filter(author => author).join(', '),
         corresponding_author_email: formData.primaryAuthor.email,
         submission_type: 'abstract',
         track: formData.category,
         subcategory: formData.subcategory,
         cross_cutting_themes: formData.crossCuttingThemes ? [formData.crossCuttingThemes] : [],
-        format: formData.presentationType,
-        submitted_by: formData.primaryAuthor.email
+        format: formData.presentationType
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts`, {
