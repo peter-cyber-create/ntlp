@@ -198,10 +198,6 @@ export default function AdminDashboard() {
       ]);
       
       let contactData, paymentData, sponsorshipData;
-      let safeContacts: any[] = [];
-      let safePayments: any[] = [];
-      let safeRegistrations: any[] = [];
-      let safeSponsorships: any[] = [];
 
       // Process contact data safely
       if (contactResponse && contactResponse.ok) {
