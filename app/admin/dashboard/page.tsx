@@ -399,9 +399,8 @@ export default function AdminDashboard() {
         const endpoint = type === 'contact' ? 'https://conference.health.go.ug/api/contacts/' : 
                         type === 'registration' ? 'https://conference.health.go.ug/api/register/' : 'https://conference.health.go.ug/api/abstracts/';
         
-        // Use the correct parameter name for each API
-        const paramName = type === 'registration' ? 'id' : 'ids';
-        const response = await fetch(`${endpoint}?${paramName}=${id}`, {
+        // Use correct URL format for delete (ID in path, not query)
+        const response = await fetch(`${endpoint}${id}`, {
           method: 'DELETE',
         });
 
@@ -1709,38 +1708,46 @@ export default function AdminDashboard() {
         showNotification(`Processing deletion of ${selectedIds.length} ${typeLabel}...`, 'info');
         setIsProcessing(true);
         
-        const endpoint = type === 'contacts' ? '/api/contacts/' : 
-                        type === 'registrations' ? '/api/registrations/' : '/api/abstracts/';
+        const endpoint = type === 'contacts' ? 'https://conference.health.go.ug/api/contacts/' : 
+                        type === 'registrations' ? 'https://conference.health.go.ug/api/register/' : 'https://conference.health.go.ug/api/abstracts/';
         
         let deletedCount = 0;
         
-        if (type === 'registrations') {
-          // Handle registrations one by one since the API doesn't support batch delete
+        // Try bulk delete first, fallback to individual deletes
+        try {
+          const bulkEndpoint = `${endpoint}bulk`;
+          const response = await fetch(bulkEndpoint, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ids: selectedIds
+            })
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            deletedCount = result.deleted?.length || selectedIds.length;
+          } else {
+            throw new Error('Bulk delete not supported');
+          }
+        } catch (bulkError) {
+          // Fallback to individual deletes
+          console.log(`Bulk delete failed, trying individual deletes for ${type}`);
           for (const id of selectedIds) {
             try {
-              const response = await fetch(`${endpoint}?id=${id}`, {
+              const response = await fetch(`${endpoint}${id}`, {
                 method: 'DELETE',
               });
               if (response.ok) {
                 deletedCount++;
               } else {
-                console.error(`Failed to delete registration ${id}`);
+                console.error(`Failed to delete ${type} ${id}`);
               }
             } catch (error) {
-              console.error(`Error deleting registration ${id}:`, error);
+              console.error(`Error deleting ${type} ${id}:`, error);
             }
-          }
-        } else {
-          // Contacts and abstracts support batch delete
-          const response = await fetch(`${endpoint}?ids=${selectedIds.join(',')}`, {
-            method: 'DELETE',
-          });
-
-          if (response.ok) {
-            const result = await response.json();
-            deletedCount = result.deletedCount || selectedIds.length;
-          } else {
-            throw new Error(`Failed to delete ${type}`);
           }
         }
 
