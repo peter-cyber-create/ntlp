@@ -875,9 +875,9 @@ export default function AdminDashboard() {
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  const confirmMessage = `✅ BATCH CONFIRM CONFIRMATION\n\nYou are about to confirm ${selectedRegistrations.length} registration(s).\n\n• This will update the status to "confirmed"\n• Participants may receive confirmation emails\n• This action can be reversed later if needed\n\nProceed with confirming ${selectedRegistrations.length} registration(s)?`;
+                  const confirmMessage = `✅ BATCH APPROVE CONFIRMATION\n\nYou are about to approve ${selectedRegistrations.length} registration(s).\n\n• This will update the status to "approved"\n• Participants may receive confirmation emails\n• This action can be reversed later if needed\n\nProceed with approving ${selectedRegistrations.length} registration(s)?`;
                   if (window.confirm(confirmMessage)) {
-                    selectedRegistrations.forEach(id => handleStatusUpdate(id, 'confirmed'))
+                    selectedRegistrations.forEach(id => handleStatusUpdate(id, 'approved'))
                     setSelectedRegistrations([])
                   }
                 }}
@@ -918,9 +918,10 @@ export default function AdminDashboard() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
               <option value="all">All Status</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="pending">Pending</option>
+              <option value="submitted">Submitted</option>
+              <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
+              <option value="under_review">Under Review</option>
             </select>
           </div>
         </div>
@@ -983,8 +984,9 @@ export default function AdminDashboard() {
                   </td>
                   <td className="py-4 px-6">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      reg.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      reg.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      reg.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      reg.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
+                      reg.status === 'under_review' ? 'bg-blue-100 text-blue-800' :
                       reg.status === 'rejected' ? 'bg-red-100 text-red-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
@@ -1003,11 +1005,11 @@ export default function AdminDashboard() {
                   <td className="py-4 px-6 text-gray-600">{reg.date}</td>
                   <td className="py-4 px-6">
                     <div className="flex items-center space-x-2">
-                      {/* Accept/Reject buttons for pending registrations */}
-                      {reg.status === 'pending' && (
+                      {/* Accept/Reject buttons for submitted registrations */}
+                      {reg.status === 'submitted' && (
                         <>
                           <button 
-                            onClick={() => handleStatusUpdate(reg.id, 'confirmed')}
+                            onClick={() => handleStatusUpdate(reg.id, 'approved')}
                             className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded" 
                             title="Accept Registration"
                           >
