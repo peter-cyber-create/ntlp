@@ -95,6 +95,12 @@ export default function AdminDashboard() {
   }, [])
 
   const loadRealData = async () => {
+    // Declare all safe data variables at the beginning
+    let safeRegistrations: any[] = [];
+    let safeContacts: any[] = [];
+    let safePayments: any[] = [];
+    let safeSponsorships: any[] = [];
+    
     try {
       console.log('🔄 Loading real data from APIs...');
       
@@ -139,7 +145,7 @@ export default function AdminDashboard() {
           console.log('✅ Registration data loaded:', regData.registrations?.length || 0, 'registrations');
           
           // Safely extract and process registration data to avoid cross-origin issues
-          const safeRegistrations = Array.isArray(regData.registrations) ? regData.registrations.map((reg: any) => ({
+          safeRegistrations = Array.isArray(regData.registrations) ? regData.registrations.map((reg: any) => ({
             id: reg._id || reg.id || String(Math.random()),
             first_name: reg.first_name || reg.firstName || '',
             last_name: reg.last_name || reg.lastName || '',
@@ -192,12 +198,16 @@ export default function AdminDashboard() {
       ]);
       
       let contactData, paymentData, sponsorshipData;
+      let safeContacts: any[] = [];
+      let safePayments: any[] = [];
+      let safeRegistrations: any[] = [];
+      let safeSponsorships: any[] = [];
 
       // Process contact data safely
       if (contactResponse && contactResponse.ok) {
         try {
           contactData = await contactResponse.json();
-          const safeContacts = Array.isArray(contactData.data) ? contactData.data.map((c: any) => ({
+          safeContacts = Array.isArray(contactData.data) ? contactData.data.map((c: any) => ({
             id: c._id || c.id || String(Math.random()),
             name: c.name || '',
             email: c.email || '',
@@ -222,7 +232,7 @@ export default function AdminDashboard() {
       if (paymentResponse && paymentResponse.ok) {
         try {
           paymentData = await paymentResponse.json();
-          const safePayments = Array.isArray(paymentData.data) ? paymentData.data.map((p: any) => ({
+          safePayments = Array.isArray(paymentData.data) ? paymentData.data.map((p: any) => ({
             id: p._id || p.id || String(Math.random()),
             amount: p.amount || 0,
             status: p.status || 'pending',
@@ -270,18 +280,18 @@ export default function AdminDashboard() {
       // Load abstracts asynchronously (doesn't block dashboard loading)
       loadAbstractsData()
 
-      // Set dashboard overview data
+      // Set dashboard overview data using safe processed data
       setDashboardData({
         stats: {
-          totalRegistrations: regData?.stats?.total || 0,
-          pendingRegistrations: regData?.stats?.pending || 0,
+          totalRegistrations: safeRegistrations?.length || 0,
+          pendingRegistrations: safeRegistrations?.filter((r: any) => r.status === 'submitted').length || 0,
           totalSpeakers: 0, // Will be updated when we have speaker data
-          contactSubmissions: contactData?.stats?.total || 0,
-          totalPayments: paymentData?.stats?.total || 0,
-          completedPayments: paymentData?.stats?.completed || 0,
-          totalSponsorships: sponsorshipData?.stats?.total || 0,
-          confirmedSponsorships: sponsorshipData?.stats?.confirmed || 0,
-          totalRevenue: (paymentData?.stats?.totalRevenue || 0) + (sponsorshipData?.stats?.totalRevenue || 0),
+          contactSubmissions: safeContacts?.length || 0,
+          totalPayments: safePayments?.length || 0,
+          completedPayments: safePayments?.filter((p: any) => p.status === 'completed').length || 0,
+          totalSponsorships: safeSponsorships?.length || 0,
+          confirmedSponsorships: safeSponsorships?.filter((s: any) => s.status === 'approved').length || 0,
+          totalRevenue: 0, // Will be calculated when we have payment amounts
           websiteViews: 15420, // Mock data for now
           conversionRate: 75 // Mock data for now
         }
