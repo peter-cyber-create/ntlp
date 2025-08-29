@@ -1,0 +1,44 @@
+cursor.AppImage: ignoring input
+
+> ndc-conference-2025@1.0.0 dev
+> next dev -p 3000
+
+  ▲ Next.js 14.2.30
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.8s
+ ○ Compiling / ...
+ ✓ Compiled / in 4s (534 modules)
+ HEAD / 200 in 4591ms
+ ✓ Compiled in 1171ms (270 modules)
+ ○ Compiling /sponsors ...
+ ✓ Compiled /sponsors in 1288ms (522 modules)
+ GET /sponsors 200 in 1573ms
+ GET /sponsors 200 in 46ms
+ ✓ Compiled /admin/dashboard in 441ms (600 modules)
+ GET /admin/dashboard 200 in 720ms
+ ○ Compiling /api/payments ...
+ ✓ Compiled /api/payments in 975ms (1267 modules)
+Ignoring invalid configuration option passed to Connection: acquireTimeout. This is currently a warning, but in future versions of MySQL2, an error will be thrown if you pass an invalid configuration option to a Connection
+Ignoring invalid configuration option passed to Connection: timeout. This is currently a warning, but in future versions of MySQL2, an error will be thrown if you pass an invalid configuration option to a Connection
+ GET /api/payments 400 in 1958ms
+✅ MySQL connection established successfully
+ GET /api/registrations 404 in 1993ms
+ GET /api/sponsorships 404 in 1989ms
+ GET /api/contacts 200 in 2008ms
+ GET /api/payments 400 in 52ms
+ GET /api/registrations 404 in 59ms
+ GET /api/sponsorships 404 in 59ms
+ GET /api/contacts 200 in 61ms
+ ✓ Compiled / in 339ms (978 modules)
+ GET / 200 in 171ms
+ ✓ Compiled /register in 272ms (1287 modules)
+ ✓ Compiled in 3.6s (630 modules)
+ ✓ Compiled in 2.6s (630 modules)
+ ✓ Compiled in 1500ms (630 modules)
+ ✓ Compiled in 1289ms (630 modules)
+ HEAD / 200 in 168ms
+ ✓ Compiled in 1133ms (630 modules)
+ ✓ Compiled in 992ms (630 modules)
