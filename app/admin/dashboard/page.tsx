@@ -96,29 +96,41 @@ export default function AdminDashboard() {
 
   const loadRealData = async () => {
     try {
-      // Load data in parallel for better performance
-      const [regResponse, contactResponse, paymentResponse, sponsorshipResponse] = await Promise.all([
-        fetch(`https://conference.health.go.ug/api/register`).catch(() => null),
+      console.log('🔄 Loading real data from APIs...');
+      
+      // Load registrations with explicit error handling
+      try {
+        console.log('📥 Fetching registrations from: https://conference.health.go.ug/api/register');
+        const regResponse = await fetch('https://conference.health.go.ug/api/register');
+        console.log('📤 Registration response status:', regResponse.status);
+        
+        if (regResponse.ok) {
+          const regData = await regResponse.json();
+          console.log('✅ Registration data loaded:', regData.registrations?.length || 0, 'registrations');
+          console.log('📋 Sample registration:', regData.registrations?.[0]);
+          setRegistrationsData(regData.registrations || []);
+          setRegistrationStats({
+            total: regData.registrations?.length || 0,
+            submitted: regData.registrations?.filter((r: any) => r.status === 'submitted').length || 0,
+            approved: regData.registrations?.filter((r: any) => r.status === 'approved').length || 0
+          });
+        } else {
+          console.error('❌ Failed to load registrations:', regResponse.status, regResponse.statusText);
+          setRegistrationsData([]);
+        }
+      } catch (regError) {
+        console.error('💥 Registration fetch error:', regError);
+        setRegistrationsData([]);
+      }
+      
+      // Load other data in parallel
+      const [contactResponse, paymentResponse, sponsorshipResponse] = await Promise.all([
         fetch('https://conference.health.go.ug/api/contacts').catch(() => null),
         fetch('https://conference.health.go.ug/api/payments').catch(() => null),
-        fetch(`https://conference.health.go.ug/api/sponsorships`).catch(() => null)
+        fetch('https://conference.health.go.ug/api/sponsorships').catch(() => null)
       ]);
       
-      let regData, contactData, paymentData, sponsorshipData;
-      let usingFallback = false;
-      
-      // Process registration data
-      if (regResponse && regResponse.ok) {
-        regData = await regResponse.json()
-        setRegistrationsData(regData.registrations || [])
-        setRegistrationStats(regData.pagination || {})
-      } else {
-        // Fallback to local data
-        console.log('Database unavailable, using local data manager...')
-        usingFallback = true;
-        loadLocalData();
-        return;
-      }
+      let contactData, paymentData, sponsorshipData;
 
       // Process contact data  
       if (contactResponse && contactResponse.ok) {
@@ -322,31 +334,49 @@ export default function AdminDashboard() {
   }
 
   const getFilteredRegistrations = () => {
-    if (!registrationsData) return []
+    console.log('🔍 Filtering registrations. Raw data length:', registrationsData?.length || 0);
     
-    return registrationsData.filter(reg => {
-      const matchesSearch = searchTerm === '' || 
-        (reg.first_name || reg.firstName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (reg.last_name || reg.lastName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reg.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reg.organization.toLowerCase().includes(searchTerm.toLowerCase())
+    if (!registrationsData || !Array.isArray(registrationsData)) {
+      console.log('❌ No registration data or not an array');
+      return []
+    }
+    
+    const filtered = registrationsData.filter(reg => {
+      if (!reg) return false;
       
-      const matchesStatus = filterStatus === 'all' || reg.status === filterStatus
+      const firstName = reg.first_name || reg.firstName || '';
+      const lastName = reg.last_name || reg.lastName || '';
+      const email = reg.email || '';
+      const organization = reg.organization || '';
+      
+      const matchesSearch = searchTerm === '' || 
+        firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        organization.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const regStatus = reg.status || 'submitted';
+      const matchesStatus = filterStatus === 'all' || regStatus === filterStatus
+      
+      console.log(`📝 Registration ${reg.id}: status=${regStatus}, matches=${matchesSearch && matchesStatus}`);
       
       return matchesSearch && matchesStatus
     }).map(reg => ({
       id: reg._id || reg.id,
-      name: `${reg.first_name || reg.firstName} ${reg.last_name || reg.lastName}`,
-      email: reg.email,
-      phone: reg.phone,
-      organization: reg.organization,
-      position: reg.position,
-      district: reg.district,
+      name: `${reg.first_name || reg.firstName || ''} ${reg.last_name || reg.lastName || ''}`.trim(),
+      email: reg.email || '',
+      phone: reg.phone || '',
+      organization: reg.organization || '',
+      position: reg.position || '',
+      district: reg.district || '',
       ticket: reg.registrationType || 'Standard',
-      paymentStatus: reg.paymentStatus || 'pending',
-      date: new Date(reg.createdAt).toLocaleDateString(),
-      status: reg.status || 'pending'
-    }))
+      paymentStatus: reg.payment_status || reg.paymentStatus || 'pending',
+      date: reg.createdAt ? new Date(reg.createdAt).toLocaleDateString() : 'N/A',
+      status: reg.status || 'submitted'
+    }));
+    
+    console.log('✅ Filtered registrations:', filtered.length);
+    return filtered;
   }
 
   const handleExportCSV = () => {
