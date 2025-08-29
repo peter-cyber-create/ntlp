@@ -101,14 +101,37 @@ export default function AdminDashboard() {
       // Load registrations with explicit error handling and CORS-safe processing
       try {
         console.log('📥 Fetching registrations from: https://conference.health.go.ug/api/register');
-        const regResponse = await fetch('https://conference.health.go.ug/api/register', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          mode: 'cors'
-        });
+        
+        // Try multiple approaches to handle CORS issues
+        let regResponse;
+        try {
+          // First attempt: Standard CORS request
+          regResponse = await fetch('https://conference.health.go.ug/api/register', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            mode: 'cors'
+          });
+        } catch (corsError) {
+          console.log('🔄 CORS error, trying without mode specification...');
+          try {
+            // Second attempt: Without explicit CORS mode
+            regResponse = await fetch('https://conference.health.go.ug/api/register', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              }
+            });
+          } catch (fallbackError) {
+            console.log('🔄 Fallback error, trying basic fetch...');
+            // Third attempt: Basic fetch
+            regResponse = await fetch('https://conference.health.go.ug/api/register');
+          }
+        }
+        
         console.log('📤 Registration response status:', regResponse.status);
         
         if (regResponse.ok) {
