@@ -98,10 +98,10 @@ export default function AdminDashboard() {
     try {
       // Load data in parallel for better performance
       const [regResponse, contactResponse, paymentResponse, sponsorshipResponse] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`).catch(() => null),
-        fetch('/api/contacts/').catch(() => null),
-        fetch('/api/payments/').catch(() => null),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sponsorships`).catch(() => null)
+        fetch(`https://conference.health.go.ug/api/register`).catch(() => null),
+        fetch('https://conference.health.go.ug/api/contacts').catch(() => null),
+        fetch('https://conference.health.go.ug/api/payments').catch(() => null),
+        fetch(`https://conference.health.go.ug/api/sponsorships`).catch(() => null)
       ]);
       
       let regData, contactData, paymentData, sponsorshipData;
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
   const loadAbstractsData = async () => {
     setLoadingAbstracts(true)
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts`)
+      const response = await fetch(`https://conference.health.go.ug/api/abstracts`)
       if (response.ok) {
         const result = await response.json()
         setAbstractsData(result.abstracts || [])
@@ -363,8 +363,8 @@ export default function AdminDashboard() {
 
   const handleStatusUpdate = async (id: string, newStatus: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
-        method: 'PUT',
+      const response = await fetch(`https://conference.health.go.ug/api/register/${id}/status`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -396,8 +396,8 @@ export default function AdminDashboard() {
     if (window.confirm(confirmMessage)) {
       setIsProcessing(true);
       try {
-        const endpoint = type === 'contact' ? '/api/contacts/' : 
-                        type === 'registration' ? '/api/registrations/' : '/api/abstracts/';
+        const endpoint = type === 'contact' ? 'https://conference.health.go.ug/api/contacts/' : 
+                        type === 'registration' ? 'https://conference.health.go.ug/api/register/' : 'https://conference.health.go.ug/api/abstracts/';
         
         // Use the correct parameter name for each API
         const paramName = type === 'registration' ? 'id' : 'ids';
@@ -526,8 +526,8 @@ export default function AdminDashboard() {
   const handleAbstractStatusUpdate = async (id: string, newStatus: 'accepted' | 'rejected' | 'pending' | 'under-review') => {
     setIsProcessing(true);
     try {
-      const response = await fetch(`/api/abstracts/`, {
-        method: 'PUT',
+      const response = await fetch(`https://conference.health.go.ug/api/abstracts/${id}/status`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -569,7 +569,7 @@ export default function AdminDashboard() {
   const handleAbstractDownload = (abstract: any) => {
     if (abstract.id && (abstract.fileName || abstract.file_url)) {
       // Use the new download API endpoint with ID for better filename generation
-      const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/abstracts/download/${abstract.id}`;
+      const downloadUrl = `https://conference.health.go.ug/api/uploads/file/${abstract.filePath || abstract.file_url}`;
       
       // Create a temporary link to trigger download
       const link = document.createElement('a');
@@ -590,7 +590,7 @@ export default function AdminDashboard() {
   const handlePaymentProofDownload = (registration: any) => {
     if (registration.payment_proof_url) {
       // Use the file path download endpoint
-      const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/uploads/file/${registration.payment_proof_url}`;
+      const downloadUrl = `https://conference.health.go.ug/api/uploads/file/${registration.payment_proof_url}`;
       
       // Create a temporary link to trigger download
       const link = document.createElement('a');
@@ -1779,8 +1779,8 @@ export default function AdminDashboard() {
     try {
       showNotification(`Updating ${selectedContacts.length} contacts...`, 'info');
       
-      const response = await fetch('/api/contacts/', {
-        method: 'PUT',
+      const response = await fetch(`https://conference.health.go.ug/api/contacts/${id}/status`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -1832,20 +1832,88 @@ export default function AdminDashboard() {
   // Form review functions
   const loadFormSubmissions = async () => {
     try {
-      const response = await fetch('/api/admin/submissions');
-      if (response.ok) {
-        const data = await response.json();
-        setFormSubmissions(data.submissions || []);
-        
-        // Calculate stats
-        const stats = {
-          pending: data.submissions?.filter((s: any) => s.status === 'submitted').length || 0,
-          underReview: data.submissions?.filter((s: any) => s.status === 'under_review').length || 0,
-          approved: data.submissions?.filter((s: any) => s.status === 'approved').length || 0,
-          rejected: data.submissions?.filter((s: any) => s.status === 'rejected').length || 0
-        };
-        setSubmissionStats(stats);
+      // Load all form data from multiple endpoints
+      const [regResponse, abstractsResponse, sponsorshipsResponse] = await Promise.all([
+        fetch('https://conference.health.go.ug/api/register').catch(() => null),
+        fetch('https://conference.health.go.ug/api/abstracts').catch(() => null),
+        fetch('https://conference.health.go.ug/api/sponsorships').catch(() => null)
+      ]);
+      
+      const allSubmissions = [];
+      
+      // Process registrations
+      if (regResponse?.ok) {
+        const regData = await regResponse.json();
+        regData.forEach((item: any) => {
+          allSubmissions.push({
+            id: item.id,
+            form_type: 'registration',
+            entity_id: item.id,
+            submitted_by: item.email || item.name || 'Unknown',
+            submission_data: item,
+            status: item.status || 'submitted',
+            admin_notes: item.admin_notes,
+            reviewed_by: item.reviewed_by,
+            reviewed_at: item.reviewed_at,
+            review_comments: item.review_comments,
+            created_at: item.created_at || item.createdAt,
+            updated_at: item.updated_at || item.updatedAt
+          });
+        });
       }
+      
+      // Process abstracts
+      if (abstractsResponse?.ok) {
+        const abstractsData = await abstractsResponse.json();
+        abstractsData.forEach((item: any) => {
+          allSubmissions.push({
+            id: item.id + 1000, // Offset to avoid ID conflicts
+            form_type: 'abstract',
+            entity_id: item.id,
+            submitted_by: item.email || item.corresponding_author_email || 'Unknown',
+            submission_data: item,
+            status: item.status || 'submitted',
+            admin_notes: item.reviewComments,
+            reviewed_by: null,
+            reviewed_at: item.updated_at !== item.created_at ? item.updated_at : null,
+            review_comments: item.reviewComments,
+            created_at: item.created_at || item.createdAt,
+            updated_at: item.updated_at || item.updatedAt
+          });
+        });
+      }
+      
+      // Process sponsorships
+      if (sponsorshipsResponse?.ok) {
+        const sponsorshipsData = await sponsorshipsResponse.json();
+        sponsorshipsData.forEach((item: any) => {
+          allSubmissions.push({
+            id: item.id + 2000, // Offset to avoid ID conflicts
+            form_type: 'sponsorship',
+            entity_id: item.id,
+            submitted_by: item.email || item.contactPerson || 'Unknown',
+            submission_data: item,
+            status: item.status || 'submitted',
+            admin_notes: item.admin_notes,
+            reviewed_by: item.reviewed_by,
+            reviewed_at: item.reviewed_at,
+            review_comments: item.review_comments,
+            created_at: item.created_at,
+            updated_at: item.updated_at
+          });
+        });
+      }
+      
+      setFormSubmissions(allSubmissions);
+      
+      // Calculate stats
+      const stats = {
+        pending: allSubmissions.filter((s: any) => s.status === 'submitted').length,
+        underReview: allSubmissions.filter((s: any) => s.status === 'under_review').length,
+        approved: allSubmissions.filter((s: any) => s.status === 'approved').length,
+        rejected: allSubmissions.filter((s: any) => s.status === 'rejected').length
+      };
+      setSubmissionStats(stats);
     } catch (error) {
       console.error('Error loading form submissions:', error);
       showNotification('Failed to load form submissions', 'error');
@@ -1857,7 +1925,7 @@ export default function AdminDashboard() {
       const submission = formSubmissions.find(s => s.id === submissionId);
       if (!submission) return;
 
-      const response = await fetch(`/api/${getEntityType(submission.form_type)}/${submission.entity_id}/status`, {
+      const response = await fetch(`https://conference.health.go.ug/api/${getEntityType(submission.form_type)}/${submission.entity_id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1884,7 +1952,7 @@ export default function AdminDashboard() {
       const submission = formSubmissions.find(s => s.id === submissionId);
       if (!submission) return;
 
-      const response = await fetch(`/api/${getEntityType(submission.form_type)}/${submission.entity_id}/status`, {
+      const response = await fetch(`https://conference.health.go.ug/api/${getEntityType(submission.form_type)}/${submission.entity_id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

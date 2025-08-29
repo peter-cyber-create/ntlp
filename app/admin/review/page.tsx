@@ -70,19 +70,104 @@ export default function AdminReviewPage() {
         limit: '100'
       });
 
-      const response = await fetch(`/api/admin/submissions?${params}`);
-      if (response.ok) {
-        const data = await response.json();
-        setSubmissions(data.submissions || []);
-        setStats({
-          total: data.statistics?.byStatus?.reduce((acc: number, stat: any) => acc + stat.count, 0) || 0,
-          submitted: data.statistics?.byStatus?.find((s: any) => s.status === 'submitted')?.count || 0,
-          underReview: data.statistics?.byStatus?.find((s: any) => s.status === 'under_review')?.count || 0,
-          approved: data.statistics?.byStatus?.find((s: any) => s.status === 'approved')?.count || 0,
-          rejected: data.statistics?.byStatus?.find((s: any) => s.status === 'rejected')?.count || 0,
-          requiresRevision: data.statistics?.byStatus?.find((s: any) => s.status === 'requires_revision')?.count || 0
+      // Load all form data from multiple endpoints
+      const [regResponse, abstractsResponse, sponsorshipsResponse] = await Promise.all([
+        fetch('https://conference.health.go.ug/api/register').catch(() => null),
+        fetch('https://conference.health.go.ug/api/abstracts').catch(() => null),
+        fetch('https://conference.health.go.ug/api/sponsorships').catch(() => null)
+      ]);
+      
+      const allSubmissions = [];
+      
+      // Process registrations
+      if (regResponse?.ok) {
+        const regData = await regResponse.json();
+        regData.forEach((item: any) => {
+          allSubmissions.push({
+            id: item.id,
+            form_type: 'registration',
+            entity_id: item.id,
+            submitted_by: item.email || item.name || 'Unknown',
+            submission_data: item,
+            status: item.status || 'submitted',
+            admin_notes: item.admin_notes,
+            reviewed_by: item.reviewed_by,
+            reviewed_at: item.reviewed_at,
+            review_comments: item.review_comments,
+            created_at: item.created_at || item.createdAt,
+            updated_at: item.updated_at || item.updatedAt
+          });
         });
       }
+      
+      // Process abstracts
+      if (abstractsResponse?.ok) {
+        const abstractsData = await abstractsResponse.json();
+        abstractsData.forEach((item: any) => {
+          allSubmissions.push({
+            id: item.id + 1000, // Offset to avoid ID conflicts
+            form_type: 'abstract',
+            entity_id: item.id,
+            submitted_by: item.email || item.corresponding_author_email || 'Unknown',
+            submission_data: item,
+            status: item.status || 'submitted',
+            admin_notes: item.reviewComments,
+            reviewed_by: null,
+            reviewed_at: item.updated_at !== item.created_at ? item.updated_at : null,
+            review_comments: item.reviewComments,
+            created_at: item.created_at || item.createdAt,
+            updated_at: item.updated_at || item.updatedAt
+          });
+        });
+      }
+      
+      // Process sponsorships
+      if (sponsorshipsResponse?.ok) {
+        const sponsorshipsData = await sponsorshipsResponse.json();
+        sponsorshipsData.forEach((item: any) => {
+          allSubmissions.push({
+            id: item.id + 2000, // Offset to avoid ID conflicts
+            form_type: 'sponsorship',
+            entity_id: item.id,
+            submitted_by: item.email || item.contactPerson || 'Unknown',
+            submission_data: item,
+            status: item.status || 'submitted',
+            admin_notes: item.admin_notes,
+            reviewed_by: item.reviewed_by,
+            reviewed_at: item.reviewed_at,
+            review_comments: item.review_comments,
+            created_at: item.created_at,
+            updated_at: item.updated_at
+          });
+        });
+      }
+      
+      // Filter submissions based on activeTab and statusFilter
+      let filteredData = allSubmissions;
+      
+      if (activeTab !== 'all') {
+        const formTypeMap = {
+          'registrations': 'registration',
+          'abstracts': 'abstract', 
+          'contacts': 'contact',
+          'sponsorships': 'sponsorship'
+        };
+        filteredData = allSubmissions.filter(s => s.form_type === formTypeMap[activeTab]);
+      }
+      
+      if (statusFilter !== 'all') {
+        filteredData = filteredData.filter(s => s.status === statusFilter);
+      }
+      
+      setSubmissions(filteredData);
+      setStats({
+        total: allSubmissions.length,
+        submitted: allSubmissions.filter((s: any) => s.status === 'submitted').length,
+        underReview: allSubmissions.filter((s: any) => s.status === 'under_review').length,
+        approved: allSubmissions.filter((s: any) => s.status === 'approved').length,
+        rejected: allSubmissions.filter((s: any) => s.status === 'rejected').length,
+        requiresRevision: allSubmissions.filter((s: any) => s.status === 'requires_revision').length
+      });
     } catch (error) {
       console.error('Error loading submissions:', error);
     } finally {
@@ -92,7 +177,7 @@ export default function AdminReviewPage() {
 
   const handleStatusUpdate = async (submissionId: number, newStatus: string, notes: string) => {
     try {
-      const response = await fetch(`/api/${getEntityType(submissions.find(s => s.id === submissionId)?.form_type)}/${submissions.find(s => s.id === submissionId)?.entity_id}/status`, {
+      const response = await fetch(`https://conference.health.go.ug/api/${getEntityType(submissions.find(s => s.id === submissionId)?.form_type)}/${submissions.find(s => s.id === submissionId)?.entity_id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -397,6 +482,66 @@ export default function AdminReviewPage() {
 
                     {/* Actions */}
                     <div className="flex items-center space-x-2">
+                      {/* Download Button */}
+                      {(submission.form_type === 'abstract' && submission.submission_data?.filePath) && (
+                        <button
+                          onClick={() => {
+                            const downloadUrl = `https://conference.health.go.ug/api/uploads/file/${submission.submission_data.filePath}`;
+                            const link = document.createElement('a');
+                            link.href = downloadUrl;
+                            link.style.display = 'none';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                          className="p-2 text-green-600 hover:text-green-700 rounded-md hover:bg-green-50"
+                          title="Download File"
+                        >
+                          <Download size={20} />
+                        </button>
+                      )}
+                      
+                      {/* Payment Proof Download */}
+                      {(submission.form_type === 'registration' && submission.submission_data?.payment_proof_url) && (
+                        <button
+                          onClick={() => {
+                            const downloadUrl = `https://conference.health.go.ug/api/uploads/file/${submission.submission_data.payment_proof_url}`;
+                            const link = document.createElement('a');
+                            link.href = downloadUrl;
+                            link.style.display = 'none';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                          className="p-2 text-purple-600 hover:text-purple-700 rounded-md hover:bg-purple-50"
+                          title="Download Payment Proof"
+                        >
+                          <Download size={20} />
+                        </button>
+                      )}
+                      
+                      {/* Delete Button */}
+                      <button
+                        onClick={async () => {
+                          if (window.confirm(`Are you sure you want to delete this ${submission.form_type}? This action cannot be undone.`)) {
+                            try {
+                              const response = await fetch(`https://conference.health.go.ug/api/${getEntityType(submission.form_type)}/${submission.entity_id}`, {
+                                method: 'DELETE'
+                              });
+                              if (response.ok) {
+                                await loadSubmissions();
+                              }
+                            } catch (error) {
+                              console.error('Error deleting submission:', error);
+                            }
+                          }
+                        }}
+                        className="p-2 text-red-600 hover:text-red-700 rounded-md hover:bg-red-50"
+                        title="Delete"
+                      >
+                        <XCircle size={20} />
+                      </button>
+                      
                       <button
                         onClick={() => setExpandedSubmission(expandedSubmission === submission.id ? null : submission.id)}
                         className="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
@@ -484,23 +629,48 @@ export default function AdminReviewPage() {
                   />
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4">
-                  <button
-                    onClick={() => setReviewModal({ open: false, submission: null })}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      const status = (document.getElementById('status-select') as HTMLSelectElement).value;
-                      const notes = (document.getElementById('admin-notes') as HTMLTextAreaElement).value;
-                      handleStatusUpdate(reviewModal.submission!.id, status, notes);
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Update Status
-                  </button>
+                <div className="flex justify-between pt-4">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        const notes = (document.getElementById('admin-notes') as HTMLTextAreaElement).value || 'Quick approved by admin';
+                        handleStatusUpdate(reviewModal.submission!.id, 'approved', notes);
+                      }}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center space-x-2"
+                    >
+                      <CheckCircle size={16} />
+                      <span>Quick Approve</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const notes = (document.getElementById('admin-notes') as HTMLTextAreaElement).value || 'Quick rejected by admin';
+                        handleStatusUpdate(reviewModal.submission!.id, 'rejected', notes);
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center space-x-2"
+                    >
+                      <XCircle size={16} />
+                      <span>Quick Reject</span>
+                    </button>
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setReviewModal({ open: false, submission: null })}
+                      className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        const status = (document.getElementById('status-select') as HTMLSelectElement).value;
+                        const notes = (document.getElementById('admin-notes') as HTMLTextAreaElement).value;
+                        handleStatusUpdate(reviewModal.submission!.id, status, notes);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Update Status
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
