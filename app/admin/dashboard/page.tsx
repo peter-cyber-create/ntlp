@@ -1152,7 +1152,11 @@ export default function AdminDashboard() {
                 }`}></div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-900">{abstract.title}</p>
-                  <p className="text-xs text-gray-500">by {abstract.authors}</p>
+                  <p className="text-xs text-gray-500">by {typeof abstract.authors === 'string' && abstract.authors.startsWith('[') 
+                    ? JSON.parse(abstract.authors).map((author: any) => 
+                        typeof author === 'string' ? author : author.name || author.email || 'Unknown'
+                      ).join(', ')
+                    : abstract.authors}</p>
                 </div>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   abstract.status === 'accepted' ? 'bg-green-100 text-green-800' :
@@ -1174,7 +1178,11 @@ export default function AdminDashboard() {
     const filteredAbstracts = abstractsData.filter(abstract => {
       const matchesSearch = searchTerm === '' || 
         abstract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        abstract.authors.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (typeof abstract.authors === 'string' && abstract.authors.startsWith('[') 
+          ? JSON.parse(abstract.authors).some((author: any) => 
+              (typeof author === 'string' ? author : (author.name || author.email || '')).toLowerCase().includes(searchTerm.toLowerCase())
+            )
+          : abstract.authors.toLowerCase().includes(searchTerm.toLowerCase())) ||
         abstract.email.toLowerCase().includes(searchTerm.toLowerCase())
       
       const matchesStatus = filterStatus === 'all' || abstract.status === filterStatus
@@ -1396,7 +1404,11 @@ export default function AdminDashboard() {
                         {abstract.title}
                       </td>
                       <td className="py-4 px-6 text-gray-600">
-                        {abstract.authors}
+                        {typeof abstract.authors === 'string' && abstract.authors.startsWith('[') 
+                          ? JSON.parse(abstract.authors).map((author: any) => 
+                              typeof author === 'string' ? author : `${author.name || ''} (${author.email || ''})`
+                            ).join(', ')
+                          : abstract.authors}
                         <br />
                         <span className="text-xs text-gray-500">{abstract.email}</span>
                       </td>
@@ -2299,10 +2311,10 @@ ABSTRACT STATUS:
             <tbody className="divide-y divide-gray-200">
               {sponsorshipsData.slice(0, 20).map((sponsorship: any) => (
                 <tr key={sponsorship.id} className="hover:bg-gray-50">
-                  <td className="py-4 px-6 font-medium text-gray-900">{sponsorship.company_name}</td>
+                  <td className="py-4 px-6 font-medium text-gray-900">{sponsorship.companyName}</td>
                   <td className="py-4 px-6">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{sponsorship.contact_person}</div>
+                      <div className="text-sm font-medium text-gray-900">{sponsorship.contactPerson}</div>
                       <div className="text-sm text-gray-500">{sponsorship.email}</div>
                     </div>
                   </td>
