@@ -98,10 +98,10 @@ export default function AdminDashboard() {
     try {
       // Load data in parallel for better performance
       const [regResponse, contactResponse, paymentResponse, sponsorshipResponse] = await Promise.all([
-        fetch('/api/registrations/').catch(() => null),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`).catch(() => null),
         fetch('/api/contacts/').catch(() => null),
         fetch('/api/payments/').catch(() => null),
-        fetch('/api/sponsorships/').catch(() => null)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sponsorships`).catch(() => null)
       ]);
       
       let regData, contactData, paymentData, sponsorshipData;
@@ -270,11 +270,11 @@ export default function AdminDashboard() {
   const loadAbstractsData = async () => {
     setLoadingAbstracts(true)
     try {
-      const response = await fetch('/api/abstracts/')
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts`)
       if (response.ok) {
         const result = await response.json()
-        setAbstractsData(result.data || [])
-        setAbstractStats(result.stats || {})
+        setAbstractsData(result.abstracts || [])
+        setAbstractStats({total: result.pagination?.total || 0})
       } else {
         console.error('Failed to fetch abstracts:', response.statusText)
         // Fallback to empty arrays for now - in production, could add mock abstract data
@@ -363,7 +363,7 @@ export default function AdminDashboard() {
 
   const handleStatusUpdate = async (id: string, newStatus: string) => {
     try {
-      const response = await fetch('/api/registrations/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
