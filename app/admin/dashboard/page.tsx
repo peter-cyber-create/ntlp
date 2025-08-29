@@ -147,17 +147,17 @@ export default function AdminDashboard() {
           // Safely extract and process registration data to avoid cross-origin issues
           safeRegistrations = Array.isArray(regData.registrations) ? regData.registrations.map((reg: any) => ({
             id: reg._id || reg.id || String(Math.random()),
-            first_name: reg.first_name || reg.firstName || '',
-            last_name: reg.last_name || reg.lastName || '',
+            first_name: reg.firstName || reg.first_name || '', // Backend uses firstName
+            last_name: reg.lastName || reg.last_name || '', // Backend uses lastName
             email: reg.email || '',
             phone: reg.phone || '',
             organization: reg.organization || '',
             position: reg.position || '',
-            district: reg.district || '',
+            district: reg.district || reg.country || '', // Backend uses country
             registrationType: reg.registrationType || 'Standard',
             status: reg.status || 'submitted',
             payment_status: reg.payment_status || reg.paymentStatus || 'pending',
-            createdAt: reg.createdAt || reg.created_at || new Date().toISOString()
+            createdAt: reg.createdAt || reg.created_at || reg.registration_date || new Date().toISOString()
           })) : [];
           
           console.log('📋 Safe registrations created:', safeRegistrations.length);
