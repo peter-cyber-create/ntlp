@@ -927,6 +927,20 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* DEBUG INFO */}
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+        <p className="text-sm text-yellow-800">
+          <strong>DEBUG:</strong> registrationsData.length = {registrationsData?.length || 0}, 
+          filteredRegistrations.length = {filteredRegistrations.length}, 
+          filterStatus = {filterStatus}
+        </p>
+        {registrationsData?.length > 0 && (
+          <p className="text-xs text-yellow-700 mt-1">
+            Sample: {JSON.stringify(registrationsData[0], null, 2).substring(0, 200)}...
+          </p>
+        )}
+      </div>
+
       {/* Registrations Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
