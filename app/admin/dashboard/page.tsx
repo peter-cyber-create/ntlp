@@ -973,11 +973,12 @@ export default function AdminDashboard() {
 
       {/* Registrations Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop and Tablet Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">
+                <th className="text-left py-3 px-3 lg:px-6 font-medium text-gray-900">
                   <input
                     type="checkbox"
                     checked={selectedRegistrations.length === filteredRegistrations.length && filteredRegistrations.length > 0}
@@ -991,20 +992,18 @@ export default function AdminDashboard() {
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                   />
                 </th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Name</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Email</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Organization</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Ticket Type</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Status</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Payment</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Date</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-900">Actions</th>
+                <th className="text-left py-3 px-3 lg:px-6 font-medium text-gray-900">Name</th>
+                <th className="text-left py-3 px-3 lg:px-6 font-medium text-gray-900 hidden lg:table-cell">Email</th>
+                <th className="text-left py-3 px-3 lg:px-6 font-medium text-gray-900 hidden xl:table-cell">Organization</th>
+                <th className="text-left py-3 px-3 lg:px-6 font-medium text-gray-900">Status</th>
+                <th className="text-left py-3 px-3 lg:px-6 font-medium text-gray-900 hidden lg:table-cell">Date</th>
+                <th className="text-left py-3 px-3 lg:px-6 font-medium text-gray-900">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredRegistrations.map((reg: any) => (
                 <tr key={reg.id} className="hover:bg-gray-50">
-                  <td className="py-4 px-6">
+                  <td className="py-3 px-3 lg:py-4 lg:px-6">
                     <input
                       type="checkbox"
                       checked={selectedRegistrations.includes(reg.id)}
@@ -1018,15 +1017,13 @@ export default function AdminDashboard() {
                       className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                     />
                   </td>
-                  <td className="py-4 px-6 font-medium text-gray-900">{reg.name}</td>
-                  <td className="py-4 px-6 text-gray-600">{reg.email}</td>
-                  <td className="py-4 px-6 text-gray-600">{reg.organization}</td>
-                  <td className="py-4 px-6">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                      {reg.ticket}
-                    </span>
+                  <td className="py-3 px-3 lg:py-4 lg:px-6">
+                    <div className="font-medium text-gray-900">{reg.name}</div>
+                    <div className="text-sm text-gray-600 lg:hidden">{reg.email}</div>
                   </td>
-                  <td className="py-4 px-6">
+                  <td className="py-3 px-3 lg:py-4 lg:px-6 text-gray-600 hidden lg:table-cell">{reg.email}</td>
+                  <td className="py-3 px-3 lg:py-4 lg:px-6 text-gray-600 hidden xl:table-cell">{reg.organization}</td>
+                  <td className="py-3 px-3 lg:py-4 lg:px-6">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       reg.status === 'approved' ? 'bg-green-100 text-green-800' :
                       reg.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
@@ -1037,19 +1034,9 @@ export default function AdminDashboard() {
                       {reg.status}
                     </span>
                   </td>
-                  <td className="py-4 px-6">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      reg.paymentStatus === 'completed' ? 'bg-green-100 text-green-800' :
-                      reg.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {reg.paymentStatus}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-gray-600">{reg.date}</td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center space-x-2">
-                      {/* Accept/Reject buttons for submitted registrations */}
+                  <td className="py-3 px-3 lg:py-4 lg:px-6 text-gray-600 hidden lg:table-cell">{reg.date}</td>
+                  <td className="py-3 px-3 lg:py-4 lg:px-6">
+                    <div className="flex items-center space-x-1 lg:space-x-2">
                       {reg.status === 'submitted' && (
                         <>
                           <button 
@@ -1057,38 +1044,30 @@ export default function AdminDashboard() {
                             className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded" 
                             title="Accept Registration"
                           >
-                            <Check size={16} />
+                            <Check size={14} className="lg:w-4 lg:h-4" />
                           </button>
                           <button 
                             onClick={() => handleStatusUpdate(reg.id, 'rejected')}
                             className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded" 
                             title="Reject Registration"
                           >
-                            <X size={16} />
+                            <X size={14} className="lg:w-4 lg:h-4" />
                           </button>
                         </>
                       )}
-                      {/* Standard action buttons */}
                       <button 
                         onClick={() => handleViewItem(reg, 'registration')}
                         className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded" 
                         title="View"
                       >
-                        <Eye size={16} />
-                      </button>
-                      <button 
-                        onClick={() => handleEditItem(reg, 'registration')}
-                        className="p-1 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 rounded" 
-                        title="Edit"
-                      >
-                        <Edit size={16} />
+                        <Eye size={14} className="lg:w-4 lg:h-4" />
                       </button>
                       <button 
                         onClick={() => handleSingleDelete(reg.id, 'registration')}
                         className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
                         title="Delete"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} className="lg:w-4 lg:h-4" />
                       </button>
                     </div>
                   </td>
@@ -1096,6 +1075,91 @@ export default function AdminDashboard() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden">
+          {filteredRegistrations.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">
+              <p>No registrations found.</p>
+              <p className="text-sm mt-1">Total: {registrationsData?.length || 0}</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {filteredRegistrations.map((reg: any) => (
+                <div key={reg.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-3 flex-1">
+                      <input
+                        type="checkbox"
+                        checked={selectedRegistrations.includes(reg.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedRegistrations([...selectedRegistrations, reg.id])
+                          } else {
+                            setSelectedRegistrations(selectedRegistrations.filter(id => id !== reg.id))
+                          }
+                        }}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-1"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{reg.name}</p>
+                        <p className="text-sm text-gray-600 truncate">{reg.email}</p>
+                        <p className="text-sm text-gray-500 truncate">{reg.organization}</p>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ml-2 ${
+                      reg.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      reg.status === 'submitted' ? 'bg-yellow-100 text-yellow-800' :
+                      reg.status === 'under_review' ? 'bg-blue-100 text-blue-800' :
+                      reg.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {reg.status}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="text-xs text-gray-500">{reg.date}</div>
+                    <div className="flex items-center space-x-2">
+                      {reg.status === 'submitted' && (
+                        <>
+                          <button 
+                            onClick={() => handleStatusUpdate(reg.id, 'approved')}
+                            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg" 
+                            title="Accept"
+                          >
+                            <Check size={16} />
+                          </button>
+                          <button 
+                            onClick={() => handleStatusUpdate(reg.id, 'rejected')}
+                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg" 
+                            title="Reject"
+                          >
+                            <X size={16} />
+                          </button>
+                        </>
+                      )}
+                      <button 
+                        onClick={() => handleViewItem(reg, 'registration')}
+                        className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg"
+                        title="View"
+                      >
+                        <Eye size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleSingleDelete(reg.id, 'registration')}
+                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg"
+                        title="Delete"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
