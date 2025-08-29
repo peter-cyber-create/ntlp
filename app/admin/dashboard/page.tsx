@@ -147,15 +147,6 @@ export default function AdminDashboard() {
     
     setRegistrationsData(immediateTestData);
     console.log('✅ IMMEDIATE TEST: Test data set, length:', immediateTestData.length);
-    
-    // IMMEDIATE FORCE SET: Set registration stats with hardcoded values
-    console.log('🚀 IMMEDIATE FORCE SET: Setting registration stats with hardcoded values');
-    setRegistrationStats({
-      total: 9, // FORCE SHOW 9 total
-      submitted: 6, // FORCE SHOW 6 submitted
-      approved: 3 // FORCE SHOW 3 approved
-    });
-    console.log('✅ IMMEDIATE FORCE SET: Registration stats set with hardcoded values');
   }, [])
 
   const loadRealData = async () => {
@@ -1059,7 +1050,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-gray-600">Total Registrations</p>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{dashboardData?.stats?.totalRegistrations || 9}</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{dashboardData?.stats?.totalRegistrations || 0}</p>
               <p className="text-xs sm:text-sm text-green-600">+12% from last week</p>
             </div>
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center">
@@ -1072,7 +1063,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-gray-600">Pending Reviews</p>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{dashboardData?.stats?.pendingRegistrations || 6}</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{dashboardData?.stats?.pendingRegistrations || 0}</p>
               <p className="text-xs sm:text-sm text-orange-600">Requires attention</p>
             </div>
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -3042,6 +3033,30 @@ ABSTRACT STATUS:
 
         {/* Main Content */}
         <main className="flex-1 p-2 sm:p-4 lg:p-6 lg:ml-0 min-h-screen">
+          {/* IMMEDIATE TEST DISPLAY - Bypass all state management */}
+          <div className="mb-4 sm:mb-6 bg-red-50 border-2 border-red-300 rounded-lg p-4">
+            <h2 className="text-lg font-bold text-red-800 mb-2">🚨 IMMEDIATE TEST - Hardcoded Numbers</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <p className="text-sm text-red-600">Total Registrations</p>
+                <p className="text-2xl font-bold text-red-800">9</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-red-600">Pending</p>
+                <p className="text-2xl font-bold text-red-800">6</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-red-600">Total Speakers</p>
+                <p className="text-2xl font-bold text-red-800">5</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-red-600">Contacts</p>
+                <p className="text-2xl font-bold text-red-800">12</p>
+              </div>
+            </div>
+            <p className="text-xs text-red-600 mt-2">These numbers are hardcoded and should always show</p>
+          </div>
+
           {/* Professional Header */}
           <div className="mb-4 sm:mb-6 bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6">
             <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
