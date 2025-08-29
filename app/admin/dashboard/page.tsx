@@ -1162,7 +1162,47 @@ export default function AdminDashboard() {
     </div>
   )
 
-  const renderRegistrations = () => (
+  const renderRegistrations = () => {
+    console.log('🎯 RENDER: renderRegistrations called');
+    console.log('🎯 RENDER: registrationsData =', registrationsData);
+    console.log('🎯 RENDER: registrationsData.length =', registrationsData?.length);
+    
+    // FORCE SHOW TEST DATA - bypass all checks
+    const forceData = [
+      {
+        id: 'force-1',
+        name: 'FORCE SHOW User 1',
+        email: 'force1@test.com',
+        phone: '+256111111111',
+        organization: 'FORCE SHOW Org 1',
+        position: 'Manager',
+        district: 'Kampala',
+        ticket: 'Standard',
+        paymentStatus: 'pending',
+        date: new Date().toLocaleDateString(),
+        status: 'submitted'
+      },
+      {
+        id: 'force-2',
+        name: 'FORCE SHOW User 2',
+        email: 'force2@test.com',
+        phone: '+256222222222',
+        organization: 'FORCE SHOW Org 2',
+        position: 'Director',
+        district: 'Entebbe',
+        ticket: 'VIP',
+        paymentStatus: 'completed',
+        date: new Date().toLocaleDateString(),
+        status: 'approved'
+      }
+    ];
+    
+    console.log('🎯 RENDER: Using force data, length =', forceData.length);
+    
+    // Use force data instead of filtered data
+    const filteredRegistrations = forceData;
+    
+    return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-gray-900">Registrations</h2>
@@ -3193,4 +3233,4 @@ ABSTRACT STATUS:
       )}
     </div>
   )
-}
+  }
