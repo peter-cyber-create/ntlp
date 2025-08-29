@@ -1779,7 +1779,7 @@ export default function AdminDashboard() {
     try {
       showNotification(`Updating ${selectedContacts.length} contacts...`, 'info');
       
-      const response = await fetch(`https://conference.health.go.ug/api/contacts/${id}/status`, {
+      const response = await fetch(`https://conference.health.go.ug/api/contacts/${selectedContacts[0]}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -1839,7 +1839,7 @@ export default function AdminDashboard() {
         fetch('https://conference.health.go.ug/api/sponsorships').catch(() => null)
       ]);
       
-      const allSubmissions = [];
+      const allSubmissions: any[] = [];
       
       // Process registrations
       if (regResponse?.ok) {
