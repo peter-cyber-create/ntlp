@@ -2942,6 +2942,11 @@ ABSTRACT STATUS:
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* ULTIMATE TEST - This should always show */}
+      <div className="fixed top-0 left-0 right-0 bg-yellow-400 text-black p-4 text-center z-50 font-bold text-lg">
+        🚨 ULTIMATE TEST - IF YOU SEE THIS, COMPONENT IS RENDERING!
+      </div>
+      
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
         <div className="flex justify-between items-center">
@@ -3033,28 +3038,12 @@ ABSTRACT STATUS:
 
         {/* Main Content */}
         <main className="flex-1 p-2 sm:p-4 lg:p-6 lg:ml-0 min-h-screen">
-          {/* IMMEDIATE TEST DISPLAY - Bypass all state management */}
-          <div className="mb-4 sm:mb-6 bg-red-50 border-2 border-red-300 rounded-lg p-4">
-            <h2 className="text-lg font-bold text-red-800 mb-2">🚨 IMMEDIATE TEST - Hardcoded Numbers</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <p className="text-sm text-red-600">Total Registrations</p>
-                <p className="text-2xl font-bold text-red-800">9</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-red-600">Pending</p>
-                <p className="text-2xl font-bold text-red-800">6</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-red-600">Total Speakers</p>
-                <p className="text-2xl font-bold text-red-800">5</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-red-600">Contacts</p>
-                <p className="text-2xl font-bold text-red-800">12</p>
-              </div>
+                    {/* SIMPLE TEST - This should show */}
+          <div className="mb-4 sm:mb-6 bg-green-200 border-2 border-green-500 rounded-lg p-4 text-center">
+            <h2 className="text-xl font-bold text-green-800">✅ SIMPLE TEST - Numbers Below</h2>
+            <div className="mt-2 text-2xl font-bold text-green-900">
+              Total: 9 | Pending: 6 | Speakers: 5
             </div>
-            <p className="text-xs text-red-600 mt-2">These numbers are hardcoded and should always show</p>
           </div>
 
           {/* Professional Header */}
