@@ -167,6 +167,31 @@ export default function AdminDashboard() {
     }
   }
 
+  const loadAbstractsData = async () => {
+    setLoadingAbstracts(true)
+    try {
+      const response = await fetch(`https://conference.health.go.ug/api/abstracts`)
+      if (response.ok) {
+        const result = await response.json()
+        setAbstractsData(result.abstracts || [])
+        setAbstractStats({
+          total: result.abstracts?.length || 0,
+          pending: result.abstracts?.filter((a: any) => a.status === 'submitted').length || 0,
+          approved: result.abstracts?.filter((a: any) => a.status === 'approved').length || 0,
+          rejected: result.abstracts?.filter((a: any) => a.status === 'rejected').length || 0,
+          under_review: result.abstracts?.filter((a: any) => a.status === 'under_review').length || 0
+        })
+        console.log(`Loaded ${result.abstracts?.length || 0} abstracts`)
+      } else {
+        console.error('Failed to load abstracts:', response.status)
+      }
+    } catch (error) {
+      console.error('Error loading abstracts:', error)
+    } finally {
+      setLoadingAbstracts(false)
+    }
+  }
+
   const loadLocalData = () => {
     try {
       if (dataManager) {
