@@ -110,8 +110,8 @@ export default function AdminDashboard() {
       // Process registration data
       if (regResponse && regResponse.ok) {
         regData = await regResponse.json()
-        setRegistrationsData(regData.data || [])
-        setRegistrationStats(regData.stats || {})
+        setRegistrationsData(regData.registrations || [])
+        setRegistrationStats(regData.pagination || {})
       } else {
         // Fallback to local data
         console.log('Database unavailable, using local data manager...')
@@ -137,8 +137,8 @@ export default function AdminDashboard() {
       // Process sponsorship data
       if (sponsorshipResponse && sponsorshipResponse.ok) {
         sponsorshipData = await sponsorshipResponse.json()
-        setSponsorshipsData(sponsorshipData.data || [])
-        setSponsorshipStats(sponsorshipData.stats || {})
+        setSponsorshipsData(sponsorshipData.sponsorships || [])
+        setSponsorshipStats(sponsorshipData.pagination || {})
       }
 
       // Load abstracts asynchronously (doesn't block dashboard loading)
@@ -567,9 +567,9 @@ export default function AdminDashboard() {
   };
 
   const handleAbstractDownload = (abstract: any) => {
-    if (abstract.id && abstract.fileName) {
+    if (abstract.id && (abstract.fileName || abstract.file_url)) {
       // Use the new download API endpoint with ID for better filename generation
-      const downloadUrl = `/api/abstracts/download/?id=${abstract.id}`;
+      const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/abstracts/download/${abstract.id}`;
       
       // Create a temporary link to trigger download
       const link = document.createElement('a');
@@ -580,10 +580,43 @@ export default function AdminDashboard() {
       link.click();
       document.body.removeChild(link);
       
-      console.log(`Downloaded: ${abstract.fileName} by ${abstract.authors}`);
+      console.log(`Downloaded: ${abstract.fileName || 'abstract-' + abstract.id} by ${abstract.authors}`);
     } else {
       alert('File information not available for download');
       console.error('Abstract download failed - missing file information:', abstract);
+    }
+  };
+
+  const handlePaymentProofDownload = (registration: any) => {
+    if (registration.payment_proof_url) {
+      // Use the file path download endpoint
+      const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/uploads/file/${registration.payment_proof_url}`;
+      
+      // Create a temporary link to trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log(`Downloaded payment proof for: ${registration.firstName} ${registration.lastName}`);
+    } else {
+      alert('No payment proof available for download');
+      console.error('Payment proof download failed - no file URL:', registration);
+    }
+  };
+
+  const handlePaymentProofView = (registration: any) => {
+    if (registration.payment_proof_url) {
+      // Open in new tab for viewing
+      const viewUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/uploads/file/${registration.payment_proof_url}`;
+      window.open(viewUrl, '_blank');
+      
+      console.log(`Viewing payment proof for: ${registration.firstName} ${registration.lastName}`);
+    } else {
+      alert('No payment proof available for viewing');
+      console.error('Payment proof view failed - no file URL:', registration);
     }
   };
 
