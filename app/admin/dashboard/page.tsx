@@ -292,29 +292,7 @@ export default function AdminDashboard() {
     })
   }
 
-  const loadAbstractsData = async () => {
-    setLoadingAbstracts(true)
-    try {
-      const response = await fetch(`https://conference.health.go.ug/api/abstracts`)
-      if (response.ok) {
-        const result = await response.json()
-        setAbstractsData(result.abstracts || [])
-        setAbstractStats({total: result.pagination?.total || 0})
-      } else {
-        console.error('Failed to fetch abstracts:', response.statusText)
-        // Fallback to empty arrays for now - in production, could add mock abstract data
-        setAbstractsData([])
-        setAbstractStats({})
-      }
-    } catch (error) {
-      console.error('Error fetching abstracts:', error)
-      // Fallback to empty arrays when database is unavailable
-      setAbstractsData([])
-      setAbstractStats({})
-    } finally {
-      setLoadingAbstracts(false)
-    }
-  }
+
 
   // Handle client-side only rendering for localStorage
   if (!dashboardData) {
