@@ -98,21 +98,47 @@ export default function AdminDashboard() {
     try {
       console.log('🔄 Loading real data from APIs...');
       
-      // Load registrations with explicit error handling
+      // Load registrations with explicit error handling and CORS-safe processing
       try {
         console.log('📥 Fetching registrations from: https://conference.health.go.ug/api/register');
-        const regResponse = await fetch('https://conference.health.go.ug/api/register');
+        const regResponse = await fetch('https://conference.health.go.ug/api/register', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          mode: 'cors'
+        });
         console.log('📤 Registration response status:', regResponse.status);
         
         if (regResponse.ok) {
           const regData = await regResponse.json();
           console.log('✅ Registration data loaded:', regData.registrations?.length || 0, 'registrations');
-          console.log('📋 Sample registration:', regData.registrations?.[0]);
-          setRegistrationsData(regData.registrations || []);
+          
+          // Safely extract and process registration data to avoid cross-origin issues
+          const safeRegistrations = Array.isArray(regData.registrations) ? regData.registrations.map((reg: any) => ({
+            id: reg._id || reg.id || String(Math.random()),
+            first_name: reg.first_name || reg.firstName || '',
+            last_name: reg.last_name || reg.lastName || '',
+            email: reg.email || '',
+            phone: reg.phone || '',
+            organization: reg.organization || '',
+            position: reg.position || '',
+            district: reg.district || '',
+            registrationType: reg.registrationType || 'Standard',
+            status: reg.status || 'submitted',
+            payment_status: reg.payment_status || reg.paymentStatus || 'pending',
+            createdAt: reg.createdAt || reg.created_at || new Date().toISOString()
+          })) : [];
+          
+          console.log('📋 Safe registrations created:', safeRegistrations.length);
+          console.log('📋 Sample safe registration:', safeRegistrations[0]);
+          
+          setRegistrationsData(safeRegistrations);
           setRegistrationStats({
-            total: regData.registrations?.length || 0,
-            submitted: regData.registrations?.filter((r: any) => r.status === 'submitted').length || 0,
-            approved: regData.registrations?.filter((r: any) => r.status === 'approved').length || 0
+            total: safeRegistrations.length,
+            submitted: safeRegistrations.filter((r: any) => r.status === 'submitted').length,
+            approved: safeRegistrations.filter((r: any) => r.status === 'approved').length
           });
         } else {
           console.error('❌ Failed to load registrations:', regResponse.status, regResponse.statusText);
@@ -123,34 +149,99 @@ export default function AdminDashboard() {
         setRegistrationsData([]);
       }
       
-      // Load other data in parallel
+      // Load other data in parallel with CORS-safe processing
       const [contactResponse, paymentResponse, sponsorshipResponse] = await Promise.all([
-        fetch('https://conference.health.go.ug/api/contacts').catch(() => null),
-        fetch('https://conference.health.go.ug/api/payments').catch(() => null),
-        fetch('https://conference.health.go.ug/api/sponsorships').catch(() => null)
+        fetch('https://conference.health.go.ug/api/contacts', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          mode: 'cors'
+        }).catch(() => null),
+        fetch('https://conference.health.go.ug/api/payments', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          mode: 'cors'
+        }).catch(() => null),
+        fetch('https://conference.health.go.ug/api/sponsorships', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          mode: 'cors'
+        }).catch(() => null)
       ]);
       
       let contactData, paymentData, sponsorshipData;
 
-      // Process contact data  
+      // Process contact data safely
       if (contactResponse && contactResponse.ok) {
-        contactData = await contactResponse.json()
-        setContactsData(contactData.data || [])
-        setContactStats(contactData.stats || {})
+        try {
+          contactData = await contactResponse.json();
+          const safeContacts = Array.isArray(contactData.data) ? contactData.data.map((c: any) => ({
+            id: c._id || c.id || String(Math.random()),
+            name: c.name || '',
+            email: c.email || '',
+            message: c.message || '',
+            status: c.status || 'new',
+            createdAt: c.createdAt || c.created_at || new Date().toISOString()
+          })) : [];
+          
+          setContactsData(safeContacts);
+          setContactStats({
+            total: safeContacts.length,
+            new: safeContacts.filter((c: any) => c.status === 'new').length,
+            replied: safeContacts.filter((c: any) => c.status === 'replied').length
+          });
+        } catch (error) {
+          console.error('💥 Contact data processing error:', error);
+          setContactsData([]);
+        }
       }
 
-      // Process payment data
+      // Process payment data safely
       if (paymentResponse && paymentResponse.ok) {
-        paymentData = await paymentResponse.json()
-        setPaymentsData(paymentData.data || [])
-        setPaymentStats(paymentData.stats || {})
+        try {
+          paymentData = await paymentResponse.json();
+          const safePayments = Array.isArray(paymentData.data) ? paymentData.data.map((p: any) => ({
+            id: p._id || p.id || String(Math.random()),
+            amount: p.amount || 0,
+            status: p.status || 'pending',
+            registrationId: p.registrationId || p.registration_id || '',
+            createdAt: p.createdAt || p.created_at || new Date().toISOString()
+          })) : [];
+          
+          setPaymentsData(safePayments);
+          setPaymentStats({
+            total: safePayments.length,
+            pending: safePayments.filter((p: any) => p.status === 'pending').length,
+            completed: safePayments.filter((p: any) => p.status === 'completed').length
+          });
+        } catch (error) {
+          console.error('💥 Payment data processing error:', error);
+          setPaymentsData([]);
+        }
       }
 
-      // Process sponsorship data
+      // Process sponsorship data safely
       if (sponsorshipResponse && sponsorshipResponse.ok) {
-        sponsorshipData = await sponsorshipResponse.json()
-        setSponsorshipsData(sponsorshipData.sponsorships || [])
-        setSponsorshipStats(sponsorshipData.pagination || {})
+        try {
+          sponsorshipData = await sponsorshipResponse.json();
+          const safeSponsorships = Array.isArray(sponsorshipData.sponsorships) ? sponsorshipData.sponsorships.map((s: any) => ({
+            id: s._id || s.id || String(Math.random()),
+            companyName: s.companyName || s.company_name || '',
+            contactPerson: s.contactPerson || s.contact_person || '',
+            email: s.email || '',
+            status: s.status || 'pending',
+            createdAt: s.createdAt || s.created_at || new Date().toISOString()
+          })) : [];
+          
+          setSponsorshipsData(safeSponsorships);
+          setSponsorshipStats({
+            total: safeSponsorships.length,
+            pending: safeSponsorships.filter((s: any) => s.status === 'pending').length,
+            approved: safeSponsorships.filter((s: any) => s.status === 'approved').length
+          });
+        } catch (error) {
+          console.error('💥 Sponsorship data processing error:', error);
+          setSponsorshipsData([]);
+        }
       }
 
       // Load abstracts asynchronously (doesn't block dashboard loading)
@@ -182,18 +273,35 @@ export default function AdminDashboard() {
   const loadAbstractsData = async () => {
     setLoadingAbstracts(true)
     try {
-      const response = await fetch(`https://conference.health.go.ug/api/abstracts`)
+      const response = await fetch(`https://conference.health.go.ug/api/abstracts`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        mode: 'cors'
+      })
       if (response.ok) {
         const result = await response.json()
-        setAbstractsData(result.abstracts || [])
+        
+        // Safely process abstracts to avoid cross-origin issues
+        const safeAbstracts = Array.isArray(result.abstracts) ? result.abstracts.map((a: any) => ({
+          id: a._id || a.id || String(Math.random()),
+          title: a.title || '',
+          author: a.author || '',
+          email: a.email || '',
+          abstract: a.abstract || '',
+          status: a.status || 'submitted',
+          fileUrl: a.fileUrl || a.file_url || '',
+          createdAt: a.createdAt || a.created_at || new Date().toISOString()
+        })) : [];
+        
+        setAbstractsData(safeAbstracts)
         setAbstractStats({
-          total: result.abstracts?.length || 0,
-          pending: result.abstracts?.filter((a: any) => a.status === 'submitted').length || 0,
-          approved: result.abstracts?.filter((a: any) => a.status === 'approved').length || 0,
-          rejected: result.abstracts?.filter((a: any) => a.status === 'rejected').length || 0,
-          under_review: result.abstracts?.filter((a: any) => a.status === 'under_review').length || 0
+          total: safeAbstracts.length,
+          pending: safeAbstracts.filter((a: any) => a.status === 'submitted').length,
+          approved: safeAbstracts.filter((a: any) => a.status === 'approved').length,
+          rejected: safeAbstracts.filter((a: any) => a.status === 'rejected').length,
+          under_review: safeAbstracts.filter((a: any) => a.status === 'under_review').length
         })
-        console.log(`Loaded ${result.abstracts?.length || 0} abstracts`)
+        console.log(`Loaded ${safeAbstracts.length} safe abstracts`)
       } else {
         console.error('Failed to load abstracts:', response.status)
       }
