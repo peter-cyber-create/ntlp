@@ -190,7 +190,7 @@ INSERT IGNORE INTO conference_settings (setting_key, setting_value, description)
 ('sponsorship_open', 'true', 'Whether sponsorship applications are open'),
 ('max_registrations', '1000', 'Maximum number of registrations'),
 ('contact_email', 'conference@idi.co.ug', 'Conference contact email'),
-('flutterwave_public_key', '', 'Flutterwave public key for frontend'),
+('payment_gateway', 'manual', 'Payment gateway type'),
 ('early_bird_deadline', '2025-02-15', 'Early bird registration deadline');
 
 -- Email templates table

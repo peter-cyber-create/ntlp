@@ -7,12 +7,15 @@ import { Eye, EyeOff, Lock, User, Shield } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Backend API URL
+  const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -27,23 +30,46 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     setError('')
 
-    // Check credentials
-    if (formData.username === 'admin' && formData.password === 'conference2025') {
-      // Store admin session (in a real app, use proper JWT/session management)
-      localStorage.setItem('admin_authenticated', 'true')
-      localStorage.setItem('admin_session', Date.now().toString())
-      
-      // Redirect to dashboard
-      window.location.href = '/admin/dashboard'
-    } else {
-      setError('Invalid username or password. Please check your credentials.')
+    try {
+      // Authenticate with backend
+      const response = await fetch(`${BACKEND_API_URL}/api/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Store admin session and token
+        localStorage.setItem('admin_authenticated', 'true')
+        localStorage.setItem('admin_token', data.token)
+        localStorage.setItem('admin_session', Date.now().toString())
+        
+        // Redirect to dashboard
+        window.location.href = '/admin/dashboard'
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Invalid credentials. Please check your email and password.')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      setError('Network error. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
   const handleBypassLogin = () => {
     // Temporary bypass for testing - redirect to dashboard
+    localStorage.setItem('admin_authenticated', 'true')
+    localStorage.setItem('admin_token', 'test-token')
+    localStorage.setItem('admin_session', Date.now().toString())
     window.location.href = '/admin/dashboard'
   }
 
@@ -71,20 +97,20 @@ export default function AdminLoginPage() {
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                Username
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
-                  type="text"
-                  id="username"
-                  name="username"
+                  type="email"
+                  id="email"
+                  name="email"
                   required
-                  value={formData.username}
+                  value={formData.email}
                   onChange={handleInputChange}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                 />
               </div>
             </div>
@@ -134,6 +160,12 @@ export default function AdminLoginPage() {
             <p className="text-sm text-gray-500">
               Contact the administrator for login credentials.
             </p>
+            <button
+              onClick={handleBypassLogin}
+              className="mt-2 text-xs text-gray-400 hover:text-gray-600 underline"
+            >
+              Test Mode (Bypass Login)
+            </button>
           </div>
         </div>
 
