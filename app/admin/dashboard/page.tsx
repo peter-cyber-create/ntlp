@@ -109,6 +109,9 @@ export default function AdminDashboard() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedItem, setSelectedItem] = useState<any>(null)
 
+  // Backend API URL
+  const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+
   useEffect(() => {
     // Check authentication
     const isAuthenticated = localStorage.getItem('admin_authenticated')
@@ -125,28 +128,46 @@ export default function AdminDashboard() {
     try {
       setIsLoading(true)
       
-      // Load dashboard statistics
-      const statsResponse = await fetch('/api/admin/dashboard')
+      // Load dashboard statistics from backend
+      const statsResponse = await fetch(`${BACKEND_API_URL}/api/admin/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
+        }
+      })
       
       if (statsResponse.ok) {
         const statsData = await statsResponse.json()
-        setDashboardData(statsData.data)
+        setDashboardData(statsData.dashboard)
+      } else {
+        console.error('Failed to load dashboard stats:', statsResponse.status)
       }
       
-      // Load recent activities
-      const activitiesResponse = await fetch('/api/admin/activity')
+      // Load recent activities from backend
+      const activitiesResponse = await fetch(`${BACKEND_API_URL}/api/admin/activity`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
+        }
+      })
       
       if (activitiesResponse.ok) {
         const activitiesData = await activitiesResponse.json()
         setRecentActivities(activitiesData.activities)
+      } else {
+        console.error('Failed to load activities:', activitiesResponse.status)
       }
       
-      // Load pending items
-      const pendingResponse = await fetch('/api/admin/pending')
+      // Load pending items from backend
+      const pendingResponse = await fetch(`${BACKEND_API_URL}/api/admin/pending`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
+        }
+      })
       
       if (pendingResponse.ok) {
         const pendingData = await pendingResponse.json()
         setPendingItems(pendingData.pending)
+      } else {
+        console.error('Failed to load pending items:', pendingResponse.status)
       }
       
     } catch (error) {
@@ -164,10 +185,11 @@ export default function AdminDashboard() {
 
   const handleBulkAction = async (action: string, ids: string[], entityType: string) => {
     try {
-      const response = await fetch('/api/admin/bulk-action', {
+      const response = await fetch(`${BACKEND_API_URL}/api/admin/bulk-action`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
         },
         body: JSON.stringify({ action, ids, entityType })
       })
@@ -185,7 +207,7 @@ export default function AdminDashboard() {
 
   const handleDownloadAbstract = async (abstractId: number, fileName: string) => {
     try {
-      const response = await fetch(`/api/abstracts/download/${abstractId}`, {
+      const response = await fetch(`${BACKEND_API_URL}/api/abstracts/download/${abstractId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
@@ -212,9 +234,9 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleDownloadPaymentProof = async (filePath: string, fileName: string) => {
+  const handleDownloadPaymentProof = async (fileId: number, fileName: string) => {
     try {
-      const response = await fetch(`/api/uploads/file/${filePath}`, {
+      const response = await fetch(`${BACKEND_API_URL}/api/uploads/payment-proof/${fileId}/download`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
