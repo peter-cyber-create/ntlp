@@ -1,6 +1,5 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { ConditionalLayout } from '../components/ConditionalLayout'
 import React from 'react'
 import type { ReactNode } from 'react'
 
@@ -59,9 +58,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         
       </head>
       <body className={inter.className}>
-        <ConditionalLayout>
-          {children}
-        </ConditionalLayout>
+        {children}
       </body>
     </html>
   )

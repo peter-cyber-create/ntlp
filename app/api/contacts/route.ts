@@ -101,13 +101,11 @@ export async function POST(request: NextRequest) {
       // Insert new contact
       await db.execute(`
         INSERT INTO contacts (
-          name, email, phone, organization, subject, message, status
-        ) VALUES (?, ?, ?, ?, ?, ?, 'new')
+          name, email, subject, message, status
+        ) VALUES (?, ?, ?, ?, 'submitted')
       `, [
         body.name,
         body.email,
-        body.phone || null,
-        body.organization || null,
         body.subject,
         body.message
       ]);

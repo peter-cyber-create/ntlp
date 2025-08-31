@@ -58,7 +58,14 @@ class DataManager {
 
   constructor() {
     if (typeof window !== 'undefined') {
+      // Client-side: load from storage first, then seed if empty
       this.loadFromStorage()
+      if (this.registrations.length === 0) {
+        this.seedDemoData()
+      }
+    } else {
+      // Server-side: always seed with demo data
+      this.seedDemoData()
     }
   }
 
@@ -85,9 +92,11 @@ class DataManager {
 
   private saveToStorage() {
     try {
-      localStorage.setItem('conference_registrations', JSON.stringify(this.registrations))
-      localStorage.setItem('conference_contacts', JSON.stringify(this.contacts))
-      localStorage.setItem('conference_speakers', JSON.stringify(this.speakers))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('conference_registrations', JSON.stringify(this.registrations))
+        localStorage.setItem('conference_contacts', JSON.stringify(this.contacts))
+        localStorage.setItem('conference_speakers', JSON.stringify(this.speakers))
+      }
     } catch (error) {
       console.error('Error saving data to storage:', error)
     }
