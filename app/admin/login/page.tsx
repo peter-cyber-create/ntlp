@@ -1,50 +1,38 @@
 'use client'
 
-import React, { useState } from 'react'
-import { User, Lock, Eye, EyeOff, Shield } from 'lucide-react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
-export default function AdminLoginPage() {
+export default function LoginPage() {
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   })
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
 
-    // Simple credential check
-    if (formData.username === 'admin' && formData.password === 'conference2025') {
-      localStorage.setItem('admin_authenticated', 'true')
-      localStorage.setItem('admin_token', 'admin-session-token')
-      localStorage.setItem('admin_session', Date.now().toString())
-      window.location.href = '/dashboard'
-    } else {
-      setError('Invalid credentials. Please use: admin / conference2025')
+    try {
+      // Simple authentication for production
+      if (formData.username === 'admin' && formData.password === 'conference2025') {
+        // Set admin session
+        localStorage.setItem('admin_token', 'admin-session-token')
+        localStorage.setItem('admin_session', Date.now().toString())
+        window.location.href = '/admin/dashboard'
+      } else {
+        setError('Invalid credentials. Please check your username and password.')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      setError('Login failed. Please try again.')
     }
     
     setIsLoading(false)
-  }
-
-  const handleBypassLogin = () => {
-    console.log('Bypass login clicked!')
-    
-    try {
-      // Set a working token directly
-      localStorage.setItem('admin_authenticated', 'true')
-      localStorage.setItem('admin_token', 'admin-session-token')
-      localStorage.setItem('admin_session', Date.now().toString())
-      
-      console.log('Authentication set, redirecting to dashboard...')
-      window.location.href = '/dashboard'
-    } catch (error) {
-      console.error('Bypass login error:', error)
-      setError('Bypass login failed. Please try again.')
-    }
   }
 
   return (
@@ -57,40 +45,35 @@ export default function AdminLoginPage() {
               <img src="/images/uganda-coat-of-arms.png" alt="Uganda Coat of Arms" className="w-full h-full object-contain" />
             </div>
             <div className="text-center">
-              <h1 className="text-2xl md:text-3xl font-bold text-primary-100">
-                NACNDC & JASH Conference 2025
-              </h1>
-              <p className="text-primary-300 text-sm md:text-base">
-                Ministry of Health Uganda - Admin Portal
-              </p>
+              <h1 className="text-2xl md:text-3xl font-bold text-primary-100">NACNDC & JASH Conference 2025</h1>
+              <p className="text-primary-300 text-sm md:text-base">Ministry of Health Uganda - Admin Portal</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Login Form */}
       <div className="flex items-center justify-center min-h-[calc(100vh-200px)] px-4">
         <div className="max-w-md w-full">
-          {/* Login Card */}
           <div className="bg-primary-900/95 border border-primary-800 rounded-3xl shadow-2xl p-8">
-            {/* Card Header */}
             <div className="text-center mb-8">
               <div className="w-20 h-20 bg-primary-800 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary-700">
-                <Shield className="h-10 w-10 text-primary-400" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shield h-10 w-10 text-primary-400">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
+                </svg>
               </div>
               <h2 className="text-2xl font-bold text-primary-100 mb-2">Admin Access</h2>
               <p className="text-primary-300 text-sm">Conference Management System</p>
             </div>
 
-            {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Username Field */}
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-primary-200 mb-2">
-                  Username
-                </label>
+                <label htmlFor="username" className="block text-sm font-medium text-primary-200 mb-2">Username</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
                   <input
                     type="text"
                     id="username"
@@ -103,40 +86,31 @@ export default function AdminLoginPage() {
                 </div>
               </div>
 
-              {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-primary-200 mb-2">
-                  Password
-                </label>
+                <label htmlFor="password" className="block text-sm font-medium text-primary-200 mb-2">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400" />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-lock absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary-400">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type="password"
                     id="password"
                     required
-                    className="w-full pl-10 pr-12 py-3 bg-primary-800 border border-primary-700 rounded-xl text-primary-100 placeholder-primary-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                    className="w-full pl-12 py-3 bg-primary-800 border border-primary-700 rounded-xl text-primary-100 placeholder-primary-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                     placeholder="Enter password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-400 hover:text-primary-300 transition-colors"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
                 </div>
               </div>
 
-              {/* Error Message */}
               {error && (
-                <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-xl text-sm">
-                  {error}
+                <div className="bg-red-900/20 border border-red-700 rounded-lg p-3">
+                  <p className="text-red-400 text-sm">{error}</p>
                 </div>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -146,17 +120,14 @@ export default function AdminLoginPage() {
               </button>
             </form>
 
-            {/* Test Mode */}
+            {/* Production Notice */}
             <div className="mt-6 text-center">
               <p className="text-sm text-primary-400 mb-3">
-                Use the credentials: admin / conference2025
+                Secure Admin Access Required
               </p>
-              <button
-                onClick={handleBypassLogin}
-                className="text-sm text-primary-300 hover:text-primary-200 underline font-medium transition-colors"
-              >
-                🚀 Test Mode (Bypass Login)
-              </button>
+              <p className="text-xs text-primary-500">
+                Contact system administrator for credentials
+              </p>
             </div>
           </div>
 
