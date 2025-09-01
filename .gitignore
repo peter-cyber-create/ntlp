@@ -1,5 +1,5 @@
 # Dependencies
-node_modules/
+/node_modules
 /.pnp
 .pnp.js
 
@@ -34,12 +34,34 @@ next-env.d.ts
 
 # Build outputs
 dist/
+
+# Large files and archives
 *.tar.gz
-*.log
-*.tar.gz
-*.log
-*.tar.gz
+*.tar
 *.zip
+*.rar
+*.7z
 *.log
-.next/
-node_modules/
+*.log.*
+
+# Upload directories
+public/uploads/
+uploads/
+
+# Large media files (optional - uncomment if you want to ignore large images)
+# *.jpg
+# *.jpeg
+# *.png
+# *.gif
+# *.pdf
+# *.mp4
+# *.mov
+# *.avi
+
+# Specific large files that should never be committed
+ntlp-frontend.tar.gz
+frontend.log
+frontend_new.log
+
+# Node modules (redundant but explicit)
+/node_modules
