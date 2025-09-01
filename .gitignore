@@ -38,3 +38,8 @@ dist/
 *.log
 *.tar.gz
 *.log
+*.tar.gz
+*.zip
+*.log
+.next/
+node_modules/
