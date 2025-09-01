@@ -6,7 +6,8 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "export": "next build && next export"
+    "export": "next build && next export",
+    "moh": "yarn build && sudo cp -r ./build/* /var/www/ntlp-frontend"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",

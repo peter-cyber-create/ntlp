@@ -82,15 +82,15 @@ export default function AdminDashboard() {
         const dashboardStats: DashboardData = {
           registrations: {
             total: registrationsData.pagination?.total || registrationsData.registrations?.length || 0,
-            approved: registrationsData.registrations?.filter((r: any) => r.status === 'approved').length || 0,
-            submitted: registrationsData.registrations?.filter((r: any) => r.status === 'pending' || r.status === 'submitted').length || 0,
+            approved: registrationsData.registrations?.filter((r: any) => r.status === 'confirmed').length || 0,
+            submitted: registrationsData.registrations?.filter((r: any) => r.status === 'pending').length || 0,
             underReview: registrationsData.registrations?.filter((r: any) => r.status === 'under_review').length || 0,
             rejected: registrationsData.registrations?.filter((r: any) => r.status === 'rejected').length || 0,
             newThisWeek: 0 // Calculate this if needed
           },
           abstracts: {
             total: abstractsData.pagination?.total || abstractsData.abstracts?.length || 0,
-            approved: abstractsData.abstracts?.filter((a: any) => a.status === 'approved').length || 0,
+            approved: abstractsData.abstracts?.filter((a: any) => a.status === 'accepted').length || 0,
             submitted: abstractsData.abstracts?.filter((a: any) => a.status === 'pending' || a.status === 'submitted').length || 0,
             underReview: abstractsData.abstracts?.filter((a: any) => a.status === 'under_review').length || 0,
             accepted: abstractsData.abstracts?.filter((a: any) => a.status === 'accepted').length || 0,

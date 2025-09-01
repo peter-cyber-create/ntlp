@@ -60,8 +60,8 @@ export default function RegistrationsPage() {
     
     const matchesStatus = statusFilter === 'all' || registration.status === statusFilter
     const matchesPayment = paymentFilter === 'all' || 
-                          (paymentFilter === 'with_proof' && registration.payment_proof_url) ||
-                          (paymentFilter === 'without_proof' && !registration.payment_proof_url)
+                          (paymentFilter === 'with_proof' && registration.payment_reference) ||
+                          (paymentFilter === 'without_proof' && !registration.payment_reference)
     
     return matchesSearch && matchesStatus && matchesPayment
   })
@@ -403,7 +403,7 @@ export default function RegistrationsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {registration.payment_proof_url ? (
+                    {registration.payment_reference ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         ✓ Proof Uploaded
                       </span>
@@ -449,7 +449,7 @@ export default function RegistrationsPage() {
                       </button>
                       {registration.payment_reference && (
                         <button 
-                          onClick={() => handleDownloadPaymentProof(registration.payment_reference, registration)}
+                          onClick={() => registration.payment_reference && handleDownloadPaymentProof(registration.payment_reference, registration)}
                           className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
                           title="Download Payment Proof"
                         >
@@ -521,11 +521,11 @@ export default function RegistrationsPage() {
                   <div className="text-base text-gray-900">{selected.status}</div>
                 </div>
               </div>
-              {selected.payment_proof_url && (
+              {selected.payment_reference && (
                 <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
                   <div className="text-sm text-gray-700 truncate">Payment proof available</div>
                   <button
-                    onClick={() => handleDownloadPaymentProof(selected.payment_proof_url!, selected)}
+                    onClick={() => selected.payment_reference && handleDownloadPaymentProof(selected.payment_reference, selected)}
                     className="text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded"
                   >
                     Download Proof
@@ -541,10 +541,10 @@ export default function RegistrationsPage() {
                 Close
               </button>
               <button
-                onClick={() => handleStatusChange(selected.id, 'approved')}
+                onClick={() => handleStatusChange(selected.id, 'confirmed')}
                 className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
               >
-                Approve
+                Confirm
               </button>
               <button
                 onClick={() => handleStatusChange(selected.id, 'rejected')}
