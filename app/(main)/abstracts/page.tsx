@@ -6,7 +6,6 @@
     'Gender and youth empowerment in policy and practice',
     'Evidence and translation from research to policy implementation',
     'South-South collaboration and regional leadership in innovation',
-    "Health professionals' education including transformative teaching methods and competency-based training"
   ];
 
 import React, { useState } from 'react'
@@ -33,7 +32,7 @@ export default function AbstractsPage() {
       lastName: '',
       email: '',
       phone: '',
-      affiliation: '',
+      institution: '',
       position: '',
       district: ''
     },
@@ -50,8 +49,8 @@ export default function AbstractsPage() {
     consentToPublish: false
   })
 
-  // Conference tracks and topics
-  const trackTopics: Record<string, string[]> = {
+  // Conference categorys and topics
+  const categoryTopics: Record<string, string[]> = {
     'Integrated Diagnostics, AMR, and Epidemic Readiness': [
       'Optimizing Laboratory Diagnostics in Integrated Health Systems',
       'Quality management systems in Multi-Disease Diagnostics',
@@ -65,9 +64,7 @@ export default function AbstractsPage() {
     'Digital Health, Data, and Innovation': [
       'AI-powered diagnostics: Innovations and governance for TB, HIV, and cervical cancer',
       'Digital platforms for surveillance, early detection, and outbreak prediction',
-      'Data interoperability and health information exchange: service delivery Integration and data/information systems, Gaps, ethics, and governance',
       'Community-led digital health: Mobile tools, and digital village health teams (VHTs)',
-      'Localized health information systems: Capturing/collection, use of data at grass root and higher levels for fast action.',
       'Leveraging digital equity in urban and peri-urban health responses',
     ],
     'Community Engagement for Disease Prevention and Elimination': [
@@ -166,7 +163,6 @@ export default function AbstractsPage() {
       const allowedTypes = [
         'application/pdf',
         'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       ]
       
       if (!allowedTypes.includes(file.type)) {
@@ -201,12 +197,12 @@ export default function AbstractsPage() {
       'title', 'category', 'abstract', 'keywords', 
       'background', 'methods', 'findings', 'conclusion'
     ]
-    if (formData.category && trackTopics[formData.category]) {
+    if (formData.category && categoryTopics[formData.category]) {
       required.push('subcategory')
     }
     const authorRequired = [
       'firstName', 'lastName', 'email', 'phone', 
-      'affiliation', 'position', 'district'
+      'institution', 'position', 'district'
     ]
     for (const field of required) {
       if (!formData[field as keyof typeof formData]) {
@@ -222,7 +218,7 @@ export default function AbstractsPage() {
       if (!formData.primaryAuthor[field as keyof typeof formData.primaryAuthor]) {
         setSubmitResult({
           type: 'error',
-          title: 'Missing Author Information',
+          title: 'Missing Required Field',
           message: `Primary author ${field} is required`
         })
         return false
@@ -305,16 +301,15 @@ export default function AbstractsPage() {
         {
           name: `${formData.primaryAuthor.firstName} ${formData.primaryAuthor.lastName}`,
           email: formData.primaryAuthor.email,
-          affiliation: formData.primaryAuthor.affiliation,
+          institution: formData.primaryAuthor.institution,
           position: formData.primaryAuthor.position
         }
       ]));
-      formDataToSend.append('corresponding_author_email', formData.primaryAuthor.email);
-      formDataToSend.append('submission_type', 'abstract');
+      formDataToSend.append('email', formData.primaryAuthor.email);
+      formDataToSend.append('institution', formData.primaryAuthor.institution);
+      formDataToSend.append('phone', formData.primaryAuthor.phone);
       formDataToSend.append('track', formData.category);
       formDataToSend.append('subcategory', formData.subcategory);
-      formDataToSend.append('cross_cutting_themes', JSON.stringify(formData.crossCuttingThemes ? [formData.crossCuttingThemes] : []));
-      formDataToSend.append('format', formData.presentationType);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts`, {
         method: 'POST',
@@ -343,7 +338,7 @@ export default function AbstractsPage() {
             lastName: '',
             email: '',
             phone: '',
-            affiliation: '',
+            institution: '',
             position: '',
             district: ''
           },
@@ -483,7 +478,6 @@ export default function AbstractsPage() {
                     </li>
                     <li className="flex items-center">
                       <CheckCircle size={18} className="mr-2 text-green-600" />
-                      File formats: PDF, DOC, DOCX only
                     </li>
                     <li className="flex items-center">
                       <CheckCircle size={18} className="mr-2 text-green-600" />
@@ -497,7 +491,6 @@ export default function AbstractsPage() {
                 <div>
                   <h4 className="font-semibold text-blue-900">Review Process</h4>
                   <p className="text-blue-700 text-sm mt-1">
-                    All abstracts will be reviewed by the scientific committee. Authors will be notified of acceptance and presentation format by email.
                   </p>
                 </div>
               </div>
@@ -511,10 +504,8 @@ export default function AbstractsPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl p-10 border-t-4 border-primary-600">
-              {/* Basic Information */}
               <div className="mb-10">
                 <h3 className="text-2xl font-bold text-primary-800 mb-8 flex items-center gap-2">
-                  <FileText className="text-primary-600" size={24} /> Abstract Information
                 </h3>
                 <div className="grid gap-8">
                   <div>
@@ -540,7 +531,6 @@ export default function AbstractsPage() {
                       <label htmlFor="presentationType" className="block text-base font-semibold text-gray-700 mb-2">
                         Presentation Type *
                         <span className="text-xs text-gray-500 block font-normal">
-                          Select your preferred presentation format
                         </span>
                       </label>
                       <select
@@ -559,7 +549,7 @@ export default function AbstractsPage() {
                       <label htmlFor="category" className="block text-base font-semibold text-gray-700 mb-2">
                         Conference Track *
                         <span className="text-xs text-gray-500 block font-normal">
-                          Choose the most relevant track
+                          Choose the most relevant category
                         </span>
                       </label>
                       <select
@@ -570,7 +560,7 @@ export default function AbstractsPage() {
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       >
-                        <option value="">Select a track</option>
+                        <option value="">Select a category</option>
                         {categories.map((cat) => (
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
@@ -578,7 +568,7 @@ export default function AbstractsPage() {
                     </div>
                   </div>
                   {/* Subcategory (Topic) selection */}
-                  {formData.category && trackTopics[formData.category] && (
+                  {formData.category && categoryTopics[formData.category] && (
                     <div className="mt-6">
                       <label htmlFor="subcategory" className="block text-base font-semibold text-gray-700 mb-2">
                         Topic (Subcategory) *
@@ -595,7 +585,7 @@ export default function AbstractsPage() {
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       >
                         <option value="">Select a topic</option>
-                        {trackTopics[formData.category].map((topic) => (
+                        {categoryTopics[formData.category].map((topic) => (
                           <option key={topic} value={topic}>{topic}</option>
                         ))}
                       </select>
@@ -603,10 +593,8 @@ export default function AbstractsPage() {
                   )}
                 </div>
               </div>
-              {/* Primary Author Information */}
               <div className="mb-10">
                 <h3 className="text-2xl font-bold text-primary-800 mb-8 flex items-center gap-2">
-                  <Users className="text-primary-600" size={24} /> Primary Author Information
                 </h3>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
@@ -672,7 +660,7 @@ export default function AbstractsPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="primaryAuthor.affiliation" className="block text-base font-semibold text-gray-700 mb-2">
+                    <label htmlFor="primaryAuthor.institution" className="block text-base font-semibold text-gray-700 mb-2">
                       Institution/Organization *
                       <span className="text-xs text-gray-500 block font-normal">
                         Full name of your institution
@@ -680,10 +668,10 @@ export default function AbstractsPage() {
                     </label>
                     <input
                       type="text"
-                      id="primaryAuthor.affiliation"
-                      name="primaryAuthor.affiliation"
+                      id="primaryAuthor.institution"
+                      name="primaryAuthor.institution"
                       required
-                      value={formData.primaryAuthor.affiliation}
+                      value={formData.primaryAuthor.institution}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     />
@@ -726,7 +714,7 @@ export default function AbstractsPage() {
                 <label htmlFor="coAuthors" className="block text-base font-semibold text-gray-700 mb-2">
                   Co-Authors (Optional)
                   <span className="text-xs text-gray-500 block font-normal">
-                    List all co-authors with their affiliations (one per line)
+                    List all co-authors with their institutions (one per line)
                   </span>
                 </label>
                 <textarea
@@ -740,7 +728,7 @@ export default function AbstractsPage() {
                 />
               </div>
               {/* Abstract Content */}
-              {formData.category === 'Cross-cutting Themes (Applicable to all tracks)' && (
+              {formData.category === 'Cross-cutting Themes (Applicable to all categorys)' && (
                 <div className="mb-10">
                   <label htmlFor="crossCuttingThemes" className="block text-base font-semibold text-gray-700 mb-2">
                     Cross-cutting Theme Option *

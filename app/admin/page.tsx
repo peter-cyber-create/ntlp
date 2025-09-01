@@ -8,17 +8,11 @@ export default function AdminIndexPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Temporarily bypass authentication for development
-    router.push('/admin/dashboard')
-    
-    // TODO: Re-enable authentication when ready
-    /*
     // Check if user is already authenticated
-    const authStatus = localStorage.getItem('admin_authenticated')
     const token = localStorage.getItem('admin_token')
     const session = localStorage.getItem('admin_session')
 
-    if (authStatus && token && session) {
+    if (token && session) {
       // Check if session is still valid (24 hours)
       const sessionTime = parseInt(session)
       const now = Date.now()
@@ -31,7 +25,6 @@ export default function AdminIndexPage() {
 
     // Not authenticated or expired session, redirect to login
     router.push('/admin/login')
-    */
   }, [router])
 
   return (

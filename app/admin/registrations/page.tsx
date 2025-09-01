@@ -14,7 +14,7 @@ interface Registration {
   status: string
   created_at: string
   updated_at: string
-  payment_proof_url?: string // Added for payment proof URL
+  payment_reference?: string // Payment proof file path
 }
 
 export default function RegistrationsPage() {
@@ -24,6 +24,8 @@ export default function RegistrationsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [paymentFilter, setPaymentFilter] = useState('all')
+  const [viewOpen, setViewOpen] = useState(false)
+  const [selected, setSelected] = useState<Registration | null>(null)
 
   useEffect(() => {
     loadRegistrations()
@@ -66,16 +68,12 @@ export default function RegistrationsPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'approved':
+      case 'confirmed':
         return <CheckCircle className="h-5 w-5 text-green-500" />
       case 'rejected':
         return <XCircle className="h-5 w-5 text-red-500" />
-      case 'submitted':
+      case 'pending':
         return <Clock className="h-5 w-5 text-yellow-500" />
-      case 'under_review':
-        return <Clock className="h-5 w-5 text-blue-500" />
-      case 'waitlist':
-        return <Clock className="h-5 w-5 text-orange-500" />
       case 'cancelled':
         return <XCircle className="h-5 w-5 text-gray-500" />
       default:
@@ -85,16 +83,12 @@ export default function RegistrationsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved':
+      case 'confirmed':
         return 'bg-green-100 text-green-800'
       case 'rejected':
         return 'bg-red-100 text-red-800'
-      case 'submitted':
+      case 'pending':
         return 'bg-yellow-100 text-yellow-800'
-      case 'under_review':
-        return 'bg-blue-100 text-blue-800'
-      case 'waitlist':
-        return 'bg-orange-100 text-orange-800'
       case 'cancelled':
         return 'bg-gray-100 text-gray-800'
       default:
@@ -103,49 +97,50 @@ export default function RegistrationsPage() {
   }
 
   const handleView = (registration: Registration) => {
-    // Implementation for viewing registration details
-    console.log('View registration:', registration)
+    setSelected(registration)
+    setViewOpen(true)
   }
 
   const handleStatusChange = async (id: number, newStatus: string) => {
     try {
+      console.log(`Updating registration ${id} status to: ${newStatus}`)
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/registrations/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ 
+          status: newStatus
+        }),
       })
 
       if (response.ok) {
+        const result = await response.json()
+        console.log('Status update result:', result)
+        
         // Update local state
         setRegistrations(prev => prev.map(reg => 
           reg.id === id ? { ...reg, status: newStatus } : reg
         ))
-        alert('Status updated successfully')
+        
+        // Show success message
+        alert(`Status updated successfully to ${newStatus}`)
       } else {
-        alert('Failed to update status')
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Status update failed:', response.status, errorData)
+        alert(`Failed to update status: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error updating status:', error)
-      alert('Failed to update status')
+      alert('Failed to update status: Network error')
     }
   }
 
   const handleDownloadPaymentProof = async (fileUrl: string, registration: Registration) => {
     try {
-      // Handle different file path formats
-      let downloadUrl = fileUrl
-      if (fileUrl.startsWith('uploads/')) {
-        // If file_url already has uploads/ prefix, use it directly
-        downloadUrl = fileUrl
-      } else if (fileUrl.includes('payment-proof-')) {
-        // If it's a payment proof filename, add the correct subdirectory
-        downloadUrl = `uploads/payment-proofs/${fileUrl}`
-      } else {
-        // Default case: add uploads/ prefix
-        downloadUrl = `uploads/${fileUrl}`
-      }
+      console.log('Downloading payment proof for registration:', registration.id)
+      console.log('File URL:', fileUrl)
       
       // Create a meaningful filename with submitter's name and registration type
       const submitterName = `${registration.first_name}_${registration.last_name}`.replace(/[^a-zA-Z0-9]/g, '_')
@@ -154,15 +149,17 @@ export default function RegistrationsPage() {
       
       const filename = `PaymentProof_${submitterName}_${registrationType}.${fileExtension}`
       
-      // Ensure the URL is properly formatted for the backend
-      const fullUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/${downloadUrl}`
-      console.log('Downloading payment proof from:', fullUrl)
+      // Use the backend file download endpoint
+      const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/uploads/file/${fileUrl}`
+      console.log('Downloading from backend endpoint:', downloadUrl)
       console.log('Filename will be:', filename)
       
       // Fetch the file as a blob to force download
-      const response = await fetch(fullUrl)
+      const response = await fetch(downloadUrl)
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorText = await response.text()
+        console.error('Download failed:', response.status, errorText)
+        throw new Error(`Download failed: ${response.status} - ${errorText}`)
       }
       
       const blob = await response.blob()
@@ -180,16 +177,23 @@ export default function RegistrationsPage() {
       
       // Clean up the blob URL
       window.URL.revokeObjectURL(blobUrl)
+      
+      console.log('Payment proof downloaded successfully')
     } catch (error) {
       console.error('Error downloading payment proof:', error)
-      alert('Failed to download payment proof')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      alert(`Failed to download payment proof: ${errorMessage}`)
     }
   }
 
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
+
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this registration?')) {
-      return
-    }
+    setDeleteConfirm(id)
+  }
+
+  const confirmDelete = async (id: number) => {
+    setDeleteConfirm(null)
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/registrations/${id}`, {
@@ -273,9 +277,9 @@ export default function RegistrationsPage() {
               <CheckCircle className="h-6 w-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Approved</p>
+              <p className="text-sm font-medium text-gray-600">Confirmed</p>
               <p className="text-2xl font-bold text-gray-900">
-                {registrations.filter(r => r.status === 'approved').length}
+                {registrations.filter(r => r.status === 'confirmed').length}
               </p>
             </div>
           </div>
@@ -287,9 +291,9 @@ export default function RegistrationsPage() {
               <Clock className="h-6 w-6 text-yellow-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Submitted</p>
+              <p className="text-sm font-medium text-gray-600">Pending</p>
               <p className="text-2xl font-bold text-gray-900">
-                {registrations.filter(r => r.status === 'submitted').length}
+                {registrations.filter(r => r.status === 'pending').length}
               </p>
             </div>
           </div>
@@ -430,9 +434,9 @@ export default function RegistrationsPage() {
                         <Eye className="h-4 w-4" />
                       </button>
                       <button 
-                        onClick={() => handleStatusChange(registration.id, 'approved')}
+                        onClick={() => handleStatusChange(registration.id, 'confirmed')}
                         className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
-                        title="Approve"
+                        title="Confirm"
                       >
                         <Check className="h-4 w-4" />
                       </button>
@@ -443,9 +447,9 @@ export default function RegistrationsPage() {
                       >
                         <X className="h-4 w-4" />
                       </button>
-                      {registration.payment_proof_url && (
+                      {registration.payment_reference && (
                         <button 
-                          onClick={() => handleDownloadPaymentProof(registration.payment_proof_url!, registration)}
+                          onClick={() => handleDownloadPaymentProof(registration.payment_reference, registration)}
                           className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
                           title="Download Payment Proof"
                         >
@@ -480,6 +484,84 @@ export default function RegistrationsPage() {
           </div>
         )}
       </div>
+
+      {/* View Modal */}
+      {viewOpen && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setViewOpen(false)} />
+          <div className="relative bg-white w-full max-w-3xl rounded-lg shadow-lg border border-gray-200 p-6 mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Registration Details</h2>
+              <button onClick={() => setViewOpen(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <div className="space-y-4 max-h-[70vh] overflow-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm text-gray-500">Name</div>
+                  <div className="text-base font-medium text-gray-900">{selected.first_name} {selected.last_name}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Email</div>
+                  <div className="text-base text-gray-900">{selected.email}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Phone</div>
+                  <div className="text-base text-gray-900">{selected.phone || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Institution</div>
+                  <div className="text-base text-gray-900">{selected.institution || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Registration Type</div>
+                  <div className="text-base text-gray-900">{selected.registration_type}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Status</div>
+                  <div className="text-base text-gray-900">{selected.status}</div>
+                </div>
+              </div>
+              {selected.payment_proof_url && (
+                <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
+                  <div className="text-sm text-gray-700 truncate">Payment proof available</div>
+                  <button
+                    onClick={() => handleDownloadPaymentProof(selected.payment_proof_url!, selected)}
+                    className="text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded"
+                  >
+                    Download Proof
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="mt-6 flex items-center justify-end space-x-2">
+              <button
+                onClick={() => setViewOpen(false)}
+                className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => handleStatusChange(selected.id, 'approved')}
+                className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => handleStatusChange(selected.id, 'rejected')}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Reject
+              </button>
+              <button
+                onClick={() => handleDelete(selected.id)}
+                className="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

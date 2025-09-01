@@ -6,14 +6,16 @@ import { FileText, Search, Filter, Download, Eye, Edit, Trash2, CheckCircle, XCi
 interface Abstract {
   id: number
   title: string
-  author_name: string
-  author_email: string
-  author_organization: string
-  abstract_text: string
+  authors: string
+  email: string
+  institution: string
+  abstract: string
   keywords: string
-  category: string
+  track: string
   status: string
-  file_url?: string
+  fileName?: string
+  filePath?: string
+  fileSize?: number
   created_at: string
   updated_at: string
 }
@@ -25,6 +27,8 @@ export default function AbstractsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [viewOpen, setViewOpen] = useState(false)
+  const [selected, setSelected] = useState<Abstract | null>(null)
 
   useEffect(() => {
     loadAbstracts()
@@ -35,7 +39,7 @@ export default function AbstractsPage() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('http://localhost:5000/api/abstracts')
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts`)
       
       if (response.ok) {
         const data = await response.json()
@@ -53,11 +57,11 @@ export default function AbstractsPage() {
 
   const filteredAbstracts = abstracts.filter(abstract => {
     const matchesSearch = abstract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         abstract.author_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         getAuthorName(abstract.authors).toLowerCase().includes(searchTerm.toLowerCase()) ||
                          abstract.keywords.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesStatus = statusFilter === 'all' || abstract.status === statusFilter
-    const matchesCategory = categoryFilter === 'all' || abstract.category === categoryFilter
+    const matchesCategory = categoryFilter === 'all' || abstract.track === categoryFilter
     
     return matchesSearch && matchesStatus && matchesCategory
   })
@@ -92,6 +96,19 @@ export default function AbstractsPage() {
     }
   }
 
+  const getAuthorName = (authors: string) => {
+    try {
+      if (!authors) return 'Unknown Author'
+      const authorsArray = JSON.parse(authors)
+      if (Array.isArray(authorsArray) && authorsArray.length > 0) {
+        return authorsArray[0].name || 'Unknown Author'
+      }
+      return 'Unknown Author'
+    } catch (error) {
+      return 'Unknown Author'
+    }
+  }
+
   const getCategoryColor = (category: string) => {
     if (!category) {
       return 'bg-gray-100 text-gray-800'
@@ -108,14 +125,13 @@ export default function AbstractsPage() {
   }
 
   const handleView = (abstract: Abstract) => {
-    // TODO: Implement view modal or navigation
-    console.log('View abstract:', abstract)
-    alert(`Viewing abstract: ${abstract.title}`)
+    setSelected(abstract)
+    setViewOpen(true)
   }
 
   const handleStatusChange = async (id: number, newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/abstracts/${id}/status`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +160,7 @@ export default function AbstractsPage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/abstracts/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts/${id}`, {
         method: 'DELETE',
       })
 
@@ -177,14 +193,14 @@ export default function AbstractsPage() {
       }
       
       // Create a meaningful filename with author name and abstract title
-      const authorName = abstract.author_name ? abstract.author_name.replace(/[^a-zA-Z0-9]/g, '_') : 'Unknown'
+      const authorName = abstract.authors ? abstract.authors.replace(/[^a-zA-Z0-9]/g, '_') : 'Unknown'
       const abstractTitle = abstract.title ? abstract.title.replace(/[^a-zA-Z0-9]/g, '_') : 'Abstract'
       const fileExtension = fileUrl.split('.').pop() || 'pdf'
       
       const filename = `Abstract_${authorName}_${abstractTitle}.${fileExtension}`
       
       // Ensure the URL is properly formatted for the backend
-      const fullUrl = `http://localhost:5000/${downloadUrl}`
+      const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/abstracts/download/${abstract.id}`
       console.log('Downloading abstract from:', fullUrl)
       console.log('Filename will be:', filename)
       
@@ -415,7 +431,7 @@ export default function AbstractsPage() {
                     <div className="max-w-xs">
                       <div className="text-sm font-medium text-gray-900 truncate">{abstract.title}</div>
                       <div className="text-sm text-gray-500 line-clamp-2">
-                        {abstract.abstract_text ? abstract.abstract_text.substring(0, 100) + '...' : 'No abstract text available'}
+                        {abstract.abstract ? abstract.abstract.substring(0, 100) + '...' : 'No abstract text available'}
                       </div>
                       <div className="text-xs text-gray-400 mt-1">
                         Keywords: {abstract.keywords}
@@ -424,14 +440,14 @@ export default function AbstractsPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{abstract.author_name}</div>
-                      <div className="text-sm text-gray-500">{abstract.author_email}</div>
-                      <div className="text-xs text-gray-400">{abstract.author_organization}</div>
+                      <div className="text-sm font-medium text-gray-900">{getAuthorName(abstract.authors)}</div>
+                      <div className="text-sm text-gray-500">{abstract.email}</div>
+                      <div className="text-xs text-gray-400">{abstract.institution}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(abstract.category)}`}>
-                      {abstract.category ? abstract.category.replace('_', ' ') : 'No Category'}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(abstract.track)}`}>
+                      {abstract.track ? abstract.track.replace('_', ' ') : 'No Category'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -454,9 +470,9 @@ export default function AbstractsPage() {
                       >
                         <Eye className="h-4 w-4" />
                       </button>
-                      {abstract.file_url && (
+                      {abstract.filePath && (
                         <button 
-                          onClick={() => handleDownload(abstract.file_url!, abstract)}
+                          onClick={() => handleDownload(abstract.filePath!, abstract)}
                           className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
                           title="Download Abstract"
                         >
@@ -505,6 +521,89 @@ export default function AbstractsPage() {
           </div>
         )}
       </div>
+
+      {/* View Modal */}
+      {viewOpen && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setViewOpen(false)} />
+          <div className="relative bg-white w-full max-w-3xl rounded-lg shadow-lg border border-gray-200 p-6 mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Abstract Details</h2>
+              <button onClick={() => setViewOpen(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <div className="space-y-4 max-h-[70vh] overflow-auto">
+              <div>
+                <div className="text-sm text-gray-500">Title</div>
+                <div className="text-base font-medium text-gray-900">{selected.title}</div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm text-gray-500">Author</div>
+                  <div className="text-base text-gray-900">{getAuthorName(selected.authors)}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Email</div>
+                  <div className="text-base text-gray-900">{selected.email}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Institution</div>
+                  <div className="text-base text-gray-900">{selected.institution || '—'}</div>
+                </div>
+                {/* Phone not in Abstract interface */}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <div className="text-sm text-gray-500">Category</div>
+                  <div className="text-base text-gray-900">{selected.track || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Status</div>
+                  <div className="text-base text-gray-900">{selected.status}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">Keywords</div>
+                  <div className="text-base text-gray-900 truncate">{selected.keywords || '—'}</div>
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Abstract</div>
+                <pre className="whitespace-pre-wrap text-sm text-gray-800 bg-gray-50 p-3 rounded border border-gray-200">{selected.abstract}</pre>
+              </div>
+              {selected.filePath && (
+                <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded p-3">
+                  <div className="text-sm text-gray-700 truncate">{selected.fileName || 'abstract.pdf'} ({selected.fileSize ? `${Math.round(selected.fileSize/1024)} KB` : '—'})</div>
+                  <button
+                    onClick={() => handleDownload(selected.filePath!, selected)}
+                    className="text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded"
+                  >
+                    Download
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="mt-6 flex items-center justify-end space-x-2">
+              <button
+                onClick={() => setViewOpen(false)}
+                className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => handleStatusChange(selected.id, 'accepted')}
+                className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => handleStatusChange(selected.id, 'rejected')}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

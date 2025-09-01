@@ -36,7 +36,7 @@ export default function SponsorshipsPage() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('http://localhost:5000/api/sponsorships')
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sponsorships`)
       
       if (response.ok) {
         const data = await response.json()
@@ -104,7 +104,7 @@ export default function SponsorshipsPage() {
 
   const handleStatusChange = async (id: number, newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/sponsorships/${id}/status`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sponsorships/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ export default function SponsorshipsPage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/sponsorships/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sponsorships/${id}`, {
         method: 'DELETE',
       })
 
