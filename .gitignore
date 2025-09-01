@@ -34,3 +34,7 @@ next-env.d.ts
 
 # Build outputs
 dist/
+*.tar.gz
+*.log
+*.tar.gz
+*.log
