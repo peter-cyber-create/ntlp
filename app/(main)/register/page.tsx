@@ -103,7 +103,7 @@ export default function RegisterPage() {
     phone: "",
     organization: "",
     position: "",
-    district: "",
+    country: "",
     specialRequirements: "",
   });
 
