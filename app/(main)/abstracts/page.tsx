@@ -11,6 +11,7 @@
 import React, { useState } from 'react'
 import { Calendar, Clock, Users, Award, AlertCircle, CheckCircle, Upload, X, FileText } from 'lucide-react'
 import { LoadingButton } from '@/components/LoadingComponents'
+// Removed external API helper - using internal Next.js API routes
 
 export default function AbstractsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -311,7 +312,7 @@ export default function AbstractsPage() {
       formDataToSend.append('track', formData.category);
       formDataToSend.append('subcategory', formData.subcategory);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts`, {
+      const response = await fetch('/api/abstracts', {
         method: 'POST',
         body: formDataToSend
         // Note: Don't set Content-Type header for FormData - browser will set it automatically with boundary
@@ -319,48 +320,56 @@ export default function AbstractsPage() {
 
       if (response.ok) {
         const result = await response.json();
-        setSubmitResult({
-          type: 'success',
-          title: 'Abstract Submitted Successfully!',
-          message: 'Your abstract has been submitted and is now under review by our scientific committee.',
-          submissionId: result.abstract?.id || result.id
-        });
-        
-        // Reset form
-        setFormData({
-          title: '',
-          presentationType: 'oral',
-          category: '',
-          subcategory: '',
-          crossCuttingThemes: '',
-          primaryAuthor: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            institution: '',
-            position: '',
-            district: ''
-          },
-          coAuthors: '',
-          abstract: '',
-          keywords: '',
-          background: '',
-          methods: '',
-          findings: '',
-          conclusion: '',
-          implications: '',
-          conflictOfInterest: false,
-          ethicalApproval: false,
-          consentToPublish: false
-        });
-        setSelectedFile(null);
+        if (result.success) {
+          setSubmitResult({
+            type: 'success',
+            title: 'Abstract Submitted Successfully!',
+            message: 'Your abstract has been submitted and is now under review by our scientific committee.',
+            submissionId: result.abstract?.id || result.id
+          });
+          
+          // Reset form
+          setFormData({
+            title: '',
+            presentationType: 'oral',
+            category: '',
+            subcategory: '',
+            crossCuttingThemes: '',
+            primaryAuthor: {
+              firstName: '',
+              lastName: '',
+              email: '',
+              phone: '',
+              institution: '',
+              position: '',
+              district: ''
+            },
+            coAuthors: '',
+            abstract: '',
+            keywords: '',
+            background: '',
+            methods: '',
+            findings: '',
+            conclusion: '',
+            implications: '',
+            conflictOfInterest: false,
+            ethicalApproval: false,
+            consentToPublish: false
+          });
+          setSelectedFile(null);
+        } else {
+          setSubmitResult({
+            type: 'error',
+            title: 'Submission Failed',
+            message: result.message || 'Failed to submit abstract. Please try again.'
+          });
+        }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         setSubmitResult({
           type: 'error',
           title: 'Submission Failed',
-          message: errorData.error || 'Failed to submit abstract. Please try again.'
+          message: errorData.message || 'Failed to submit abstract. Please try again.'
         });
       }
     } catch (error) {
