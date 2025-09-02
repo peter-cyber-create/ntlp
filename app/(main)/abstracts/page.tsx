@@ -11,7 +11,7 @@
 import React, { useState } from 'react'
 import { Calendar, Clock, Users, Award, AlertCircle, CheckCircle, Upload, X, FileText } from 'lucide-react'
 import { LoadingButton } from '@/components/LoadingComponents'
-import API from '@/helpers/api'
+// Removed external API helper - using internal Next.js API routes
 
 export default function AbstractsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -312,78 +312,73 @@ export default function AbstractsPage() {
       formDataToSend.append('track', formData.category);
       formDataToSend.append('subcategory', formData.subcategory);
 
-      const response = await API.post('/abstracts', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      const response = await fetch('/api/abstracts', {
+        method: 'POST',
+        body: formDataToSend
+        // Note: Don't set Content-Type header for FormData - browser will set it automatically with boundary
       });
 
-      // Success response from axios
-      const result = response.data;
-      setSubmitResult({
-        type: 'success',
-        title: 'Abstract Submitted Successfully!',
-        message: 'Your abstract has been submitted and is now under review by our scientific committee.',
-        submissionId: result.abstract?.id || result.id
-      });
-      
-      // Reset form
-      setFormData({
-        title: '',
-        presentationType: 'oral',
-        category: '',
-        subcategory: '',
-        crossCuttingThemes: '',
-        primaryAuthor: {
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          institution: '',
-          position: '',
-          district: ''
-        },
-        coAuthors: '',
-        abstract: '',
-        keywords: '',
-        background: '',
-        methods: '',
-        findings: '',
-        conclusion: '',
-        implications: '',
-        conflictOfInterest: false,
-        ethicalApproval: false,
-        consentToPublish: false
-      });
-      setSelectedFile(null);
-    } catch (error: any) {
-      console.error('Submission error:', error);
-      
-      // Handle axios error responses
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        const errorData = error.response.data;
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setSubmitResult({
+            type: 'success',
+            title: 'Abstract Submitted Successfully!',
+            message: 'Your abstract has been submitted and is now under review by our scientific committee.',
+            submissionId: result.abstract?.id || result.id
+          });
+          
+          // Reset form
+          setFormData({
+            title: '',
+            presentationType: 'oral',
+            category: '',
+            subcategory: '',
+            crossCuttingThemes: '',
+            primaryAuthor: {
+              firstName: '',
+              lastName: '',
+              email: '',
+              phone: '',
+              institution: '',
+              position: '',
+              district: ''
+            },
+            coAuthors: '',
+            abstract: '',
+            keywords: '',
+            background: '',
+            methods: '',
+            findings: '',
+            conclusion: '',
+            implications: '',
+            conflictOfInterest: false,
+            ethicalApproval: false,
+            consentToPublish: false
+          });
+          setSelectedFile(null);
+        } else {
+          setSubmitResult({
+            type: 'error',
+            title: 'Submission Failed',
+            message: result.message || 'Failed to submit abstract. Please try again.'
+          });
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
         setSubmitResult({
           type: 'error',
           title: 'Submission Failed',
-          message: errorData.error || errorData.message || 'Failed to submit abstract. Please try again.'
-        });
-      } else if (error.request) {
-        // The request was made but no response was received
-        setSubmitResult({
-          type: 'error',
-          title: 'Network Error',
-          message: 'Could not connect to the server. Please check your internet connection and try again.'
-        });
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        setSubmitResult({
-          type: 'error',
-          title: 'Error',
-          message: 'An unexpected error occurred. Please try again.'
+          message: errorData.message || 'Failed to submit abstract. Please try again.'
         });
       }
+    } catch (error) {
+      console.error('Submission error:', error);
+      setSubmitResult({
+        type: 'error',
+        title: 'Network Error',
+        message: 'Could not connect to the server. Please try again later.'
+      });
     } finally {
       setIsSubmitting(false);
     }
