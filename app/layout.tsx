@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: 'NACNDC & JASHConference 2025',
   description: 'Join Uganda\'s premier national health conference organized by the Ministry of Health. Addressing critical health challenges through collaboration and innovation.',
   keywords: ['uganda health conference', 'ministry of health uganda', 'national health', 'communicable diseases', 'non-communicable diseases', 'health policy'],
