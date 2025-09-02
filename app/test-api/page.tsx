@@ -14,8 +14,8 @@ export default function TestAPIPage() {
         setError(null)
 
         const [registrationsResponse, abstractsResponse] = await Promise.all([
-          fetch('http://localhost:5000/api/registrations'),
-          fetch('http://localhost:5000/api/abstracts')
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/registrations`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts`)
         ])
 
         if (registrationsResponse.ok && abstractsResponse.ok) {

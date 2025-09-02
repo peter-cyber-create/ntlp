@@ -311,7 +311,7 @@ export default function AbstractsPage() {
       formDataToSend.append('track', formData.category);
       formDataToSend.append('subcategory', formData.subcategory);
 
-      const response = await fetch(`https://conference.health.go.ug/api/abstracts`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/abstracts`, {
         method: 'POST',
         body: formDataToSend
         // Note: Don't set Content-Type header for FormData - browser will set it automatically with boundary
