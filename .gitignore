@@ -1,0 +1,20 @@
+# Main project ignores
+node_modules/
+.env*
+
+# Keep the organized structure but ignore old files
+ntlp-conference/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
